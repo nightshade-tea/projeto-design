@@ -1,13 +1,15 @@
-# Requisitos do sistema
+# Requisitos do Sistema
 
 ## Contexto
 
-Gestao de projetos de extensao considerando uma universidade federal,
-possibilitando analise estatistica e geracao de certificados
+**Gestão de projetos de extensão** — Sistema interno para cadastrar projetos de extensão, participantes e atividades, registrar participação e presença e acompanhar horas e requisitos para certificação. Sistema para uma universidade federal com as seguintes características:
 
-alunos: 40k
-professores: 2.5k
-acessos simultaneos: 4k no pico
+- Alunos: ~40k
+- Professores: ~2.5k
+- Acessos simultaneos: ~4k (pico de acessos simultâneos)
+- Equipe de desenvolvimento especializada de porte medio (~15 pessoas)
+
+Picos ocorrem durante periodos específicos do semestre, perto dos prazos definidos de submissão de projetos e horas de extensão.
 
 
 
@@ -15,12 +17,11 @@ acessos simultaneos: 4k no pico
 
 ### Administrador
 
-Responsável pela administração da plataforma.
+Majoritariamente composta por desenvolvedores. Responsável pela administração, manutenção e gerenciamento das funcionalidades da plataforma.
 
 ### Professor
 
-Responsável pelo cadastro, gerenciamento e acompanhamento dos projetos de
-extensão sob sua coordenação.
+Responsável pelo cadastro, gerenciamento e acompanhamento dos projetos de extensão sob sua coordenação.
 
 ### Aluno
 
@@ -85,6 +86,20 @@ de login institucional disponibilizado pela universidade.
 Diferentes níveis de accesso ao sistema, como administradores, docentes,
 discentes, devem ser baseados no perfil institucional.
 
+## Regras de Negócio
+
+### RN01 Criação de Projetos
+
+Apenas usuários com perfil Docente ou Administrador podem criar novos projetos de extensão.
+
+### RN02 Escopo de Gestão de Docente
+
+Um Docente só pode gerenciar, atualizar e cadastrar atividades/participantes em projetos nos quais esteja vinculado como Coordenador (ou responsável).
+
+### RN03 Acesso Administrativo
+
+Usuários com perfil Administrador possuem permissão total para gerenciar qualquer projeto, atividade, participante, carga horária e regra de certificação no sistema.
+
 
 ## ASRs
 
@@ -96,6 +111,8 @@ desempenho mesmo durante períodos de alta demanda. A arquitetura deverá
 permitir a expansão dos recursos computacionais conforme o crescimento da
 utilização do sistema.
 
+O **ASR01** define questões como escalabilidade e disponibilidade que são altamente limitados pela arquitetura e disponibilidade de recursos.
+
 ### ASR02 Integração Institucional
 
 O sistema deverá integrar-se ao mecanismo de autenticação institucional
@@ -104,10 +121,14 @@ meio de suas credenciais institucionais. A solução deverá utilizar os serviç
 de autenticação existentes, sem a necessidade de implementar ou manter um
 mecanismo próprio de gerenciamento de credenciais.
 
+O **ASR02** define a necessidade de comunicação e integração com componentes externos ao sistema em si, portanto é relevante em decisões arquiteturais
+
 ### ASR03 Manutenibilidade e Evolução
 
 A arquitetura deverá facilitar a manutenção e a evolução do sistema, permitindo
 a inclusão de novas funcionalidades, a alteração das regras de certificação e a
 adaptação aos processos administrativos da universidade, minimizando o impacto
 dessas mudanças sobre componentes não relacionados.
+
+O **ASR03** leva em consideração que o sistema deve ser flexível o suficiente para que possa incluir nova funcionalidades e regras. Especialmente no sistema de gestão de extensão, o problema se liga a outros fatores como limitações institucionais e uma questão de facilidade de modificar regras e estruturas do sistema.
 
