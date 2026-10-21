@@ -94,7 +94,7 @@ Apenas usuários com perfil Docente ou Administrador podem criar novos projetos 
 
 ### RN02 Escopo de Gestão de Docente
 
-Um Docente só pode gerenciar, atualizar e cadastrar atividades/participantes em projetos nos quais esteja vinculado como Coordenador (ou responsável).
+Apenas Docentes podem gerenciar, atualizar e cadastrar atividades/participantes em projetos nos quais esteja vinculado como Coordenador (ou responsável).
 
 ### RN03 Acesso Administrativo
 
