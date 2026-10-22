@@ -1,117 +1,106 @@
-# Requisitos do Sistema
+# Especificação de Requisitos
 
 ## Contexto
 
-**Gestão de projetos de extensão** — Sistema interno para cadastrar projetos de extensão, participantes e atividades, registrar participação e presença e acompanhar horas e requisitos para certificação. Sistema para uma universidade federal com as seguintes características:
+**Gestão de projetos de extensão**: Sistema interno para cadastrar projetos de
+extensão, participantes e atividades, registrar participação e presença e
+acompanhar horas e requisitos para certificação. Sistema para uma universidade
+federal com as seguintes características:
 
 - Alunos: ~40k
 - Professores: ~2.5k
 - Acessos simultaneos: ~4k (pico de acessos simultâneos)
-- Equipe de desenvolvimento especializada de porte medio (~15 pessoas)
+- Equipe de desenvolvimento: ~4 pessoas
 
-Picos ocorrem durante periodos específicos do semestre, perto dos prazos definidos de submissão de projetos e horas de extensão.
+Picos ocorrem durante periodos específicos do semestre, perto dos prazos
+definidos de submissão de projetos e horas de extensão.
 
+### Atores
 
+**Aluno** : Participa de projetos. Consulta projetos e atividades, acompanha as
+próprias horas e baixa os próprios certificados.
 
-## Atores
+**Professor** : professor vinculado a um projeto como coordenador. Gerencia o
+projeto, as atividades, os participantes, as presenças e os critérios de
+certificação desse projeto.
 
-### Administrador
+**Administrador** : Tem acesso total ao sistema para manutenção.
 
-Majoritariamente composta por desenvolvedores. Responsável pela administração, manutenção e gerenciamento das funcionalidades da plataforma.
+**Provedor de identidade institucional** (sistema externo) : Serviço de login
+único da universidade.
 
-### Professor
+## Requisitos funcionais
 
-Responsável pelo cadastro, gerenciamento e acompanhamento dos projetos de extensão sob sua coordenação.
+**RF01 Gerenciar projetos** : O professor coordenador e o administrador podem
+criar, editar, consultar e encerrar projetos.
 
-### Aluno
+**RF02 Gerenciar atividades** : O coordenador pode cadastrar, editar e remover
+atividades de um projeto ativo.
 
-Responsável por consultar os projetos disponíveis, acompanhar suas horas e
-emitir seus certificados.
+**RF03 Gerenciar participantes** : O coordenador pode vincular alunos ao
+projeto, buscando pela matrícula, e desvincular alunos. Desvincular encerra a
+participação, mas mantém as presenças e horas já registradas.
 
+**RF04 Registrar presença** : O coordenador registra a presença dos
+participantes em uma atividade.
 
+**RF05 Consultar horas** : O aluno consulta as próprias horas por projeto e no
+total. O coordenador consulta as horas de todos os participantes do seu projeto.
 
-## Funcionais
+**RF06 Definir critérios de certificação** : O coordenador define os critérios
+de certificação de um projeto a partir de opções já disponibilizadas no sistema
+(ex. mínimo de horas e percentual mínimo de presença). Os critérios só podem
+ser alterados enquanto não houver certificado emitido no projeto.
 
-### RF01 Cadastro de Projetos
+**RF07 Emitir certificados** : Ao encerrar um projeto, ou quando o coordenador
+solicitar, o sistema emite um certificado para cada participante que cumpre os
+critérios definidos.
 
-O sistema deverá permitir o cadastro, a edição, a consulta e o encerramento de
-projetos de extensão.
+**RF08 Baixar certificados** : O aluno pode baixar os próprios certificados.
 
-### RF02 Gerenciamento de Atividades
+## Regras de negócio
 
-O sistema deverá permitir o cadastro e o gerenciamento das atividades
-vinculadas a cada projeto.
+**RN01**
+: Só professores e administradores podem criar projetos. O professor que cria o
+projeto passa a ser o seu coordenador.
 
-### RF03 Gerenciamento de Participantes
+**RN02**
+: O professor só gerencia projetos em que é coordenador.
 
-O sistema deverá permitir o registro e o gerenciamento dos alunos participantes
-de cada projeto.
-
-### RF04 Registro de Presença
-
-O sistema deverá permitir o registro e a consulta da presença dos alunos nas
-atividades dos projetos.
-
-### RF05 Controle de Horas
-
-O sistema deverá contabilizar e disponibilizar as horas de participação de cada
-aluno nos projetos e atividades.
-
-### RF06 Definição de requisitos de certificação
-
-O sistema deverá permitir a definição dos critérios necessários para a obtenção
-de certificados, considerando cada projeto ou atividade.
-
-### RF07 Geração de certificados
-
-O sistema deverá gerar certificados para os alunos que atenderem aos critérios
-de certificação definidos.
-
-### RF08 Download de certificados
-
-O sistema deverá permitir que os alunos consultem e realizem o download dos
-certificados emitidos.
+**RN03**
+: O administrador pode gerenciar qualquer projeto.
 
 
+## Requisitos não funcionais
 
-## Restricoes
+**RNF01 Desempenho**
+: Com 4.000 usuários simultâneos, 95% das consultas respondem em até 1 s e 95%
+das operações de escrita em até 2 s.
 
-### RE01 Autenticação Institucional
+**RNF02 Disponibilidade**
+: Disponibilidade mensal de pelo menos 99,5% do tempo.
 
-O acesso ao sistema deverá ser realizado exclusivamente por meio do mecanismo
-de login institucional disponibilizado pela universidade.
+## Restrições
 
-### RE02 Papéis Institucionais
+**RE01 Autenticação institucional**
+: O login é feito exclusivamente pelo provedor de identidade da universidade.
 
-Diferentes níveis de accesso ao sistema, como administradores, docentes,
-discentes, devem ser baseados no perfil institucional.
+**RE02 Papéis institucionais**
+: O papel de cada usuário (aluno, professor, administrador) é derivado do
+vínculo informado pelo provedor de identidade.
 
-## Regras de Negócio
-
-### RN01 Criação de Projetos
-
-Apenas usuários com perfil Docente ou Administrador podem criar novos projetos de extensão.
-
-### RN02 Escopo de Gestão de Docente
-
-Apenas Docentes podem gerenciar, atualizar e cadastrar atividades/participantes em projetos nos quais esteja vinculado como Coordenador (ou responsável).
-
-### RN03 Acesso Administrativo
-
-Usuários com perfil Administrador possuem permissão total para gerenciar qualquer projeto, atividade, participante, carga horária e regra de certificação no sistema.
-
-
-## ASRs
+## Requisitos arquiteturalmente significativos (ASRs)
 
 ### ASR01 Escalabilidade e Disponibilidade
 
 O sistema deverá suportar até 4.000 acessos simultâneos, garantindo a
 disponibilidade de suas funcionalidades e mantendo níveis adequados de
-desempenho mesmo durante períodos de alta demanda. A arquitetura deverá
-permitir a expansão dos recursos computacionais conforme o crescimento da
-utilização do sistema.
+desempenho mesmo durante períodos de alta demanda. A arquitetura deverá permitir
+a expansão dos recursos computacionais conforme o crescimento da utilização do
+sistema.
 
-O **ASR01** define questões como escalabilidade e disponibilidade que são altamente limitados pela arquitetura e disponibilidade de recursos.
+O **ASR01** define questões como escalabilidade e disponibilidade que são
+altamente limitados pela arquitetura e disponibilidade de recursos.
 
 ### ASR02 Integração Institucional
 
@@ -121,7 +110,8 @@ meio de suas credenciais institucionais. A solução deverá utilizar os serviç
 de autenticação existentes, sem a necessidade de implementar ou manter um
 mecanismo próprio de gerenciamento de credenciais.
 
-O **ASR02** define a necessidade de comunicação e integração com componentes externos ao sistema em si, portanto é relevante em decisões arquiteturais
+O **ASR02** define a necessidade de comunicação e integração com componentes
+externos ao sistema em si, portanto é relevante em decisões arquiteturais
 
 ### ASR03 Manutenibilidade e Evolução
 
@@ -130,5 +120,9 @@ a inclusão de novas funcionalidades, a alteração das regras de certificação
 adaptação aos processos administrativos da universidade, minimizando o impacto
 dessas mudanças sobre componentes não relacionados.
 
-O **ASR03** leva em consideração que o sistema deve ser flexível o suficiente para que possa incluir nova funcionalidades e regras. Especialmente no sistema de gestão de extensão, o problema se liga a outros fatores como limitações institucionais e uma questão de facilidade de modificar regras e estruturas do sistema.
+O **ASR03** leva em consideração que o sistema deve ser flexível o suficiente
+para que possa incluir nova funcionalidades e regras. Especialmente no sistema
+de gestão de extensão, o problema se liga a outros fatores como limitações
+institucionais e uma questão de facilidade de modificar regras e estruturas do
+sistema.
 
