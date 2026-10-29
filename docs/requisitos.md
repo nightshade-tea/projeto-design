@@ -12,8 +12,9 @@ federal com as seguintes características:
 - Acessos simultaneos: ~4k (pico de acessos simultâneos)
 - Equipe de desenvolvimento: ~4 pessoas
 
-Picos ocorrem durante periodos específicos do semestre, perto dos prazos
-definidos de submissão de projetos e horas de extensão.
+Picos ocorrem no começo do semestre, quando a maioria dos projetos são
+registrados, e no fim do semestre, quando os alunos consultam as horas de
+extensão e baixam os certificados.
 
 ### Atores
 
@@ -50,11 +51,10 @@ total. O coordenador consulta as horas de todos os participantes do seu projeto.
 **RF06 Definir critérios de certificação** : O coordenador define os critérios
 de certificação de um projeto a partir de opções já disponibilizadas no sistema
 (ex. mínimo de horas e percentual mínimo de presença). Os critérios só podem
-ser alterados enquanto não houver certificado emitido no projeto.
+ser alterados enquanto o projeto não for encerrado.
 
-**RF07 Emitir certificados** : Ao encerrar um projeto, ou quando o coordenador
-solicitar, o sistema emite um certificado para cada participante que cumpre os
-critérios definidos.
+**RF07 Emitir certificados** : Ao encerrar um projeto, o sistema emite um
+certificado para cada participante que cumpre os critérios definidos.
 
 **RF08 Baixar certificados** : O aluno pode baixar os próprios certificados.
 
