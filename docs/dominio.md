@@ -24,7 +24,7 @@ derivado do vínculo informado pelo provedor de identidade.
 
 **Projeto** (objeto)
 - Atributos: `titulo`, `descricao`, `coordenador`, `status`
-  (`ATIVO` | `ENCERRADO`), `atividades`, `participacoes`
+  (`ATIVO` | `ENCERRADO`), `atividades`, `participacoes`, `criterios`
 - Responsabilidades:
   - criar o projeto com um professor como coordenador
     (`new Projeto(titulo, descricao, coordenador): Projeto`)
@@ -32,20 +32,35 @@ derivado do vínculo informado pelo provedor de identidade.
     ou um administrador (`podeGerenciar(usuario)`)
   - editar os próprios dados (`editarTitulo(titulo)`, etc.)
   - encerrar o projeto (`encerrar()`)
-    - depois de encerrado, o projeto não aceita mais alterações
+    - depois de encerrado, o projeto não aceita mais alterações, incluindo
+      atividades, participantes, presenças e critérios
   - criar, editar e remover atividades
-  - publicar o evento `AtividadeRemovida` ao remover uma atividade
+    - remover uma atividade remove também as presenças dela
   - vincular e desvincular alunos
     (`vincular(aluno)`, `desvincular(aluno)`)
     - desvincular só encerra a participação, sem apagar o registro
   - informar se um aluno estava vinculado em uma data
     (`vinculado(aluno, data)`)
-  - publicar o evento `ProjetoEncerrado` ao ser encerrado
+  - registrar e remover presenças
+    (`registrarPresenca(atividade, aluno)`,
+    `removerPresenca(atividade, aluno)`)
+    - recusa alunos não vinculados na data da atividade
+  - definir os critérios de certificação (`definirCriterios(criterios)`)
+  - apurar a frequência de um aluno
+    (`resumoFrequencia(aluno): ResumoFrequencia`)
+    - soma a carga horária e conta as atividades e presenças, considerando
+      só as atividades dentro do período da participação
+  - informar os participantes que atendem a todos os critérios, inclusive os
+    desvinculados (`aprovados(): ResumoFrequencia[]`)
+    - sem critérios definidos, não há aprovados
 
 **Atividade** (objeto)
-- Atributos: `titulo`, `descricao`, `data`, `cargaHoraria`
-- Responsabilidade:
+- Atributos: `titulo`, `descricao`, `data`, `cargaHoraria`, `presentes`
+- Responsabilidades:
   - manter os próprios dados
+  - registrar e remover a presença de um aluno
+    (`registrarPresenca(aluno)`, `removerPresenca(aluno)`)
+  - informar se um aluno esteve presente (`estevePresente(aluno)`)
 
 **Participacao** (objeto)
 - Atributos: `aluno`, `inicio`, `fim`
@@ -53,51 +68,12 @@ derivado do vínculo informado pelo provedor de identidade.
   - encerrar a participação (`encerrar()`)
   - informar se está ativa em uma data (`ativaEm(data)`)
 
-**ProjetoEncerrado** (evento de domínio): `projeto`. Permite que
-`certificacao` reaja ao encerramento sem que `projetos` dependa dela.
-
-**AtividadeRemovida** (evento de domínio): `atividade`. Permite que
-`frequencia` exclua a lista de presença da atividade removida.
-
-### Módulo `frequencia`
-
-**ListaPresenca** (objeto)
-- Uma por atividade
-- Atributos: `atividade`, `projeto`, `presentes` (alunos presentes)
-- Responsabilidades:
-  - registrar a presença de um participante
-    (`registrar(aluno)`)
-    - recusa alterações se o projeto estiver encerrado ou para
-      alunos não vinculados na data da atividade
-  - remover uma presença registrada por engano (`remover(aluno)`)
-  - informar se um aluno esteve presente (`estevePresente(aluno)`)
-
-**ApuracaoFrequencia** (serviço de domínio)
-- `apurar(participacao, atividades, listas): ResumoFrequencia`
-- Soma a carga horária das atividades em que o aluno esteve presente
-- Conta as atividades realizadas no projeto e as presenças do aluno,
-  considerando só as atividades dentro do período da participação
-
 **ResumoFrequencia** (objeto)
 - Atributos: `aluno`, `projeto`, `horasCumpridas`, `qtdPresencas`,
   `qtdAtividades`
 - Responsabilidades:
   - informar o percentual de presença (`percentualPresenca()`)
-- É usado na consulta de horas e na avaliação de certificação
-
-### Módulo `certificacao`
-
-**PoliticaCertificacao** (objeto)
-- Atributos: `projeto`, `criterios` (lista de `CriterioCertificacao`),
-  `bloqueada`
-- Responsabilidades:
-  - definir os critérios, recusando a alteração se `bloqueada`
-    (`definirCriterios(criterios)`)
-  - avaliar o resumo de frequência de um aluno e informar se atende a
-    todos os critérios (`avaliar(resumo): boolean`)
-  - emitir o certificado de quem atende os critérios
-    (`emitir(resumo): Certificado`)
-  - bloquear os critérios quando o projeto é encerrado (`bloquear()`)
+- É usado na consulta de horas e na emissão de certificados
 
 **CriterioCertificacao** (interface)
 - `avaliar(resumo): boolean`
@@ -105,10 +81,14 @@ derivado do vínculo informado pelo provedor de identidade.
   - `MinimoHoras(cargaHoraria)`
   - `PercentualMinimoPresenca(pct)`
 
+### Módulo `certificacao`
+
 **Certificado** (objeto)
 - Atributos: `projeto`, `aluno`, `nomeAluno`, `tituloProjeto`,
   `cargaHoraria`, `emitidoEm`
-- Responsabilidade:
+- Responsabilidades:
+  - ser criado a partir do resumo de frequência de um aluno aprovado
+    (`new Certificado(resumo): Certificado`)
   - responder se pertence a um usuário (`pertenceA(usuario)`)
 - Guarda uma cópia dos dados do momento da emissão, de modo que alterações
   posteriores no projeto não mudam um certificado já emitido
@@ -117,28 +97,17 @@ derivado do vínculo informado pelo provedor de identidade.
 - `gerar(certificado): bytes`: produz o arquivo que o aluno baixa
 - Implementações: `GeradorPdf` e `GeradorDocumentoTeste`
 
-**EmissaoCertificados** (serviço de domínio)
-- `emitirCertificados(projeto): Certificado[]`
-- Para cada participante, inclusive os desvinculados, apura a frequência,
-  avalia pela política e emite o certificado de quem atende os critérios
-- Acionado pelo evento `ProjetoEncerrado`, que também bloqueia a política
-- Não emite certificados para projetos sem critérios definidos
-
 ### Agregados
 
 - `Projeto` (com `Atividade` e `Participacao`)
-- `ListaPresenca`
-- `PoliticaCertificacao`
 - `Certificado`
 
 Cada agregado é alterado e salvo como uma unidade
 
-### Repositórios
+### Repositories
 
-- `ProjetoRepositorio`
-- `ListaPresencaRepositorio`
-- `PoliticaCertificacaoRepositorio`
-- `CertificadoRepositorio`
+- `ProjetoRepository`
+- `CertificadoRepository`
 
 São interfaces, e as implementações ficam fora do domínio
 
@@ -146,19 +115,18 @@ São interfaces, e as implementações ficam fora do domínio
 
 **Information Expert**
 - Cada objeto responde com os dados que já possui: `Projeto.podeGerenciar`,
-  `Projeto.vinculado`, `Participacao.ativaEm`, `ListaPresenca.estevePresente`,
-  `ResumoFrequencia.percentualPresenca` e `Certificado.pertenceA`
+  `Projeto.vinculado`, `Projeto.resumoFrequencia`, `Participacao.ativaEm`,
+  `Atividade.estevePresente`, `ResumoFrequencia.percentualPresenca` e
+  `Certificado.pertenceA`
 
 **Creator**
 - `Projeto` cria `Atividade` e `Participacao`, pois as contém
-- `PoliticaCertificacao` cria `Certificado`, pois recebe o resumo de
-  frequência, que tem o aluno, o projeto e as horas, e só emite para quem
-  atende os critérios
+- `Certificado` é criado a partir de um resumo em `projeto.aprovados()`, que
+  tem o aluno, o projeto e as horas
 
 **Pure Fabrication**
-- `ApuracaoFrequencia` e `EmissaoCertificados` usam dados de mais de um
-  agregado e não pertencem a nenhum deles
-- Os repositórios separam a persistência dos objetos de domínio
+- Os repositories não são conceitos do domínio e existem para separar a
+  persistência dos objetos de domínio
 
 **Polymorphism e Protected Variations**
 - `CriterioCertificacao`: permite adicionar critérios
@@ -166,39 +134,36 @@ São interfaces, e as implementações ficam fora do domínio
 - `GeradorDocumentoCertificado`: isola o formato do arquivo gerado
 
 **Indirection**
-- Os eventos `ProjetoEncerrado` e `AtividadeRemovida` ligam os módulos sem
-  que `projetos` dependa de `frequencia` ou `certificacao`
+- As interfaces `ProvedorIdentidade`, `GeradorDocumentoCertificado` e os
+  repositories ficam entre o domínio e as suas implementações
 
 ## Coesão e acoplamento
 
 **Coesão**
-- Cada módulo trata de um único assunto: identidade, projetos, frequência e
+- Cada módulo trata de um único assunto: identidade, projetos e
   certificação
-- Apuração, avaliação e geração do arquivo do certificado ficam em classes
-  separadas
+- `Certificado` só guarda os dados da emissão, e a geração do arquivo fica
+  em `GeradorDocumentoCertificado`
 
 **Acoplamento**
-- As dependências seguem um único sentido: `certificacao` → `frequencia` →
-  `projetos` → `identidade`
-- Os eventos de domínio evitam dependências no sentido contrário
-- Sistemas externos são acessados só por interfaces
+- Os módulos dependem em um único sentido: `certificacao` → `projetos` →
+  `identidade`
+- Sistemas externos e persistência são acessados só por interfaces
 
 **Pontos de atenção**
 - `Projeto` concentra muitas responsabilidades, o que é razoável já que ele
-  garante que um projeto encerrado não seja alterado
-- `ListaPresenca` consulta `Projeto` para validar o registro de presença
-- `EmissaoCertificados` usa `projetos`, `frequencia` e `certificacao` e é o
-  ponto de maior acoplamento, mantido isolado no serviço
+  garante que um projeto encerrado não seja alterado e cada projeto tem um
+  só coordenador
 
 ## Princípios SOLID
 
 **SRP (Single Responsibility Principle)**
-- `ApuracaoFrequencia` apura, `PoliticaCertificacao` avalia e
-  `GeradorDocumentoCertificado` gera o arquivo
+- `Projeto` mantém as regras do projeto, `Certificado` guarda os dados da
+  emissão e `GeradorDocumentoCertificado` gera o arquivo
 
 **OCP (Open/Closed Principle)**
 - Novos critérios são novas implementações de `CriterioCertificacao`, sem
-  alterar `PoliticaCertificacao`
+  alterar `Projeto`
 
 **LSP (Liskov Substitution Principle)**
 - As implementações de cada interface podem ser trocadas entre si
@@ -207,6 +172,6 @@ São interfaces, e as implementações ficam fora do domínio
 - As interfaces são pequenas e específicas para cada uso
 
 **DIP (Dependency Inversion Principle)**
-- O domínio depende de interfaces (`ProvedorIdentidade`,
-  `GeradorDocumentoCertificado` e repositórios), e as implementações ficam
-  fora dele
+- O domínio define as interfaces (`ProvedorIdentidade`,
+  `GeradorDocumentoCertificado` e repositories) e não depende das
+  implementações
