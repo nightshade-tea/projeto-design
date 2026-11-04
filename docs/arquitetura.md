@@ -42,18 +42,23 @@ permitem separar um módulo no futuro, se for necessário.
 ### Services
 
 **ProjetoService**
-- criar, editar, consultar e encerrar projetos
+- criar, editar e consultar projetos
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
-- ao encerrar o projeto, cria e salva um `Certificado` para cada resumo em
-  `projeto.aprovados()`
-- verifica as permissões com `podeCriarProjeto()` e `podeGerenciar(usuario)`
+- verifica as permissões com `podeCriarProjeto()`
+- só aceita alterações do coordenador do projeto ou de um administrador
+
+**EncerramentoService**
+- encerrar o projeto e emitir os certificados
+  - cria e salva um `Certificado` para cada resumo em `projeto.aprovados()`
+- só aceita o coordenador do projeto ou um administrador
 
 **FrequenciaService**
 - registrar e remover presenças
 - consultar as horas do aluno, por projeto e no total, e as horas de todos
   os participantes para o coordenador
-- verifica as permissões com `podeGerenciar(usuario)`
+- só o coordenador do projeto ou um administrador registra presenças e
+  consulta as horas de todos os participantes
 
 **CertificadoService**
 - listar os certificados do aluno
@@ -195,8 +200,8 @@ Todas as rotas exigem o token no cabeçalho `Authorization: Bearer <token>`.
 - As camadas só dependem das camadas mais internas
 
 **Pontos de atenção**
-- `ProjetoService` usa `projetos` e `certificacao` ao encerrar o projeto e é
-  o ponto de maior acoplamento, mantido isolado no service
+- `EncerramentoService` é o único service que usa `projetos` e
+  `certificacao` e é o ponto de maior acoplamento, mantido isolado nele
 
 ## Princípios SOLID
 

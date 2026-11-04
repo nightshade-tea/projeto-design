@@ -25,34 +25,20 @@ derivado do vínculo informado pelo provedor de identidade.
 **Projeto** (objeto)
 - Atributos: `titulo`, `descricao`, `coordenador`, `status`
   (`ATIVO` | `ENCERRADO`), `atividades`, `participacoes`, `criterios`
+  (`CriteriosCertificacao`)
 - Responsabilidades:
   - criar o projeto com um professor como coordenador
     (`new Projeto(titulo, descricao, coordenador): Projeto`)
-  - informar se um usuário pode gerenciar o projeto, sendo o coordenador
-    ou um administrador (`podeGerenciar(usuario)`)
-  - editar os próprios dados (`editarTitulo(titulo)`, etc.)
-  - encerrar o projeto (`encerrar()`)
-    - depois de encerrado, o projeto não aceita mais alterações, incluindo
-      atividades, participantes, presenças e critérios
-  - criar, editar e remover atividades
+  - editar e encerrar o projeto (`encerrar()`)
+    - depois de encerrado, o projeto não aceita mais alterações
+  - gerenciar atividades, participantes e critérios
     - remover uma atividade remove também as presenças dela
-  - vincular e desvincular alunos
-    (`vincular(aluno)`, `desvincular(aluno)`)
-    - desvincular só encerra a participação, sem apagar o registro
-  - informar se um aluno estava vinculado em uma data
-    (`vinculado(aluno, data)`)
-  - registrar e remover presenças
-    (`registrarPresenca(atividade, aluno)`,
-    `removerPresenca(atividade, aluno)`)
-    - recusa alunos não vinculados na data da atividade
-  - definir os critérios de certificação (`definirCriterios(criterios)`)
-  - apurar a frequência de um aluno
-    (`resumoFrequencia(aluno): ResumoFrequencia`)
-    - soma a carga horária e conta as atividades e presenças, considerando
-      só as atividades dentro do período da participação
-  - informar os participantes que atendem a todos os critérios, inclusive os
-    desvinculados (`aprovados(): ResumoFrequencia[]`)
-    - sem critérios definidos, não há aprovados
+    - desvincular um aluno só encerra a participação
+  - registrar e remover presenças, recusando alunos não vinculados na data
+    da atividade (`vinculado(aluno, data)`)
+  - informar a frequência de um aluno e os aprovados, inclusive os
+    desvinculados (`resumoFrequencia(aluno)`, `aprovados()`), calculados por
+    `Participacao` e `CriteriosCertificacao`
 
 **Atividade** (objeto)
 - Atributos: `titulo`, `descricao`, `data`, `cargaHoraria`, `presentes`
@@ -67,6 +53,10 @@ derivado do vínculo informado pelo provedor de identidade.
 - Responsabilidades:
   - encerrar a participação (`encerrar()`)
   - informar se está ativa em uma data (`ativaEm(data)`)
+  - apurar a própria frequência
+    (`resumoFrequencia(projeto, atividades): ResumoFrequencia`)
+    - soma a carga horária e conta as atividades e presenças, considerando
+      só as atividades dentro do período da participação
 
 **ResumoFrequencia** (objeto)
 - Atributos: `aluno`, `projeto`, `horasCumpridas`, `qtdPresencas`,
@@ -74,6 +64,14 @@ derivado do vínculo informado pelo provedor de identidade.
 - Responsabilidades:
   - informar o percentual de presença (`percentualPresenca()`)
 - É usado na consulta de horas e na emissão de certificados
+
+**CriteriosCertificacao** (objeto)
+- Atributos: `criterios` (lista de `CriterioCertificacao`)
+- Responsabilidades:
+  - substituir os critérios (`definir(criterios)`)
+  - informar se um resumo atende a todos os critérios
+    (`atende(resumo): boolean`)
+    - sem critérios definidos, nenhum resumo atende
 
 **CriterioCertificacao** (interface)
 - `avaliar(resumo): boolean`
@@ -99,7 +97,7 @@ derivado do vínculo informado pelo provedor de identidade.
 
 ### Agregados
 
-- `Projeto` (com `Atividade` e `Participacao`)
+- `Projeto` (com `Atividade`, `Participacao` e `CriteriosCertificacao`)
 - `Certificado`
 
 Cada agregado é alterado e salvo como uma unidade
@@ -114,13 +112,14 @@ São interfaces, e as implementações ficam fora do domínio
 ## Justificativas GRASP
 
 **Information Expert**
-- Cada objeto responde com os dados que já possui: `Projeto.podeGerenciar`,
-  `Projeto.vinculado`, `Projeto.resumoFrequencia`, `Participacao.ativaEm`,
-  `Atividade.estevePresente`, `ResumoFrequencia.percentualPresenca` e
-  `Certificado.pertenceA`
+- Cada objeto responde com os dados que já possui: `Projeto.vinculado`,
+  `Participacao.ativaEm`, `Participacao.resumoFrequencia`,
+  `Atividade.estevePresente`, `CriteriosCertificacao.atende`,
+  `ResumoFrequencia.percentualPresenca` e `Certificado.pertenceA`
 
 **Creator**
-- `Projeto` cria `Atividade` e `Participacao`, pois as contém
+- `Projeto` cria `Atividade`, `Participacao` e `CriteriosCertificacao`, pois
+  as contém
 - `Certificado` é criado a partir de um resumo em `projeto.aprovados()`, que
   tem o aluno, o projeto e as horas
 
@@ -151,19 +150,22 @@ São interfaces, e as implementações ficam fora do domínio
 - Sistemas externos e persistência são acessados só por interfaces
 
 **Pontos de atenção**
-- `Projeto` concentra muitas responsabilidades, o que é razoável já que ele
-  garante que um projeto encerrado não seja alterado e cada projeto tem um
-  só coordenador
+- `Projeto` é a entrada para alterar atividades, participantes, presenças e
+  critérios, o que é razoável já que ele garante que um projeto encerrado
+  não seja alterado
+  - os cálculos ficam em `Participacao` e `CriteriosCertificacao`, e
+    `Projeto` só verifica as regras e repassa
 
 ## Princípios SOLID
 
 **SRP (Single Responsibility Principle)**
-- `Projeto` mantém as regras do projeto, `Certificado` guarda os dados da
-  emissão e `GeradorDocumentoCertificado` gera o arquivo
+- `Projeto` mantém as regras do projeto, `Participacao` apura a frequência,
+  `CriteriosCertificacao` avalia os critérios, `Certificado` guarda os dados
+  da emissão e `GeradorDocumentoCertificado` gera o arquivo
 
 **OCP (Open/Closed Principle)**
 - Novos critérios são novas implementações de `CriterioCertificacao`, sem
-  alterar `Projeto`
+  alterar `Projeto` nem `CriteriosCertificacao`
 
 **LSP (Liskov Substitution Principle)**
 - As implementações de cada interface podem ser trocadas entre si
