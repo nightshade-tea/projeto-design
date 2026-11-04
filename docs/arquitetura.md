@@ -34,10 +34,26 @@ permitem separar um módulo no futuro, se for necessário.
 
 ### Controllers
 
-- `ProjetoController`, `FrequenciaController` e `CertificadoController`
-- Recebem as requisições do cliente, identificam o usuário com
-  `ProvedorIdentidade.identificar(token)` e chamam o service correspondente
-- Não têm regras de negócio
+Todos recebem as requisições do cliente, identificam o usuário com
+`AutenticacaoService` e chamam um service, sem regras de negócio
+
+**ProjetoController**
+- requisições sobre projetos, atividades, participantes e critérios
+  - chama `ProjetoService`
+- requisição de encerramento do projeto
+  - chama `EncerramentoService`
+
+**FrequenciaController**
+- requisições de registro e remoção de presenças e de consulta de horas
+  - chama `FrequenciaService`
+
+**CertificadoController**
+- requisições de listagem e download de certificados
+  - chama `CertificadoService`
+
+**AutenticacaoController**
+- requisição de consulta do usuário logado, com nome e papel
+  - chama `AutenticacaoService`
 
 ### Services
 
@@ -65,10 +81,16 @@ permitem separar um módulo no futuro, se for necessário.
 - gerar o arquivo para download com `GeradorDocumentoCertificado`
   - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`)
 
+**AutenticacaoService**
+- identificar o usuário a partir do token, com
+  `ProvedorIdentidade.identificar(token)`
+  - usado por todos os controllers no início de cada requisição
+- recusa tokens ausentes ou inválidos
+
 ### Infraestrutura
 
-- Implementações de `ProjetoRepository` e `CertificadoRepository`, que
-  acessam o banco de dados
+- `ProjetoRepositorySql` e `CertificadoRepositorySql`, implementações dos
+  repositories, que acessam o banco de dados
 - `ProvedorIdentidadeInstitucional`, que acessa o login da universidade
 - `GeradorPdf`, que gera o arquivo do certificado
 
@@ -95,7 +117,7 @@ permitem separar um módulo no futuro, se for necessário.
     `ProvedorIdentidadeTeste`
 - `ProjetoRepository` e `CertificadoRepository`: salvar e buscar os
   agregados
-  - implementações na infraestrutura, com acesso ao banco de dados
+  - implementações: `ProjetoRepositorySql` e `CertificadoRepositorySql`
 - `GeradorDocumentoCertificado`: geração do arquivo do certificado
   - implementações: `GeradorPdf` e `GeradorDocumentoTeste`
 - `CriterioCertificacao`: critérios de certificação, usada só dentro do
@@ -116,7 +138,7 @@ permitem separar um módulo no futuro, se for necessário.
 - A comunicação é síncrona, sem filas ou eventos, pois todos os módulos
   rodam na mesma aplicação
 - O servidor não guarda sessão; cada requisição envia o token do login
-  institucional, validado pelo controller
+  institucional, validado pelo `AutenticacaoService`
 - O cliente só conversa com os controllers, e nunca com o banco de dados ou
   o provedor de identidade
 
@@ -172,6 +194,9 @@ Todas as rotas exigem o token no cabeçalho `Authorization: Bearer <token>`.
 **CertificadoController**
 - `GET /me/certificados`: listar os certificados do aluno
 - `GET /certificados/{id}/arquivo`: baixar o certificado em PDF
+
+**AutenticacaoController**
+- `GET /me`: usuário logado, com nome e papel
 
 **Respostas de erro**
 - `401`: token ausente ou inválido
