@@ -7,31 +7,24 @@ Cliente-servidor
 +
 Monólito modular
 +
-Organização em camadas (Clean Architecture, com portas e adaptadores)
+Organização em camadas
 ```
 
-- **Cliente-servidor**: o cliente (navegador) acessa o servidor por HTTPS
+- **Cliente-servidor**: o cliente (navegador) acessa o servidor por REST/HTTPS
 - **Monólito modular**: o servidor é implantado como uma única aplicação,
   dividida nos módulos do domínio (`identidade`, `projetos` e
   `certificacao`)
-- **Clean Architecture** (portas e adaptadores): o código é organizado em
+- **Camadas**: o código é organizado em
   camadas, e as dependências apontam para o domínio
 
 Com uma equipe pequena e a carga esperada, um monólito modular é mais simples
 de manter do que serviços separados. Os módulos e as interfaces do domínio
-permitem separar um módulo no futuro, se for necessário.
+permitem separar um módulo no futuro, se for necessário. A separação modular mantêm o sistema relativamente escalável
 
 ## Diagrama
 
 ![Diagrama da arquitetura](img/arquitetura.svg)
 
-- As setas tracejadas indicam dependência: controllers → services → domínio
-  → interfaces
-- As setas com triângulo vazado indicam implementação: cada implementação
-  aponta para a interface que implementa
-- Os módulos do domínio dependem em um único sentido: `certificacao` →
-  `projetos` → `identidade`
-- Nomes em itálico são interfaces
 
 ## Camadas
 
@@ -39,9 +32,9 @@ permitem separar um módulo no futuro, se for necessário.
   identificam o usuário e chamam um service
 - **Services** (`...Service`): executam os casos de uso; buscam os objetos no
   repository, chamam o domínio e salvam o resultado
-- **Domínio**: objetos, regras de negócio e interfaces, descritos em
+- **Domínio**: objetos e regras de negócio, descritos em
   `dominio.md`
-- **Infraestrutura**: implementações dos repositories, do login
+- **Interfaces e Implementações**: interfaces e implementações dos repositories, do login
   institucional e da geração do arquivo do certificado
 
 ### Controllers
@@ -73,7 +66,7 @@ Todos recebem as requisições do cliente, identificam o usuário com
 - criar, editar e consultar projetos
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
-- verifica as permissões com `podeCriarProjeto()`
+- só aceita a criação de projetos por um `Professor` ou `Administrador`
 - só aceita alterações do coordenador do projeto ou de um administrador
 
 **EncerramentoService**
@@ -94,19 +87,20 @@ Todos recebem as requisições do cliente, identificam o usuário com
   - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`)
 
 **AutenticacaoService**
+- direciona usuários não autenticados para o sistema externo de login
 - identificar o usuário a partir do token, com
   `ProvedorIdentidade.identificar(token)`
   - usado por todos os controllers no início de cada requisição
 - recusa tokens ausentes ou inválidos
 
-### Infraestrutura
+### Implementações
 
 - `ProjetoRepositorySql` e `CertificadoRepositorySql`, implementações dos
   repositories, que acessam o banco de dados
 - `ProvedorIdentidadeInstitucional`, que acessa o login da universidade
 - `GeradorPdf`, que gera o arquivo do certificado
 
-## Módulos
+## Módulos no Domínio
 
 - **`identidade`**: usuários e papéis, a partir do provedor de identidade
 - **`projetos`**: projetos, atividades, participantes, presenças, critérios
@@ -117,8 +111,7 @@ Todos recebem as requisições do cliente, identificam o usuário com
 ## Dependências
 
 - Entre camadas: controllers → services → domínio
-- A infraestrutura depende do domínio, pois implementa as interfaces
-  definidas nele
+- A implementação depende do das interfaces definidas
 - Entre módulos: `certificacao` → `projetos` → `identidade`, sem
   dependências no sentido contrário
 
@@ -147,8 +140,11 @@ Todos recebem as requisições do cliente, identificam o usuário com
   `ProvedorIdentidade`
 
 **Decisões**
-- A comunicação é síncrona, sem filas ou eventos, pois todos os módulos
-  rodam na mesma aplicação
+- A comunicação não necessita de eventos por ser monolito.
+- Haveria uma fila de requisições, especialmente para ajudar em períodos de pico.
+- Requisições são tratadas de forma assíncrona pós-autenticação
+- autenticação é síncrona, pois demanda uma resposta para continuar executando.
+- Funcionalidades como geração do certificado são assíncronas para não afetar funcionalidades principais do sistema.
 - O servidor não guarda sessão; cada requisição envia o token do login
   institucional, validado pelo `AutenticacaoService`
 - O cliente só conversa com os controllers, e nunca com o banco de dados ou
