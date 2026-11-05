@@ -21,6 +21,18 @@ Com uma equipe pequena e a carga esperada, um monólito modular é mais simples
 de manter do que serviços separados. Os módulos e as interfaces do domínio
 permitem separar um módulo no futuro, se for necessário.
 
+## Diagrama
+
+![Diagrama da arquitetura](img/arquitetura.svg)
+
+- As setas tracejadas indicam dependência: controllers → services → domínio
+  → interfaces
+- As setas com triângulo vazado indicam implementação: cada implementação
+  aponta para a interface que implementa
+- Os módulos do domínio dependem em um único sentido: `certificacao` →
+  `projetos` → `identidade`
+- Nomes em itálico são interfaces
+
 ## Camadas
 
 - **Controllers** (`...Controller`): recebem as requisições do cliente,
@@ -61,7 +73,7 @@ Todos recebem as requisições do cliente, identificam o usuário com
 - criar, editar e consultar projetos
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
-- só aceita a criação de projetos por um `Professor`
+- verifica as permissões com `podeCriarProjeto()`
 - só aceita alterações do coordenador do projeto ou de um administrador
 
 **EncerramentoService**
