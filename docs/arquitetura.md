@@ -61,7 +61,7 @@ Todos recebem as requisições do cliente, identificam o usuário com
 - criar, editar e consultar projetos
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
-- verifica as permissões com `podeCriarProjeto()`
+- só aceita a criação de projetos por um `Professor`
 - só aceita alterações do coordenador do projeto ou de um administrador
 
 **EncerramentoService**

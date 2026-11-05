@@ -4,15 +4,12 @@
 
 ### Módulo `identidade`
 
-**Usuario** (objeto)
-- Atributos: `matricula`, `nome`, `papel`
-- Responsabilidades:
-  - informar o próprio papel (`ehAluno()`, `ehProfessor()`,
-    `ehAdministrador()`)
-  - responder se pode criar projetos (`podeCriarProjeto()`)
-
-**Papel** (enumeração): `ALUNO`, `PROFESSOR`, `ADMINISTRADOR`. O valor é
-derivado do vínculo informado pelo provedor de identidade.
+**Usuario** (classe abstrata)
+- Atributos: `matricula`, `nome`
+- Apenas getters e setters
+- Subclasses concretas: `Aluno`, `Professor` e `Administrador`. A classe
+  instanciada é definida pelo vínculo informado pelo provedor de
+  identidade.
 
 **ProvedorIdentidade** (interface)
 - `identificar(token): Usuario`: valida o token recebido do login
