@@ -276,3 +276,92 @@ def sem_sobreposicao(caixas, folga=20):
             if (a[0] < b[0] + b[2] + folga and b[0] < a[0] + a[2] + folga and
                     a[1] < b[1] + b[3] + folga and b[1] < a[1] + a[3] + folga):
                 raise SystemExit(f"sobreposição: {a[4]} e {b[4]}")
+
+
+# ------------------------------------------------------------- componentes
+
+H_CAB_COMP = 10 + LH_ESTEREO + LH_NOME
+ICONE_ESPACO = 32   # reservado à direita (e, para centrar, à esquerda)
+
+
+def icone_componente(svg, dir_, topo):
+    """ícone UML de componente no canto superior direito"""
+    x, y = dir_ - 20, topo + 8
+    svg.retangulo(x, y, 12, 16, espessura=1)
+    svg.retangulo(x - 4, y + 3, 8, 3.5, espessura=1)
+    svg.retangulo(x - 4, y + 9.5, 8, 3.5, espessura=1)
+
+
+class Componente(Caixa):
+    """Componente UML: palavra-chave «component», ícone e, opcionalmente,
+    o compartimento «realizations» com os classificadores que o realizam."""
+
+    def __init__(self, nome, realizacoes=()):
+        self.nome = nome
+        self.realizacoes = list(realizacoes)
+        ws = [largura(nome, TAM_NOME, True) + 2 * ICONE_ESPACO,
+              largura("«component»", TAM_ESTEREO) + 2 * ICONE_ESPACO]
+        if self.realizacoes:
+            ws.append(largura("«realizations»", TAM_ESTEREO) + 2 * PAD_X)
+            ws += [largura(r, TAM_MEMBRO) + 2 * PAD_X
+                   for r in self.realizacoes]
+        self.w = max(140, max(ws))
+        self.h = H_CAB_COMP + (8 + (len(self.realizacoes) + 1) * LH_MEMBRO
+                               if self.realizacoes else 0)
+
+    def desenhar(self, svg):
+        svg.retangulo(self.x, self.y, self.w, self.h)
+        svg.texto(self.cx, self.y + 19, "«component»", TAM_ESTEREO, "middle",
+                  cor=SECUNDARIO)
+        svg.texto(self.cx, self.y + 38, self.nome, TAM_NOME, "middle",
+                  negrito=True)
+        icone_componente(svg, self.dir, self.y)
+        if self.realizacoes:
+            y = self.y + H_CAB_COMP
+            svg.add(f'<line x1="{self.x:.1f}" y1="{y:.1f}" '
+                    f'x2="{self.dir:.1f}" y2="{y:.1f}" stroke="{TINTA}" '
+                    f'stroke-width="1.2"/>')
+            svg.texto(self.cx, y + LH_MEMBRO, "«realizations»", TAM_ESTEREO,
+                      "middle", cor=SECUNDARIO)
+            for i, r in enumerate(self.realizacoes):
+                svg.texto(self.x + PAD_X, y + (i + 2) * LH_MEMBRO, r,
+                          TAM_MEMBRO)
+
+
+def componente_conteiner(svg, x, y, w, h, nome, fundo=FUNDO_PACOTE):
+    """componente que mostra as partes internas; cabeçalho à esquerda"""
+    svg.retangulo(x, y, w, h, fundo=fundo)
+    svg.texto(x + 12, y + 19, "«component»", TAM_ESTEREO, cor=SECUNDARIO)
+    svg.texto(x + 12, y + 38, nome, TAM_NOME, negrito=True)
+    icone_componente(svg, x + w, y)
+
+
+R_BOLA, R_SOQUETE, PORTA = 7, 11, 12
+
+
+def porta(svg, x, y):
+    """porta: quadrado centrado no ponto (na borda do componente)"""
+    svg.retangulo(x - PORTA / 2, y - PORTA / 2, PORTA, PORTA, espessura=1.2)
+
+
+def montagem(svg, req, prov, rotulo):
+    """conector de montagem: reta horizontal ou vertical do componente que
+    requer a interface (soquete) ao que a fornece (bola), nome da interface
+    junto da bola"""
+    (x1, y1), (x2, y2) = req, prov
+    comp = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    dx, dy = (x2 - x1) / comp, (y2 - y1) / comp
+    cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+    svg.linha([(x1, y1), (cx - dx * R_SOQUETE, cy - dy * R_SOQUETE)])
+    nx, ny = dy, -dx
+    svg.add(f'<path d="M{cx + nx * R_SOQUETE:.1f},{cy + ny * R_SOQUETE:.1f} '
+            f'A{R_SOQUETE},{R_SOQUETE} 0 0 0 '
+            f'{cx - nx * R_SOQUETE:.1f},{cy - ny * R_SOQUETE:.1f}" '
+            f'fill="none" stroke="{TINTA}" stroke-width="1.3"/>')
+    svg.add(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{R_BOLA}" fill="#fff" '
+            f'stroke="{TINTA}" stroke-width="1.3"/>')
+    svg.linha([(cx + dx * R_BOLA, cy + dy * R_BOLA), (x2, y2)])
+    if abs(dy) < 1e-9:
+        svg.texto(cx, cy - R_SOQUETE - 7, rotulo, 12, "middle")
+    else:
+        svg.texto(cx + R_SOQUETE + 7, cy + 4, rotulo, 12)
