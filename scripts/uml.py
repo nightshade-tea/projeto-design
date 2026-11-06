@@ -119,7 +119,40 @@ TAM_NOME = 14
 TAM_ESTEREO = 12
 
 
-class Classe:
+class Caixa:
+    """geometria comum a classes e componentes (x, y, w, h)"""
+    x = y = w = h = 0
+
+    @property
+    def esq(self):
+        return self.x
+
+    @property
+    def dir(self):
+        return self.x + self.w
+
+    @property
+    def topo(self):
+        return self.y
+
+    @property
+    def base(self):
+        return self.y + self.h
+
+    @property
+    def cx(self):
+        return self.x + self.w / 2
+
+    @property
+    def cy(self):
+        return self.y + self.h / 2
+
+    def mover(self, dx, dy):
+        self.x += dx
+        self.y += dy
+
+
+class Classe(Caixa):
     """Classificador UML com compartimentos.
 
     tipo: "classe", "abstrata", "interface" ou "enumeracao".
@@ -162,35 +195,6 @@ class Classe:
                         for c in self.compartimentos]
         self.h = self.h_cab + sum(self.h_comps)
 
-    # geometria
-    @property
-    def esq(self):
-        return self.x
-
-    @property
-    def dir(self):
-        return self.x + self.w
-
-    @property
-    def topo(self):
-        return self.y
-
-    @property
-    def base(self):
-        return self.y + self.h
-
-    @property
-    def cx(self):
-        return self.x + self.w / 2
-
-    @property
-    def cy(self):
-        return self.y + self.h / 2
-
-    def mover(self, dx, dy):
-        self.x += dx
-        self.y += dy
-
     def desenhar(self, svg):
         svg.retangulo(self.x, self.y, self.w, self.h)
         y = self.y + 6
@@ -219,16 +223,50 @@ class Classe:
 # ---------------------------------------------------------------- pacotes
 
 ABA_H = 22
+ABA_VAZIA_W = 40
 
 
-def pacote(svg, x, y, w, h, nome):
-    """Pacote UML: aba com o nome e corpo; y é o topo da aba, h a altura do
-    corpo. Devolve o topo do corpo."""
-    aba_w = largura(nome, 14, True) + 24
-    svg.retangulo(x, y, aba_w, ABA_H, fundo=FUNDO_PACOTE)
-    svg.retangulo(x, y + ABA_H, w, h, fundo=FUNDO_PACOTE)
-    svg.texto(x + 10, y + 16, nome, 14, negrito=True)
+def pacote(svg, x, y, w, h, nome, nome_no_corpo=False, fundo=FUNDO_PACOTE):
+    """Pacote UML: aba e corpo; y é o topo da aba, h a altura do corpo.
+    Com nome_no_corpo (pacote sem conteúdo mostrado) o nome fica centrado
+    no corpo e a aba fica vazia. Devolve o topo do corpo."""
+    aba_w = ABA_VAZIA_W if nome_no_corpo else largura(nome, 14, True) + 24
+    svg.retangulo(x, y, aba_w, ABA_H, fundo=fundo)
+    svg.retangulo(x, y + ABA_H, w, h, fundo=fundo)
+    if nome_no_corpo:
+        svg.texto(x + w / 2, y + ABA_H + h / 2 + 5, nome, 14, "middle",
+                  negrito=True)
+    else:
+        svg.texto(x + 10, y + 16, nome, 14, negrito=True)
     return y + ABA_H
+
+
+class Pacote(Caixa):
+    """Pacote UML com os membros listados no corpo; o nome fica na aba
+    (UML 2.5: com membros mostrados no corpo, o nome vai para a aba).
+    y é o topo da aba; h inclui a aba."""
+
+    def __init__(self, nome, membros=()):
+        self.nome = nome
+        self.membros = list(membros)
+        self.aba_w = largura(nome, 14, True) + 24
+        self.w = max(self.aba_w + 40,
+                     max((largura(m, TAM_MEMBRO) for m in self.membros),
+                         default=0) + 2 * 16)
+        self.h = ABA_H + len(self.membros) * LH_MEMBRO + 14
+
+    @property
+    def topo_corpo(self):
+        return self.y + ABA_H
+
+    def desenhar(self, svg):
+        svg.retangulo(self.x, self.y, self.aba_w, ABA_H, fundo=FUNDO_PACOTE)
+        svg.retangulo(self.x, self.y + ABA_H, self.w, self.h - ABA_H,
+                      fundo=FUNDO_PACOTE)
+        svg.texto(self.x + 12, self.y + 16, self.nome, 14, negrito=True)
+        for i, m in enumerate(self.membros):
+            svg.texto(self.x + 16, self.y + ABA_H + 8 + (i + 1) * LH_MEMBRO
+                      - 5, m, TAM_MEMBRO)
 
 
 def sem_sobreposicao(caixas, folga=20):
