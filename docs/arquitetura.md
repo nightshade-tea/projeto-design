@@ -14,12 +14,13 @@ Organização em camadas
 - **Monólito modular**: o servidor é implantado como uma única aplicação,
   dividida nos módulos do domínio (`identidade`, `projetos` e
   `certificacao`)
-- **Camadas**: o código é organizado em
-  camadas, e as dependências apontam para o domínio
+- **Camadas**: o código é organizado em camadas, e as dependências apontam
+  para o domínio
 
 Com uma equipe pequena e a carga esperada, um monólito modular é mais simples
 de manter do que serviços separados. Os módulos e as interfaces do domínio
-permitem separar um módulo no futuro, se for necessário. A separação modular mantêm o sistema relativamente escalável
+permitem separar um módulo no futuro, se for necessário, o que mantém o
+sistema escalável
 
 ## Diagrama
 
@@ -29,18 +30,22 @@ permitem separar um módulo no futuro, se for necessário. A separação modular
 ## Camadas
 
 - **Controllers** (`...Controller`): recebem as requisições do cliente,
-  identificam o usuário e chamam um service
+  identificam o usuário e chamam um service ou colocam a escrita na fila
 - **Services** (`...Service`): executam os casos de uso; buscam os objetos no
   repository, chamam o domínio e salvam o resultado
 - **Domínio**: objetos e regras de negócio, descritos em
   `dominio.md`
-- **Interfaces e Implementações**: interfaces e implementações dos repositories, do login
-  institucional e da geração do arquivo do certificado
+- **Interfaces e Implementações**: interfaces e implementações dos
+  repositories, do login institucional e da geração do arquivo do
+  certificado
 
 ### Controllers
 
-Todos recebem as requisições do cliente, identificam o usuário com
-`AutenticacaoService` e chamam um service, sem regras de negócio
+Todos recebem as requisições do cliente e identificam o usuário com
+`AutenticacaoService`, sem regras de negócio
+- consultas chamam o service e respondem na hora
+- escritas chamam o service, que verifica permissão e regras na hora, se a
+  escrita for aceita, ela entra na fila e a resposta é `202 Accepted`
 
 **ProjetoController**
 - requisições sobre projetos, atividades, participantes e critérios
@@ -57,7 +62,7 @@ Todos recebem as requisições do cliente, identificam o usuário com
   - chama `CertificadoService`
 
 **AutenticacaoController**
-- requisição de consulta do usuário logado, com nome e papel
+- requisição de consulta do usuário logado, com nome e tipo
   - chama `AutenticacaoService`
 
 ### Services
@@ -70,8 +75,10 @@ Todos recebem as requisições do cliente, identificam o usuário com
 - só aceita alterações do coordenador do projeto ou de um administrador
 
 **EncerramentoService**
-- encerrar o projeto e emitir os certificados
-  - cria e salva um `Certificado` para cada resumo em `projeto.aprovados()`
+- encerrar o projeto e emitir os certificados, em duas operações da fila
+  - a primeira encerra e salva o projeto, e coloca a emissão na fila
+  - a emissão cria e salva um `Certificado` para cada resumo em
+    `projeto.aprovados()` que ainda não tem certificado
 - só aceita o coordenador do projeto ou um administrador
 
 **FrequenciaService**
@@ -87,22 +94,24 @@ Todos recebem as requisições do cliente, identificam o usuário com
   - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`)
 
 **AutenticacaoService**
-- direciona usuários não autenticados para o sistema externo de login
 - identificar o usuário a partir do token, com
   `ProvedorIdentidade.identificar(token)`
   - usado por todos os controllers no início de cada requisição
-- recusa tokens ausentes ou inválidos
+- recusar tokens ausentes ou inválidos (`401`), e o cliente então direciona
+  o usuário para o login institucional
 
 ### Implementações
 
 - `ProjetoRepositorySql` e `CertificadoRepositorySql`, implementações dos
   repositories, que acessam o banco de dados
-- `ProvedorIdentidadeInstitucional`, que acessa o login da universidade
+- `ProvedorIdentidadeInstitucional`, que acessa o login da universidade e
+  guarda a cópia local dos usuários
 - `GeradorPdf`, que gera o arquivo do certificado
 
 ## Módulos no Domínio
 
-- **`identidade`**: usuários e papéis, a partir do provedor de identidade
+- **`identidade`**: usuários (`Aluno`, `Professor` e `Administrador`),
+  obtidos do provedor de identidade
 - **`projetos`**: projetos, atividades, participantes, presenças, critérios
   de certificação e apuração da frequência
 - **`certificacao`**: certificados emitidos e geração do arquivo para
@@ -111,7 +120,8 @@ Todos recebem as requisições do cliente, identificam o usuário com
 ## Dependências
 
 - Entre camadas: controllers → services → domínio
-- A implementação depende do das interfaces definidas
+- Entre implementações e domínio: as implementações dependem das
+  interfaces definidas no domínio
 - Entre módulos: `certificacao` → `projetos` → `identidade`, sem
   dependências no sentido contrário
 
@@ -135,113 +145,105 @@ Todos recebem as requisições do cliente, identificam o usuário com
   - o arquivo do certificado é devolvido em PDF
 - Dentro do servidor: chamadas de método entre camadas e módulos, na mesma
   aplicação
-- Servidor → banco de dados: pelas implementações dos repositories
+- Servidor → banco de dados: pelas implementações dos repositories e de
+  `ProvedorIdentidade` (cópia local dos usuários)
 - Servidor → provedor de identidade: pela implementação de
   `ProvedorIdentidade`
+- Fila: uma tabela no banco de dados, lida da mesma aplicação,
+  que chamam os services
 
 **Decisões**
-- A comunicação não necessita de eventos por ser monolito.
-- Haveria uma fila de requisições, especialmente para ajudar em períodos de pico.
-- Requisições são tratadas de forma assíncrona pós-autenticação
-- autenticação é síncrona, pois demanda uma resposta para continuar executando.
-- Funcionalidades como geração do certificado são assíncronas para não afetar funcionalidades principais do sistema.
-- O servidor não guarda sessão; cada requisição envia o token do login
+- A comunicação entre módulos não precisa de eventos, por ser um monólito
+- A autenticação é síncrona, pois o restante da requisição depende dela
+- Consultas são síncronas
+- Escritas são assíncronas: depois da autenticação e da verificação de
+  permissão e regras, entram na fila e são processadas, o que
+  absorve os picos de acesso
+  - como os erros são devolvidos antes de a escrita entrar na fila, o
+    cliente não precisa consultar o resultado depois
+  - se o estado mudar antes da execução (ex.: o projeto ser encerrado nesse
+    meio-tempo), são verificadas as regras de novo e descarta a escrita
+  - a fila fica no próprio banco de dados, sem um serviço a mais para
+    operar
+  - uma operação que falha é tentada de novo, por isso as escritas são
+    idempotentes (ver Persistência)
+- A emissão dos certificados é uma operação separada do encerramento, para
+  não atrasar as outras operações da fila
+- O servidor não guarda sessão, cada requisição envia o token do login
   institucional, validado pelo `AutenticacaoService`
 - O cliente só conversa com os controllers, e nunca com o banco de dados ou
   o provedor de identidade
 
 ## Persistência
 
-- Banco de dados relacional, compartilhado pelos módulos
+- Banco de dados, compartilhado pelos módulos
   - cada módulo tem as próprias tabelas, e um módulo não acessa as tabelas
     de outro
 - Um repository por agregado, e cada agregado é salvo como uma unidade
-- Cada caso de uso salva os dados em uma transação
-  - ao encerrar um projeto, o projeto e os certificados são salvos na mesma
-    transação
+- Cada operação salva os dados em uma transação
+  - ao encerrar um projeto, o projeto é salvo primeiro, e os certificados
+    são emitidos em outra operação; se a emissão falhar, ela é tentada de
+    novo sem duplicar certificados
 - O arquivo do certificado não é guardado; ele é gerado a cada download a
   partir dos dados salvos em `Certificado`
+- Usuários vem do provedor de identidade
+
+
+**Idempotência**
+- A matrícula é a chave do usuário: salvar um usuário que já existe atualiza
+  a cópia em vez de criar outra, então repetir um login ou uma busca não
+  duplica dados
+- Escritas que podem ser repetidas (pela fila ou pelo cliente reenviando a
+  requisição) não têm efeito duplicado
+  - registrar uma presença já registrada não cria outra
+  - encerrar um projeto já encerrado é recusado, e há no máximo um
+    certificado por aluno e projeto
 
 ## Integrações externas
 
 **Provedor de identidade institucional**
 - O usuário faz login no serviço de login único da universidade, e o cliente
   recebe um token
-- O servidor valida o token a cada requisição e obtém o usuário e o papel
-  (`identificar(token)`)
+- O servidor valida o token a cada requisição (`identificar(token)`), só
+  para confirmar a sessão e saber de qual usuário ela é
+- O tipo do usuário não vem do token: é a subclasse de `Usuario` (`Aluno`,
+  `Professor` ou `Administrador`), definida pelo vínculo quando o usuário é
+  obtido do provedor e guardada na cópia local
 - O servidor busca alunos pela matrícula para vinculá-los a projetos
   (`buscarPorMatricula(matricula)`)
-- Se o provedor estiver indisponível, não é possível entrar no sistema
+- Se o provedor estiver indisponível, não é possível entrar no sistema nem
+  vincular alunos que ainda não estão na cópia local
 
 ## API
 
 Todas as rotas exigem o token no cabeçalho `Authorization: Bearer <token>`.
+Consultas (`GET`) respondem com os dados; escritas respondem `202 Accepted`
+depois de verificadas, e são salvas em seguida pela fila.
 
-**ProjetoController**
-- `GET /projetos`: listar projetos
-- `POST /projetos`: criar projeto
-- `GET /projetos/{id}`: consultar projeto, com atividades e participantes
-- `PUT /projetos/{id}`: editar projeto
-- `POST /projetos/{id}/encerramento`: encerrar projeto e emitir os
+**Projetos** (`ProjetoController`)
+- `GET` e `POST /projetos`: listar e criar projetos
+- `GET` e `PUT /projetos/{id}`: consultar e editar um projeto
+- `POST /projetos/{id}/encerramento`: encerrar o projeto e emitir os
   certificados
-- `POST /projetos/{id}/atividades`: criar atividade
-- `PUT /projetos/{id}/atividades/{atividadeId}`: editar atividade
-- `DELETE /projetos/{id}/atividades/{atividadeId}`: remover atividade
-- `POST /projetos/{id}/participantes`: vincular aluno pela matrícula
-- `DELETE /projetos/{id}/participantes/{matricula}`: desvincular aluno
-- `PUT /projetos/{id}/criterios`: definir critérios de certificação
+- `/projetos/{id}/atividades`, `/participantes` e `/criterios`: gerenciar
+  atividades, participantes (pela matrícula) e critérios
 
-**FrequenciaController**
+**Frequência** (`FrequenciaController`)
 - `POST /projetos/{id}/atividades/{atividadeId}/presencas`: registrar
   presença pela matrícula
-- `DELETE /projetos/{id}/atividades/{atividadeId}/presencas/{matricula}`:
-  remover presença
-- `GET /projetos/{id}/horas`: horas de todos os participantes do projeto
-- `GET /me/horas`: horas do aluno, por projeto e no total
+- `GET /projetos/{id}/horas` e `GET /me/horas`: horas dos participantes, para
+  o coordenador, e as do próprio aluno
 
-**CertificadoController**
+**Certificados** (`CertificadoController`)
 - `GET /me/certificados`: listar os certificados do aluno
 - `GET /certificados/{id}/arquivo`: baixar o certificado em PDF
 
-**AutenticacaoController**
-- `GET /me`: usuário logado, com nome e papel
+**Usuário** (`AutenticacaoController`)
+- `GET /me`: usuário logado, com nome e tipo
 
-**Respostas de erro**
-- `401`: token ausente ou inválido
-- `403`: usuário sem permissão para a operação
-- `404`: recurso não encontrado
-- `409`: operação recusada por uma regra de negócio, como alterar um
-  projeto encerrado
-
-## Justificativas GRASP
-
-**Controller**
-- Os services recebem cada operação vinda dos controllers e coordenam o
-  domínio, sem conter regras de negócio
-
-**Pure Fabrication**
-- Services e controllers não são conceitos do domínio e existem para separar
-  a coordenação e a comunicação com o cliente
-
-## Coesão e acoplamento
-
-**Coesão**
-- Cada camada tem um papel: controllers recebem requisições, services
-  coordenam os casos de uso e o domínio mantém as regras
-
-**Acoplamento**
-- As camadas só dependem das camadas mais internas
-
-**Pontos de atenção**
-- `EncerramentoService` é o único service que usa `projetos` e
-  `certificacao` e é o ponto de maior acoplamento, mantido isolado nele
-
-## Princípios SOLID
-
-**SRP (Single Responsibility Principle)**
-- Controllers recebem requisições, services coordenam e o domínio mantém as
-  regras
-
-**DIP (Dependency Inversion Principle)**
-- Os services dependem das interfaces definidas no domínio, e as
-  implementações ficam na infraestrutura
+**Erros**
+- `401` token ausente ou inválido, `403` sem permissão, `404` não
+  encontrado e `409` recusado por uma regra de negócio (ex.: alterar um
+  projeto encerrado)
+- Todos os erros são devolvidos na própria requisição, antes de a escrita
+  entrar na fila
