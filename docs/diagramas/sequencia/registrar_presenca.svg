@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1508" height="752" viewBox="0 0 1508 752" font-family="Helvetica, Arial, 'Liberation Sans', sans-serif">
+<defs>
+<marker id="seta" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12"
+ markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,1 L11,6 L1,11" fill="none" stroke="#222" stroke-width="1.3"/>
+</marker>
+<marker id="seta_cheia" viewBox="0 0 12 12" refX="11" refY="6"
+ markerWidth="12" markerHeight="12" orient="auto-start-reverse"
+ markerUnits="userSpaceOnUse">
+<path d="M1,1 L11,6 L1,11 Z" fill="#222" stroke="#222" stroke-width="1"/>
+</marker>
+<marker id="triangulo" viewBox="0 0 16 16" refX="15" refY="8" markerWidth="16"
+ markerHeight="16" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,1 L15,8 L1,15 Z" fill="#fff" stroke="#222" stroke-width="1.3"/>
+</marker>
+<marker id="losango" viewBox="0 0 22 12" refX="21" refY="6" markerWidth="22"
+ markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,6 L11,1 L21,6 L11,11 Z" fill="#222" stroke="#222"
+ stroke-width="1.2"/>
+</marker>
+<marker id="losango_vazio" viewBox="0 0 22 12" refX="21" refY="6"
+ markerWidth="22" markerHeight="12" orient="auto-start-reverse"
+ markerUnits="userSpaceOnUse">
+<path d="M1,6 L11,1 L21,6 L11,11 Z" fill="#fff" stroke="#222"
+ stroke-width="1.2"/>
+</marker>
+</defs>
+<rect width="1508" height="752" fill="#fff"/>
+<rect x="30.0" y="30.0" width="1448.0" height="692.0" fill="none" stroke="#222" stroke-width="1.2"/>
+<path d="M30.0,30.0 H180.6 V44.0 L174.6,50.0 H30.0 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="37.0" y="45.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">sd</text>
+<text x="55.8" y="45.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">Registrar presença</text>
+<line x1="109.0" y1="106.0" x2="109.0" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="427.1" y1="106.0" x2="427.1" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="627.6" y1="106.0" x2="627.6" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="823.9" y1="106.0" x2="823.9" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="1033.9" y1="106.0" x2="1033.9" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="1219.7" y1="106.0" x2="1219.7" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="1392.6" y1="106.0" x2="1392.6" y2="706.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<rect x="54.0" y="70.0" width="110.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="109.0" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: Cliente web</text>
+<rect x="345.9" y="70.0" width="162.4" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="427.1" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaController</text>
+<rect x="548.3" y="70.0" width="158.6" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="627.6" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: AutenticacaoService</text>
+<rect x="746.9" y="70.0" width="153.9" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="823.9" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProvedorIdentidade</text>
+<rect x="959.7" y="70.0" width="148.5" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1033.9" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaService</text>
+<rect x="1148.2" y="70.0" width="143.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1219.7" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProjetoRepository</text>
+<rect x="1331.2" y="70.0" width="122.8" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1392.6" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">projeto : Projeto</text>
+<rect x="818.9" y="212.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="622.6" y="176.0" width="10.0" height="108.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1214.7" y="356.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="818.9" y="428.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1387.6" y="500.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1214.7" y="572.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1028.9" y="320.0" width="10.0" height="324.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="422.1" y="140.0" width="10.0" height="540.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="104.0" y="128.0" width="10.0" height="568.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<polyline points="114.0,140.0 422.1,140.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="268.0" y="133.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">registrarPresenca(token, id, atividadeId, matricula)</text>
+<polyline points="432.1,176.0 622.6,176.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="527.3" y="169.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
+<polyline points="632.6,212.0 818.9,212.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="725.7" y="205.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
+<polyline points="818.9,248.0 632.6,248.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="725.7" y="241.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
+<polyline points="622.6,284.0 432.1,284.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="527.3" y="277.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
+<polyline points="432.1,320.0 1028.9,320.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="730.5" y="313.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">registrarPresenca(id, atividadeId, matricula, usuario)</text>
+<polyline points="1038.9,356.0 1214.7,356.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1126.8" y="349.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">buscarPorId(id)</text>
+<polyline points="1214.7,392.0 1038.9,392.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="1126.8" y="385.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">projeto</text>
+<polyline points="1028.9,428.0 828.9,428.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="928.9" y="421.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">buscarPorMatricula(matricula)</text>
+<polyline points="828.9,464.0 1028.9,464.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="928.9" y="457.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">aluno</text>
+<polyline points="1038.9,500.0 1387.6,500.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1213.2" y="493.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">registrarPresenca(atividade, aluno)</text>
+<polyline points="1387.6,536.0 1038.9,536.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="1213.2" y="529.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111"></text>
+<polyline points="1038.9,572.0 1214.7,572.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1126.8" y="565.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">salvar(projeto)</text>
+<polyline points="1214.7,608.0 1038.9,608.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="1126.8" y="601.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111"></text>
+<polyline points="1028.9,644.0 432.1,644.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="730.5" y="637.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111"></text>
+<polyline points="422.1,680.0 114.0,680.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="268.0" y="673.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">202 Accepted</text>
+</svg>
