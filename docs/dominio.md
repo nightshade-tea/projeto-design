@@ -15,6 +15,9 @@
 - `identificar(token): Usuario`: valida o token recebido do login
   institucional e devolve o usuário
 - `buscarPorMatricula(matricula): Usuario`: usado para vincular alunos
+- `urlLogin(): String`: endereço da página de login institucional
+- `trocarCodigo(codigo): String`: troca o código devolvido pelo login
+  institucional por um token
 - Implementações: `ProvedorIdentidadeInstitucional` e `ProvedorIdentidadeTeste`
 
 ### Módulo `projetos`

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Gera docs/diagramas/diagrama_pacotes.svg (diagrama de pacotes, ver
+# Gera docs/diagramas/pacotes.svg (diagrama de pacotes, ver
 # docs/arquitetura.md e docs/dominio.md)
 # Uso: python3 scripts/diagrama_pacotes.py
 #
@@ -81,4 +81,4 @@ yc = modulos[0].topo_corpo + (min(p.h for p in modulos) - ABA_H) / 2
 for a, b in zip(modulos, modulos[1:]):
     dep([(a.dir, yc), (b.esq, yc)])
 
-svg.salvar("diagrama_pacotes.svg", W, H)
+svg.salvar("pacotes.svg", W, H)

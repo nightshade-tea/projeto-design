@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Gera docs/diagramas/diagrama_classes.svg (diagrama de classes do domínio, ver docs/dominio.md)
+# Gera docs/diagramas/classes.svg (diagrama de classes do domínio, ver docs/dominio.md)
 # Uso: python3 scripts/diagrama_classes.py
 #
 # Notação UML 2:
@@ -152,6 +152,8 @@ mod_projetos = [projeto_repo, projeto, status, atividade, participacao,
 provedor = Classe("ProvedorIdentidade", tipo="interface", operacoes=[
     "+ identificar(token : String) : Usuario",
     "+ buscarPorMatricula(matricula : String) : Usuario",
+    "+ urlLogin() : String",
+    "+ trocarCodigo(codigo : String) : String",
 ])
 usuario = Classe("Usuario", tipo="abstrata", atributos=[
     "- matricula : String",
@@ -287,4 +289,4 @@ dependencia_horizontal(provedor, usuario)
 # generalizações em árvore, com uma única ponta na superclasse
 arvore(usuario, papeis)
 
-svg.salvar("diagrama_classes.svg", W, H)
+svg.salvar("classes.svg", W, H)

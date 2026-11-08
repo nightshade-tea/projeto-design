@@ -62,6 +62,8 @@ Todos recebem as requisições do cliente e identificam o usuário com
   - chama `CertificadoService`
 
 **AutenticacaoController**
+- início do login, que redireciona o navegador para o login institucional
+- retorno do login, que troca o código recebido por um token
 - requisição de consulta do usuário logado, com nome e tipo
   - chama `AutenticacaoService`
 
@@ -94,6 +96,11 @@ Todos recebem as requisições do cliente e identificam o usuário com
   - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`)
 
 **AutenticacaoService**
+- obter o endereço do login institucional, com
+  `ProvedorIdentidade.urlLogin()`
+- concluir o login, trocando o código por um token, com
+  `ProvedorIdentidade.trocarCodigo(codigo)`
+  - recusa códigos inválidos
 - identificar o usuário a partir do token, com
   `ProvedorIdentidade.identificar(token)`
   - usado por todos os controllers no início de cada requisição
@@ -172,7 +179,9 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - O servidor não guarda sessão, cada requisição envia o token do login
   institucional, validado pelo `AutenticacaoService`
 - O cliente só conversa com os controllers, e nunca com o banco de dados ou
-  o provedor de identidade
+  o provedor de identidade; o servidor conduz o login, redirecionando o
+  navegador para a página de login institucional e recebendo o código de
+  volta
 
 ## Persistência
 
@@ -202,8 +211,10 @@ Todos recebem as requisições do cliente e identificam o usuário com
 ## Integrações externas
 
 **Provedor de identidade institucional**
-- O usuário faz login no serviço de login único da universidade, e o cliente
-  recebe um token
+- O servidor redireciona o navegador para o serviço de login único da
+  universidade (`urlLogin()`); depois do login, o serviço devolve o
+  navegador ao servidor com um código, que o servidor troca por um token
+  (`trocarCodigo(codigo)`) e entrega ao cliente
 - O servidor valida o token a cada requisição (`identificar(token)`), só
   para confirmar a sessão e saber de qual usuário ela é
 - O tipo do usuário não vem do token: é a subclasse de `Usuario` (`Aluno`,
@@ -216,9 +227,10 @@ Todos recebem as requisições do cliente e identificam o usuário com
 
 ## API
 
-Todas as rotas exigem o token no cabeçalho `Authorization: Bearer <token>`.
-Consultas (`GET`) respondem com os dados; escritas respondem `202 Accepted`
-depois de verificadas, e são salvas em seguida pela fila.
+Todas as rotas, exceto as de login, exigem o token no cabeçalho
+`Authorization: Bearer <token>`. Consultas (`GET`) respondem com os dados;
+escritas respondem `202 Accepted` depois de verificadas, e são salvas em
+seguida pela fila.
 
 **Projetos** (`ProjetoController`)
 - `GET` e `POST /projetos`: listar e criar projetos
@@ -239,11 +251,14 @@ depois de verificadas, e são salvas em seguida pela fila.
 - `GET /certificados/{id}/arquivo`: baixar o certificado em PDF
 
 **Usuário** (`AutenticacaoController`)
+- `GET /login`: redireciona (`302`) para o login institucional
+- `GET /login/callback?code=...`: recebe o código do login institucional e
+  devolve o token
 - `GET /me`: usuário logado, com nome e tipo
 
 **Erros**
-- `401` token ausente ou inválido, `403` sem permissão, `404` não
-  encontrado e `409` recusado por uma regra de negócio (ex.: alterar um
-  projeto encerrado)
+- `401` token ausente ou inválido, ou código de login inválido, `403` sem
+  permissão, `404` não encontrado e `409` recusado por uma regra de negócio
+  (ex.: alterar um projeto encerrado)
 - Todos os erros são devolvidos na própria requisição, antes de a escrita
   entrar na fila

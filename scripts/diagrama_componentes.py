@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Gera docs/diagramas/diagrama_componentes.svg (diagrama de componentes, ver
+# Gera docs/diagramas/componentes.svg (diagrama de componentes, ver
 # docs/arquitetura.md)
 # Uso: python3 scripts/diagrama_componentes.py
 #
@@ -145,4 +145,4 @@ for a, interface in ligacoes:
 for a, ext in [(r0, banco), (r1, banco), (idp, provedor_ext)]:
     svg.linha([(a.dir, a.cy), (ext.esq, a.cy)], tracejado=True, fim="seta")
 
-svg.salvar("diagrama_componentes.svg", W, H)
+svg.salvar("componentes.svg", W, H)

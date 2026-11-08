@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2092" height="231" viewBox="0 0 2092 231" font-family="Helvetica, Arial, 'Liberation Sans', sans-serif">
+<defs>
+<marker id="seta" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12"
+ markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,1 L11,6 L1,11" fill="none" stroke="#222" stroke-width="1.3"/>
+</marker>
+<marker id="seta_cheia" viewBox="0 0 12 12" refX="11" refY="6"
+ markerWidth="12" markerHeight="12" orient="auto-start-reverse"
+ markerUnits="userSpaceOnUse">
+<path d="M1,1 L11,6 L1,11 Z" fill="#222" stroke="#222" stroke-width="1"/>
+</marker>
+<marker id="triangulo" viewBox="0 0 16 16" refX="15" refY="8" markerWidth="16"
+ markerHeight="16" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,1 L15,8 L1,15 Z" fill="#fff" stroke="#222" stroke-width="1.3"/>
+</marker>
+<marker id="losango" viewBox="0 0 22 12" refX="21" refY="6" markerWidth="22"
+ markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+<path d="M1,6 L11,1 L21,6 L11,11 Z" fill="#222" stroke="#222"
+ stroke-width="1.2"/>
+</marker>
+<marker id="losango_vazio" viewBox="0 0 22 12" refX="21" refY="6"
+ markerWidth="22" markerHeight="12" orient="auto-start-reverse"
+ markerUnits="userSpaceOnUse">
+<path d="M1,6 L11,1 L21,6 L11,11 Z" fill="#fff" stroke="#222"
+ stroke-width="1.2"/>
+</marker>
+</defs>
+<rect width="2092" height="231" fill="#fff"/>
+<rect x="30.0" y="30.0" width="2031.9" height="171.0" fill="none" stroke="#222" stroke-width="1.2"/>
+<path d="M30.0,30.0 H102.6 V44.0 L96.6,50.0 H30.0 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="37.0" y="45.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">sd</text>
+<text x="55.8" y="45.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">Login</text>
+<g transform="translate(54.0,122.0)">
+<polyline points="1619.7,18.0 1659.7,22.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4"/>
+<path d="M1659.7,-10.0 H1973.9 L1983.9,0.0 V55.0 H1659.7 Z M1973.9,-10.0 V0.0 H1983.9" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1669.7" y="10.0" font-size="12" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">[código inválido]: trocarCodigo(codigo) recusa o código,</text>
+<text x="1669.7" y="27.0" font-size="12" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">callback devolve 401 Unauthorized e a interação</text>
+<text x="1669.7" y="44.0" font-size="12" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">termina (4 não ocorre)</text>
+<polyline points="323.7,18.0 143.0,18.0" fill="none" stroke="#222" stroke-width="1.3"/>
+<polyline points="247.4,9.0 219.4,9.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="163.0" y="-1.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">2: entrar(matricula, senha)</text>
+<polyline points="433.7,18.0 694.5,18.0" fill="none" stroke="#222" stroke-width="1.3"/>
+<polyline points="550.1,9.0 578.1,9.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="453.7" y="-35.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">1: login()</text>
+<text x="453.7" y="-18.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">3: callback(codigo)</text>
+<text x="453.7" y="-1.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">4 [código válido]: consultarUsuario(token)</text>
+<polyline points="867.1,18.0 1075.5,18.0" fill="none" stroke="#222" stroke-width="1.3"/>
+<polyline points="957.3,9.0 985.3,9.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="887.1" y="-35.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">1.1: url := urlLogin()</text>
+<text x="887.1" y="-18.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">3.1: token := entrar(codigo)</text>
+<text x="887.1" y="-1.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">4.1: usuario := identificar(token)</text>
+<polyline points="1234.1,18.0 1465.8,18.0" fill="none" stroke="#222" stroke-width="1.3"/>
+<polyline points="1335.9,9.0 1363.9,9.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1254.1" y="-35.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">1.1.1: url := urlLogin()</text>
+<text x="1254.1" y="-18.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">3.1.1: token := trocarCodigo(codigo)</text>
+<text x="1254.1" y="-1.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">4.1.1: usuario := identificar(token)</text>
+<rect x="0.0" y="0.0" width="143.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="71.5" y="23.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: Login institucional</text>
+<rect x="323.7" y="0.0" width="110.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="378.7" y="23.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: Cliente web</text>
+<rect x="694.5" y="0.0" width="172.6" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="780.8" y="23.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: AutenticacaoController</text>
+<rect x="1075.5" y="0.0" width="158.6" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1154.8" y="23.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: AutenticacaoService</text>
+<rect x="1465.8" y="0.0" width="153.9" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1542.8" y="23.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProvedorIdentidade</text>
+</g>
+</svg>
