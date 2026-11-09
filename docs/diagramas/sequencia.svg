@@ -128,7 +128,7 @@
 <polyline points="861.6,848.0 489.2,848.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <text x="675.4" y="841.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
 <polyline points="479.2,884.0 114.0,884.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="296.6" y="877.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">200 OK (nome, tipo)</text>
+<text x="296.6" y="877.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">200 OK (nome, papel)</text>
 <polyline points="114.0,920.0 673.9,920.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
 <text x="393.9" y="913.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(token, titulo, descricao)</text>
 <polyline points="683.9,956.0 861.6,956.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
@@ -146,7 +146,7 @@
 <polyline points="683.9,1172.0 1267.9,1172.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
 <text x="975.9" y="1165.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(titulo, descricao, usuario)</text>
 <polyline points="1277.9,1216.0 1557.3,1216.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="1417.6" y="1209.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">Projeto(titulo, descricao, usuario)</text>
+<text x="1417.6" y="1209.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">Projeto(titulo, descricao, coordenador)</text>
 <polyline points="1277.9,1262.0 1440.8,1262.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
 <text x="1359.4" y="1255.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">salvar(projeto)</text>
 <polyline points="1440.8,1298.0 1277.9,1298.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>

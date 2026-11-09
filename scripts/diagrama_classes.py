@@ -52,6 +52,7 @@ projeto_repo = Classe("ProjetoRepository", tipo="interface", operacoes=[
     "+ salvar(projeto : Projeto)",
     "+ buscarPorId(id : Integer) : Projeto",
     "+ listar() : Projeto [0..*]",
+    "+ listarPorAluno(aluno : Aluno) : Projeto [0..*]",
 ])
 projeto = Classe("Projeto", atributos=[
     "- titulo : String",

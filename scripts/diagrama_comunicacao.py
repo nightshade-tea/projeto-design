@@ -107,7 +107,7 @@ projeto = Objeto("projeto : Projeto")
 repo = Objeto(": ProjetoRepository")
 m_ctrl = ["1: criar(token, titulo, descricao)"]
 m_svc = ["1.2: projeto := criar(titulo, descricao, usuario)"]
-m_proj = ["1.2.1: «create» Projeto(titulo, descricao, usuario)"]
+m_proj = ["1.2.1: «create» Projeto(titulo, descricao, coordenador)"]
 m_repo = ["1.2.2: salvar(projeto)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
@@ -209,9 +209,9 @@ repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 m_ctrl = ["1: consultarHoras(token)"]
 m_svc = ["1.2: resumos := consultarHoras(usuario)"]
-m_repo = ["1.2.1: projetos := listarPorAluno(usuario)"]
+m_repo = ["1.2.1: projetos := listarPorAluno(aluno)"]
 m_proj = ["1.2.2 *[para cada projeto em projetos]:",
-          "resumo := resumoFrequencia(usuario)"]
+          "resumo := resumoFrequencia(aluno)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -323,7 +323,7 @@ m_idp_ext = ["3.1.1.1: matricula := validar(token)",
 m_svc_repo = ["4.2.2: salvar(projeto)",
               "5.2.1: projeto := buscarPorId(id)",
               "5.2.4: salvar(projeto)"]
-m_svc_proj = ["4.2.1: «create» Projeto(titulo, descricao, usuario)",
+m_svc_proj = ["4.2.1: «create» Projeto(titulo, descricao, coordenador)",
               "5.2.3: vincular(aluno)"]
 
 

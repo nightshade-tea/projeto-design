@@ -63,7 +63,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 
 **AutenticacaoController**
 - início do login, que redireciona o navegador para o login institucional
-- requisição de consulta do usuário logado, com nome e tipo
+- requisição de consulta do usuário logado, com nome e papel
   - chama `AutenticacaoService`
 
 ### Services
@@ -211,7 +211,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
   devolve o navegador ao cliente com ele
 - O servidor valida o token a cada requisição (`identificar(token)`), só
   para confirmar a sessão e saber de qual usuário ela é
-- O tipo do usuário não vem do token: é a subclasse de `Usuario` (`Aluno`,
+- O papel do usuário não vem do token: é a subclasse de `Usuario` (`Aluno`,
   `Professor` ou `Administrador`), definida pelo vínculo quando o usuário é
   obtido do provedor e guardada na cópia local
 - O servidor busca alunos pela matrícula para vinculá-los a projetos
@@ -246,7 +246,7 @@ seguida pela fila.
 
 **Usuário** (`AutenticacaoController`)
 - `GET /login`: redireciona (`302`) para o login institucional
-- `GET /me`: usuário logado, com nome e tipo
+- `GET /me`: usuário logado, com nome e papel
 
 **Erros**
 - `401` token ausente ou inválido, `403` sem permissão, `404` não
