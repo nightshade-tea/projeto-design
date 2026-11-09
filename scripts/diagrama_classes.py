@@ -153,7 +153,6 @@ provedor = Classe("ProvedorIdentidade", tipo="interface", operacoes=[
     "+ identificar(token : String) : Usuario",
     "+ buscarPorMatricula(matricula : String) : Usuario",
     "+ urlLogin() : String",
-    "+ trocarCodigo(codigo : String) : String",
 ])
 usuario = Classe("Usuario", tipo="abstrata", atributos=[
     "- matricula : String",

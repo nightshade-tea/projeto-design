@@ -655,8 +655,30 @@ def ligacao(svg, a, b, mensagens=(), lado=1, x=None, y=None):
         y = a.cy if y is None else y
         x1, x2 = (a.dir, b.esq) if a.cx < b.cx else (a.esq, b.dir)
         svg.linha([(x1, y), (x2, y)])
-        if not mensagens:
-            return None
+        return _rotular(svg, (x1, y), (x2, y), mensagens, lado)
+    x = a.cx if x is None else x
+    y1, y2 = (a.base, b.topo) if a.cy < b.cy else (a.topo, b.base)
+    svg.linha([(x, y1), (x, y2)])
+    return _rotular(svg, (x, y1), (x, y2), mensagens, lado)
+
+
+def ligacao_rota(svg, pontos, mensagens=(), lado=1, trecho=None):
+    """ligação em ângulos retos pelos pontos dados (do primeiro objeto ao
+    segundo); as mensagens ficam no trecho indicado (padrão: o mais longo)"""
+    svg.linha(pontos)
+    if trecho is None:
+        trecho = max(range(len(pontos) - 1), key=lambda i: abs(
+            pontos[i + 1][0] - pontos[i][0]) + abs(pontos[i + 1][1] - pontos[i][1]))
+    return _rotular(svg, pontos[trecho], pontos[trecho + 1], mensagens, lado)
+
+
+def _rotular(svg, p1, p2, mensagens, lado):
+    """mensagens e seta de sentido sobre o trecho reto p1 -> p2"""
+    if not mensagens:
+        return None
+    (x1, y1), (x2, y2) = p1, p2
+    if y1 == y2:
+        y = y1
         s = 1 if x2 > x1 else -1
         cx = (x1 + x2) / 2
         bw, bh = bloco_mensagens(mensagens)
@@ -670,11 +692,7 @@ def ligacao(svg, a, b, mensagens=(), lado=1, x=None, y=None):
             svg.texto(cx - bw / 2, base + i * LH_MSG, m, 12, halo=True)
         return (cx - bw / 2, base - 13, cx + bw / 2,
                 base + (len(mensagens) - 1) * LH_MSG + 4)
-    x = a.cx if x is None else x
-    y1, y2 = (a.base, b.topo) if a.cy < b.cy else (a.topo, b.base)
-    svg.linha([(x, y1), (x, y2)])
-    if not mensagens:
-        return None
+    x = x1
     s = 1 if y2 > y1 else -1
     cy = (y1 + y2) / 2
     bw, bh = bloco_mensagens(mensagens)

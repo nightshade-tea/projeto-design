@@ -2,7 +2,7 @@
 # Gera os diagramas de comunicação (os mesmos de scripts/diagrama_sequencia.py):
 # - docs/diagramas/comunicacao.svg: cenário completo, com autenticação: o
 #   professor faz login pelo login institucional, cria um projeto e vincula
-#   um aluno; as mensagens 4 a 6 têm a guarda [código válido], e uma nota
+#   um aluno; as mensagens 4 e 5 têm a guarda [token válido], e uma nota
 #   indica o fluxo de exceção (401)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/comunicacao/login.svg
@@ -20,7 +20,8 @@
 #   no sentido do envio; o resultado aparece como "var := operacao(...)"
 # - repetição indicada por "*[guarda]" e condição por "[guarda]" depois do
 #   número de sequência
-from uml import Objeto, Svg, ligacao, bloco_mensagens, salvar_interacao, nota
+from uml import Objeto, Svg, ligacao, bloco_mensagens, salvar_interacao, nota, \
+    ligacao_rota
 
 GMIN = 80    # comprimento mínimo de um link
 
@@ -31,6 +32,14 @@ def gap_h(msgs):
 
 def gap_v(msgs):
     return max(GMIN, bloco_mensagens(msgs)[1] + 50) if msgs else GMIN
+
+
+def por_cima(a, b, msgs_abaixo, folga=50):
+    """rota de a até b passando acima da linha, sobre as mensagens dos links
+    dessa linha"""
+    y = min(a.topo, b.topo) - max(bloco_mensagens(m)[1]
+                                  for m in msgs_abaixo) - folga
+    return [(a.cx, a.topo), (a.cx, y), (b.cx, y), (b.cx, b.topo)]
 
 
 def lado_a_lado(a, b, msgs):
@@ -46,9 +55,11 @@ def acima(a, b, msgs):
     b.x, b.y = a.cx - b.w / 2, a.topo - gap_v(msgs) - b.h
 
 
-def desenhar(nome, arquivo, objetos, links, notas=()):
+def desenhar(nome, arquivo, objetos, links, notas=(), rotas=()):
     svg = Svg()
     caixas = [(o.esq, o.topo, o.dir, o.base) for o in objetos]
+    for pontos, msgs, lado in rotas:
+        caixas.append(ligacao_rota(svg, pontos, msgs, lado))
     for x, y, linhas, alvo in notas:
         caixas.append(nota(svg, x, y, linhas, alvo))
     for a, b, msgs, lado, *x in links:
@@ -248,27 +259,28 @@ auth = Objeto(": AutenticacaoService")
 idp = Objeto(": ProvedorIdentidade")
 m_ext = ["2: entrar(matricula, senha)"]
 m_ctrl = ["1: login()",
-          "3: callback(codigo)",
-          "4 [código válido]: consultarUsuario(token)"]
+          "3: consultarUsuario(token)"]
 m_auth = ["1.1: url := urlLogin()",
-          "3.1: token := entrar(codigo)",
-          "4.1: usuario := identificar(token)"]
+          "3.1: usuario := identificar(token)"]
 m_idp = ["1.1.1: url := urlLogin()",
-         "3.1.1: token := trocarCodigo(codigo)",
-         "4.1.1: usuario := identificar(token)"]
+         "3.1.1: usuario := identificar(token)"]
 ext.x, ext.y = 0, 0
 lado_a_lado(ext, cliente, m_ext)
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, auth, m_auth)
 lado_a_lado(auth, idp, m_idp)
+# o provedor consulta o login institucional
+m_idp_ext = ["3.1.1.1: matricula := validar(token)"]
 desenhar("Login", "comunicacao/login.svg",
          [ext, cliente, ctrl, auth, idp],
          [(cliente, ext, m_ext, 1), (cliente, ctrl, m_ctrl, 1),
           (ctrl, auth, m_auth, 1), (auth, idp, m_idp, 1)],
+         rotas=[(por_cima(idp, ext, [m_ext, m_ctrl, m_auth, m_idp]),
+                 m_idp_ext, 1)],
          notas=[(idp.dir + 40, idp.y - 10,
-                 ["[código inválido]: trocarCodigo(codigo) recusa o código,",
-                  "callback devolve 401 Unauthorized e a interação",
-                  "termina (4 não ocorre)"],
+                 ["[token inválido]: validar(token) recusa o token,",
+                  "consultarUsuario devolve 401 Unauthorized e a",
+                  "interação termina"],
                  (idp.dir, idp.cy))])
 
 # ------------------------------------- cenário completo, com autenticação
@@ -291,28 +303,28 @@ projeto = Objeto("projeto : Projeto")
 
 m_cli_ext = ["2: entrar(matricula, senha)"]
 m_cli_actrl = ["1: login()",
-               "3: callback(codigo)",
-               "4 [código válido]: consultarUsuario(token)"]
+               "3: consultarUsuario(token)"]
 m_actrl_auth = ["1.1: url := urlLogin()",
-                "3.1: token := entrar(codigo)",
-                "4.1: professor := identificar(token)"]
+                "3.1: professor := identificar(token)"]
 m_auth_idp = ["1.1.1: url := urlLogin()",
-              "3.1.1: token := trocarCodigo(codigo)",
-              "4.1.1: professor := identificar(token)",
-              "5.1.1: usuario := identificar(token)",
-              "6.1.1: usuario := identificar(token)"]
-m_cli_pctrl = ["5 [código válido]: criar(token, titulo, descricao)",
-               "6 [código válido]: vincular(token, id, matricula)"]
-m_pctrl_auth = ["5.1: usuario := identificar(token)",
-                "6.1: usuario := identificar(token)"]
-m_pctrl_svc = ["5.2: projeto := criar(titulo, descricao, usuario)",
-               "6.2: vincular(id, matricula, usuario)"]
-m_svc_idp = ["6.2.2: aluno := buscarPorMatricula(matricula)"]
-m_svc_repo = ["5.2.2: salvar(projeto)",
-              "6.2.1: projeto := buscarPorId(id)",
-              "6.2.4: salvar(projeto)"]
-m_svc_proj = ["5.2.1: «create» Projeto(titulo, descricao, usuario)",
-              "6.2.3: vincular(aluno)"]
+              "3.1.1: professor := identificar(token)",
+              "4.1.1: usuario := identificar(token)",
+              "5.1.1: usuario := identificar(token)"]
+m_cli_pctrl = ["4 [token válido]: criar(token, titulo, descricao)",
+               "5 [token válido]: vincular(token, id, matricula)"]
+m_pctrl_auth = ["4.1: usuario := identificar(token)",
+                "5.1: usuario := identificar(token)"]
+m_pctrl_svc = ["4.2: projeto := criar(titulo, descricao, usuario)",
+               "5.2: vincular(id, matricula, usuario)"]
+m_svc_idp = ["5.2.2: aluno := buscarPorMatricula(matricula)"]
+m_idp_ext = ["3.1.1.1: matricula := validar(token)",
+             "4.1.1.1: matricula := validar(token)",
+             "5.1.1.1: matricula := validar(token)"]
+m_svc_repo = ["4.2.2: salvar(projeto)",
+              "5.2.1: projeto := buscarPorId(id)",
+              "5.2.4: salvar(projeto)"]
+m_svc_proj = ["4.2.1: «create» Projeto(titulo, descricao, usuario)",
+              "5.2.3: vincular(aluno)"]
 
 
 def lw(msgs):
@@ -353,8 +365,10 @@ desenhar("Professor cria projeto e vincula aluno", "comunicacao.svg",
           (svc, idp, m_svc_idp, -1),
           (svc, repo, m_svc_repo, 1),
           (svc, projeto, m_svc_proj, 1)],
+         rotas=[(por_cima(idp, ext, [m_actrl_auth, m_auth_idp]),
+                 m_idp_ext, 1)],
          notas=[(idp.dir + 40, idp.y - 10,
-                 ["[código inválido]: trocarCodigo(codigo) recusa o código,",
-                  "callback devolve 401 Unauthorized e a interação",
-                  "termina (4, 5 e 6 não ocorrem)"],
+                 ["[token inválido]: validar(token) recusa o token,",
+                  "consultarUsuario devolve 401 Unauthorized e a",
+                  "interação termina (4 e 5 não ocorrem)"],
                  (idp.dir, idp.cy))])

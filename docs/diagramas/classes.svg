@@ -153,14 +153,13 @@
 <line x1="1343.8" y1="1248.0" x2="1651.8" y2="1248.0" stroke="#222" stroke-width="1.2"/>
 <text x="1353.8" y="1266.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">«create» + PercentualMinimoPresenca(pct : Real)</text>
 <text x="1353.8" y="1285.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ avaliar(resumo : ResumoFrequencia) : Boolean</text>
-<rect x="489.5" y="1468.0" width="305.1" height="130.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<rect x="489.5" y="1468.0" width="305.1" height="111.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="642.0" y="1487.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">«interface»</text>
 <text x="642.0" y="1506.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">ProvedorIdentidade</text>
 <line x1="489.5" y1="1514.0" x2="794.5" y2="1514.0" stroke="#222" stroke-width="1.2"/>
 <text x="499.5" y="1532.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ identificar(token : String) : Usuario</text>
 <text x="499.5" y="1551.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ buscarPorMatricula(matricula : String) : Usuario</text>
 <text x="499.5" y="1570.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ urlLogin() : String</text>
-<text x="499.5" y="1589.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ trocarCodigo(codigo : String) : String</text>
 <rect x="874.5" y="1468.0" width="207.5" height="176.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="978.3" y="1490.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">Usuario</text>
 <text x="978.3" y="1505.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">{abstract}</text>
@@ -203,7 +202,7 @@
 <text x="1158.5" y="1051.0" font-size="12" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">0..*</text>
 <polyline points="1151.5,1191.0 1151.5,1161.0 1151.5,1161.0 1151.5,1131.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#triangulo)"/>
 <polyline points="1497.8,1191.0 1497.8,1161.0 1151.5,1161.0 1151.5,1131.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#triangulo)"/>
-<polyline points="794.5,1533.0 874.5,1533.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<polyline points="794.5,1523.5 874.5,1523.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <polyline points="798.3,1704.0 798.3,1674.0 978.3,1674.0 978.3,1644.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
 <polyline points="978.3,1704.0 978.3,1674.0 978.3,1674.0 978.3,1644.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
 <polyline points="1158.3,1704.0 1158.3,1674.0 978.3,1674.0 978.3,1644.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>

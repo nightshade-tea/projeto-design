@@ -2,7 +2,7 @@
 # Gera os diagramas de sequência (ver docs/arquitetura.md e docs/dominio.md):
 # - docs/diagramas/sequencia.svg: cenário completo, com
 #   autenticação: o professor faz login pelo login institucional, cria um
-#   projeto e vincula um aluno; se o código do login for inválido, a
+#   projeto e vincula um aluno; se o token for inválido, a
 #   interação termina com 401 (fragmento break)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/sequencia/login.svg
@@ -23,10 +23,14 @@
 from uml import Sequencia
 
 
-def identificar(ctrl):
-    """cada requisição começa identificando o usuário pelo token"""
+def identificar(ctrl, ext=False):
+    """cada requisição começa identificando o usuário pelo token; com ext, o
+    provedor valida o token no login institucional"""
     s.chamada(ctrl, "auth", "identificar(token)")
     s.chamada("auth", "idp", "identificar(token)")
+    if ext:
+        s.chamada("idp", "ext", "validar(token)")
+        s.retorno("ext", "idp", "matricula")
     s.retorno("idp", "auth", "usuario")
     s.retorno("auth", ctrl, "usuario")
 
@@ -193,21 +197,21 @@ s.retorno("idp", "auth", "url")
 s.retorno("auth", "ctrl", "url")
 s.retorno("ctrl", "cliente", "302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
-s.retorno("ext", "cliente", "302 Found (callback, codigo)")
-s.chamada("cliente", "ctrl", "callback(codigo)")
-s.chamada("ctrl", "auth", "entrar(codigo)")
-s.chamada("auth", "idp", "trocarCodigo(codigo)")
-s.inicio("break", "[código inválido]")
-s.retorno("idp", "auth", "código inválido")
-s.retorno("auth", "ctrl", "código inválido")
+s.retorno("ext", "cliente", "302 Found (token)")
+# usuário logado; o token é validado no login institucional
+s.chamada("cliente", "ctrl", "consultarUsuario(token)")
+s.chamada("ctrl", "auth", "identificar(token)")
+s.chamada("auth", "idp", "identificar(token)")
+s.chamada("idp", "ext", "validar(token)")
+s.inicio("break", "[token inválido]")
+s.retorno("ext", "idp", "token inválido")
+s.retorno("idp", "auth", "token inválido")
+s.retorno("auth", "ctrl", "token inválido")
 s.retorno("ctrl", "cliente", "401 Unauthorized")
 s.fim()
-s.retorno("idp", "auth", "token")
-s.retorno("auth", "ctrl", "token")
-s.retorno("ctrl", "cliente", "200 OK (token)")
-# usuário logado
-s.chamada("cliente", "ctrl", "consultarUsuario(token)")
-identificar("ctrl")
+s.retorno("ext", "idp", "matricula")
+s.retorno("idp", "auth", "usuario")
+s.retorno("auth", "ctrl", "usuario")
 s.retorno("ctrl", "cliente", "200 OK (nome, tipo)")
 s.desenhar("sequencia/login.svg")
 
@@ -232,25 +236,25 @@ s.retorno("idp", "auth", "url")
 s.retorno("auth", "actrl", "url")
 s.retorno("actrl", "cliente", "302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
-s.retorno("ext", "cliente", "302 Found (callback, codigo)")
-s.chamada("cliente", "actrl", "callback(codigo)")
-s.chamada("actrl", "auth", "entrar(codigo)")
-s.chamada("auth", "idp", "trocarCodigo(codigo)")
-s.inicio("break", "[código inválido]")
-s.retorno("idp", "auth", "código inválido")
-s.retorno("auth", "actrl", "código inválido")
+s.retorno("ext", "cliente", "302 Found (token)")
+# usuário logado; o token é validado no login institucional
+s.chamada("cliente", "actrl", "consultarUsuario(token)")
+s.chamada("actrl", "auth", "identificar(token)")
+s.chamada("auth", "idp", "identificar(token)")
+s.chamada("idp", "ext", "validar(token)")
+s.inicio("break", "[token inválido]")
+s.retorno("ext", "idp", "token inválido")
+s.retorno("idp", "auth", "token inválido")
+s.retorno("auth", "actrl", "token inválido")
 s.retorno("actrl", "cliente", "401 Unauthorized")
 s.fim()
-s.retorno("idp", "auth", "token")
-s.retorno("auth", "actrl", "token")
-s.retorno("actrl", "cliente", "200 OK (token)")
-# usuário logado
-s.chamada("cliente", "actrl", "consultarUsuario(token)")
-identificar("actrl")
+s.retorno("ext", "idp", "matricula")
+s.retorno("idp", "auth", "usuario")
+s.retorno("auth", "actrl", "usuario")
 s.retorno("actrl", "cliente", "200 OK (nome, tipo)")
 # criar projeto
 s.chamada("cliente", "pctrl", "criar(token, titulo, descricao)")
-identificar("pctrl")
+identificar("pctrl", ext=True)
 s.chamada("pctrl", "svc", "criar(titulo, descricao, usuario)")
 s.criacao("svc", "projeto", "Projeto(titulo, descricao, usuario)")
 s.chamada("svc", "repo", "salvar(projeto)")
@@ -259,7 +263,7 @@ s.retorno("svc", "pctrl", "projeto")
 s.retorno("pctrl", "cliente", "202 Accepted")
 # vincular aluno
 s.chamada("cliente", "pctrl", "vincular(token, id, matricula)")
-identificar("pctrl")
+identificar("pctrl", ext=True)
 s.chamada("pctrl", "svc", "vincular(id, matricula, usuario)")
 s.chamada("svc", "repo", "buscarPorId(id)")
 s.retorno("repo", "svc", "projeto")
