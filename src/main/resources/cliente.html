@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Projetos de Extensão</title>
+</head>
+<body>
+<h1>Projetos de Extensão</h1>
+<p>Protótipo do cliente web. Cada botão chama a API do servidor e mostra a resposta no fim da página.</p>
+<hr>
+
+<h2>1. Usuário</h2>
+<p>Entre pelo login institucional (simulado). As senhas estão em <tt>src/main/resources/usuarios-institucionais.csv</tt>.</p>
+<table>
+<tr><td>Token:</td><td><input id="token" size="40"></td>
+<td><button onclick="location.href='/login'">Entrar</button>
+<button onclick="api('GET','/me')">Quem sou eu</button>
+<button onclick="campo('token').value=''">Sair</button></td></tr>
+</table>
+<hr>
+
+<h2>2. Projetos</h2>
+<table>
+<tr><td>Título:</td><td><input id="titulo" size="40"></td></tr>
+<tr><td>Descrição:</td><td><input id="descricao" size="40"></td></tr>
+<tr><td></td><td><button onclick="api('POST','/projetos',{titulo:v('titulo'),descricao:v('descricao')})">Criar projeto</button>
+<button onclick="api('GET','/projetos')">Listar projetos</button></td></tr>
+<tr><td>Projeto (id):</td><td><input id="projeto" size="5">
+<button onclick="api('GET','/projetos/'+v('projeto'))">Consultar</button>
+<button onclick="api('PUT','/projetos/'+v('projeto'),{titulo:v('titulo'),descricao:v('descricao')})">Editar</button>
+<button onclick="api('POST','/projetos/'+v('projeto')+'/encerramento')">Encerrar</button></td></tr>
+</table>
+<p>Editar usa o título e a descrição acima. Encerrar emite os certificados dos aprovados.</p>
+<hr>
+
+<h2>3. Participantes</h2>
+<table>
+<tr><td>Matrícula:</td><td><input id="matricula" size="12">
+<button onclick="api('POST','/projetos/'+v('projeto')+'/participantes',{matricula:v('matricula')})">Vincular</button>
+<button onclick="api('DELETE','/projetos/'+v('projeto')+'/participantes/'+v('matricula'))">Desvincular</button></td></tr>
+</table>
+<hr>
+
+<h2>4. Atividades e presenças</h2>
+<table>
+<tr><td>Título:</td><td><input id="atvTitulo" size="30"></td></tr>
+<tr><td>Data:</td><td><input id="atvData" size="12" placeholder="AAAA-MM-DD"></td></tr>
+<tr><td>Carga horária:</td><td><input id="atvCarga" size="5"> horas</td></tr>
+<tr><td></td><td><button onclick="api('POST','/projetos/'+v('projeto')+'/atividades',{titulo:v('atvTitulo'),data:v('atvData'),cargaHoraria:v('atvCarga')})">Adicionar atividade</button></td></tr>
+<tr><td>Atividade (id):</td><td><input id="atividade" size="5">
+<button onclick="api('DELETE','/projetos/'+v('projeto')+'/atividades/'+v('atividade'))">Remover atividade</button></td></tr>
+<tr><td></td><td><button onclick="api('POST','/projetos/'+v('projeto')+'/atividades/'+v('atividade')+'/presencas',{matricula:v('matricula')})">Registrar presença</button>
+<button onclick="api('DELETE','/projetos/'+v('projeto')+'/atividades/'+v('atividade')+'/presencas/'+v('matricula'))">Remover presença</button></td></tr>
+</table>
+<p>A presença usa o projeto, a atividade e a matrícula informados acima.</p>
+<hr>
+
+<h2>5. Critérios de certificação</h2>
+<table>
+<tr><td>Mínimo de horas:</td><td><input id="minimoHoras" size="5"></td></tr>
+<tr><td>Presença mínima:</td><td><input id="percentualMinimo" size="5"> %</td></tr>
+<tr><td></td><td><button onclick="api('PUT','/projetos/'+v('projeto')+'/criterios',{minimoHoras:v('minimoHoras'),percentualMinimo:v('percentualMinimo')})">Definir critérios</button>
+<button onclick="api('GET','/projetos/'+v('projeto')+'/horas')">Horas dos participantes</button></td></tr>
+</table>
+<hr>
+
+<h2>6. Aluno</h2>
+<table>
+<tr><td></td><td><button onclick="api('GET','/me/horas')">Minhas horas</button>
+<button onclick="api('GET','/me/certificados')">Meus certificados</button></td></tr>
+<tr><td>Certificado (id):</td><td><input id="certificado" size="5">
+<button onclick="api('GET','/certificados/'+v('certificado')+'/arquivo')">Baixar certificado</button></td></tr>
+</table>
+<hr>
+
+<h2>Resposta</h2>
+<pre id="saida">(nenhuma requisição ainda)</pre>
+
+<script>
+function campo(id) { return document.getElementById(id); }
+function v(id) { return campo(id).value.trim(); }
+
+// chama a API com o token no cabeçalho Authorization e mostra a resposta
+async function api(metodo, caminho, dados) {
+  var opcoes = { method: metodo, headers: { 'Authorization': 'Bearer ' + v('token') } };
+  if (dados) {
+    opcoes.headers['Content-Type'] = 'application/json';
+    opcoes.body = JSON.stringify(dados);
+  }
+  var resposta = await fetch(caminho, opcoes);
+  var texto = await resposta.text();
+  try { texto = JSON.stringify(JSON.parse(texto), null, 2); } catch (e) {}
+  campo('saida').textContent = metodo + ' ' + caminho + '\n' + resposta.status + ' '
+      + resposta.statusText + '\n\n' + texto;
+}
+
+// o login institucional volta para esta página com ?token=...
+var token = new URLSearchParams(location.search).get('token');
+if (token) {
+  campo('token').value = token;
+  history.replaceState(null, '', '/');
+  api('GET', '/me');
+}
+</script>
+</body>
+</html>
