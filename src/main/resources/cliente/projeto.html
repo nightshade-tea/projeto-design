@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Projeto - Projetos de Extensão</title></head>
+<body>
+<div id="topo"></div>
+<p><a href="/projetos.html">&lt;&lt; Projetos</a></p>
+<h2 id="titulo"></h2>
+<p id="mensagem"></p>
+<table>
+<tr><td><b>Coordenador:</b></td><td id="coordenador"></td></tr>
+<tr><td><b>Status:</b></td><td id="status"></td></tr>
+<tr><td valign="top"><b>Descrição:</b></td><td id="descricao"></td></tr>
+<tr><td><b>Critérios:</b></td><td id="criterios"></td></tr>
+</table>
+
+<h3>Participantes</h3>
+<div id="participantes"></div>
+
+<h3>Atividades</h3>
+<div id="atividades"></div>
+
+<div id="gestao" hidden>
+<hr>
+<h3>Vincular aluno</h3>
+<p>Matrícula: <input id="matricula" size="12"> <button onclick="vincular()">Vincular</button></p>
+
+<h3>Nova atividade</h3>
+<table>
+<tr><td>Título:</td><td><input id="atvTitulo" size="30"></td></tr>
+<tr><td>Descrição:</td><td><input id="atvDescricao" size="30"></td></tr>
+<tr><td>Data:</td><td><input id="atvData" type="date"></td></tr>
+<tr><td>Carga horária:</td><td><input id="atvCarga" size="4"> horas</td></tr>
+<tr><td></td><td><button onclick="adicionarAtividade()">Adicionar atividade</button></td></tr>
+</table>
+
+<h3>Presença</h3>
+<p>Só alunos vinculados na data da atividade.</p>
+<p>Atividade: <select id="presAtividade"></select>
+Aluno: <select id="presAluno"></select>
+<button onclick="presenca('POST')">Registrar presença</button>
+<button onclick="presenca('DELETE')">Remover presença</button></p>
+
+<h3>Critérios de certificação</h3>
+<p>Deixe em branco para não usar o critério. Sem critérios, ninguém é aprovado.</p>
+<table>
+<tr><td>Mínimo de horas:</td><td><input id="minimoHoras" size="4"></td></tr>
+<tr><td>Presença mínima:</td><td><input id="percentualMinimo" size="4"> %</td></tr>
+<tr><td></td><td><button onclick="definirCriterios()">Definir critérios</button></td></tr>
+</table>
+
+<h3>Horas dos participantes</h3>
+<div id="horas"></div>
+
+<h3>Editar projeto</h3>
+<table>
+<tr><td>Título:</td><td><input id="edTitulo" size="40"></td></tr>
+<tr><td>Descrição:</td><td><textarea id="edDescricao" rows="3" cols="40"></textarea></td></tr>
+<tr><td></td><td><button onclick="editar()">Salvar</button></td></tr>
+</table>
+
+<h3>Encerrar projeto</h3>
+<p>Encerrar emite os certificados dos alunos que atendem aos critérios.
+Depois disso, o projeto não aceita alterações.</p>
+<p><button onclick="encerrar()">Encerrar projeto</button></p>
+</div>
+
+<script src="/api.js"></script>
+<script>
+var id = parametro('id');
+var base = '/projetos/' + id;
+
+async function carregar() {
+  var r = await chamar('GET', base);
+  if (!r.ok) { mensagem('Erro ' + r.status + ': ' + r.corpo.erro); return; }
+  var p = r.corpo;
+  var gestor = usuario.papel === 'administrador' || usuario.matricula === p.matriculaCoordenador;
+  document.title = p.titulo + ' - Projetos de Extensão';
+  el('titulo').textContent = p.titulo;
+  el('coordenador').textContent = p.coordenador;
+  el('status').textContent = p.status;
+  el('descricao').textContent = p.descricao;
+  el('criterios').textContent = p.criterios.length ? p.criterios.join('; ') : 'nenhum';
+
+  el('participantes').innerHTML = tabela(['Matrícula', 'Nome', 'Início', 'Fim', ''],
+      p.participantes.map(function (a) {
+        var acao = gestor && !a.fim ? '<button onclick="desvincular(\'' + esc(a.matricula) + '\')">Desvincular</button>' : '';
+        return [esc(a.matricula), esc(a.nome), a.inicio, a.fim || '-', acao];
+      }), 'Nenhum aluno vinculado.');
+
+  el('atividades').innerHTML = tabela(['Id', 'Título', 'Data', 'Horas', 'Presentes', ''],
+      p.atividades.map(function (a) {
+        var acao = gestor ? '<button onclick="removerAtividade(' + a.id + ')">Remover</button>' : '';
+        return [a.id, esc(a.titulo), a.data, a.cargaHoraria, esc(a.presentes.join(', ')) || '-', acao];
+      }), 'Nenhuma atividade.');
+
+  el('gestao').hidden = !gestor;
+  if (!gestor) return;
+  el('presAtividade').innerHTML = p.atividades.map(function (a) {
+    return '<option value="' + a.id + '">' + esc(a.titulo) + ' (' + a.data + ')</option>';
+  }).join('');
+  el('presAluno').innerHTML = p.participantes.map(function (a) {
+    return '<option value="' + esc(a.matricula) + '">' + esc(a.nome) + ' (' + esc(a.matricula) + ')</option>';
+  }).join('');
+  if (!v('edTitulo')) { el('edTitulo').value = p.titulo; el('edDescricao').value = p.descricao; }
+  var horas = (await chamar('GET', base + '/horas')).corpo;
+  el('horas').innerHTML = tabela(['Aluno', 'Horas', 'Presenças', 'Presença'],
+      horas.map(function (h) {
+        return [esc(h.aluno), h.horasCumpridas, h.presencas + ' de ' + h.atividades, h.percentualPresenca + '%'];
+      }), 'Nenhum participante.');
+}
+
+async function depois(r) { await carregar(); return r; }
+
+function vincular() {
+  escrever('POST', base + '/participantes', { matricula: v('matricula') }).then(depois);
+}
+function desvincular(matricula) {
+  escrever('DELETE', base + '/participantes/' + encodeURIComponent(matricula)).then(depois);
+}
+function adicionarAtividade() {
+  escrever('POST', base + '/atividades', { titulo: v('atvTitulo'), descricao: v('atvDescricao'),
+      data: v('atvData'), cargaHoraria: v('atvCarga') }).then(depois);
+}
+function removerAtividade(atividade) {
+  if (confirm('Remover a atividade e as presenças dela?'))
+    escrever('DELETE', base + '/atividades/' + atividade).then(depois);
+}
+function presenca(metodo) {
+  var caminho = base + '/atividades/' + v('presAtividade') + '/presencas';
+  var r = metodo === 'POST'
+      ? escrever('POST', caminho, { matricula: v('presAluno') })
+      : escrever('DELETE', caminho + '/' + encodeURIComponent(v('presAluno')));
+  r.then(depois);
+}
+function definirCriterios() {
+  escrever('PUT', base + '/criterios', { minimoHoras: v('minimoHoras'),
+      percentualMinimo: v('percentualMinimo') }).then(depois);
+}
+function editar() {
+  escrever('PUT', base, { titulo: v('edTitulo'), descricao: v('edDescricao') }).then(depois);
+}
+function encerrar() {
+  if (!confirm('Encerrar o projeto? Ele não poderá mais ser alterado.')) return;
+  chamar('POST', base + '/encerramento').then(function (r) {
+    mensagem(r.ok ? 'Projeto encerrado. Certificados emitidos: ' + r.corpo.certificadosEmitidos
+                  : 'Erro ' + r.status + ': ' + r.corpo.erro);
+    carregar();
+  });
+}
+
+iniciar().then(carregar);
+</script>
+</body>
+</html>

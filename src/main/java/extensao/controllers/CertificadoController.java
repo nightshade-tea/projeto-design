@@ -26,7 +26,8 @@ public class CertificadoController extends Controller {
                 service.listar(identificar(troca)).stream().map(CertificadoController::resumo).toList()));
         r.rota("GET", "/certificados/(\\d+)/arquivo", (troca, p) -> {
             byte[] arquivo = service.gerarArquivo(inteiro(p.get(0), "id"), identificar(troca));
-            return Resposta.texto("text/plain", new String(arquivo, StandardCharsets.UTF_8));
+            return Resposta.texto("text/plain", new String(arquivo, StandardCharsets.UTF_8))
+                    .com("Content-Disposition", "attachment; filename=certificado-" + p.get(0) + ".txt");
         });
     }
 

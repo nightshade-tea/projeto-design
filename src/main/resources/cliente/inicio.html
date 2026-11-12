@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Início - Projetos de Extensão</title></head>
+<body>
+<div id="topo"></div>
+<h2>Início</h2>
+<div id="conteudo"></div>
+<script src="/api.js"></script>
+<script>
+iniciar().then(function (u) {
+  var h = '<p>Olá, ' + esc(u.nome) + '.</p><ul>';
+  if (u.papel === 'aluno') {
+    h += '<li><a href="/projetos.html">Projetos</a>: projetos de que você participa</li>'
+       + '<li><a href="/horas.html">Minhas horas</a>: horas cumpridas em cada projeto</li>'
+       + '<li><a href="/certificados.html">Meus certificados</a>: certificados emitidos para baixar</li>';
+  } else if (u.papel === 'professor') {
+    h += '<li><a href="/projetos.html">Projetos</a>: criar projetos e gerenciar os que você coordena'
+       + ' (atividades, participantes, presenças, critérios e encerramento)</li>';
+  } else {
+    h += '<li><a href="/projetos.html">Projetos</a>: gerenciar qualquer projeto</li>';
+  }
+  el('conteudo').innerHTML = h + '</ul>';
+});
+</script>
+</body>
+</html>

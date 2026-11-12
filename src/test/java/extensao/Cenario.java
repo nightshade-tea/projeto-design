@@ -46,7 +46,7 @@ public final class Cenario {
                 Path.of("src/main/resources/usuarios-institucionais.csv"));
         login.iniciar(0);
         HttpServer servidor = Main.iniciar(0, "http://localhost:" + login.porta(), dados,
-                Path.of("src/main/resources/cliente.html"));
+                Path.of("src/main/resources/cliente"));
         try {
             new Cenario(imprimir).executar("http://localhost:" + servidor.getAddress().getPort());
             if (imprimir) {

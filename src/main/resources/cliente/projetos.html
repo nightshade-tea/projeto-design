@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Projetos - Projetos de Extensão</title></head>
+<body>
+<div id="topo"></div>
+<h2>Projetos</h2>
+<p id="mensagem"></p>
+<div id="lista"></div>
+
+<div id="criar" hidden>
+<h3>Novo projeto</h3>
+<p>Você será o coordenador do projeto.</p>
+<table>
+<tr><td>Título:</td><td><input id="titulo" size="40"></td></tr>
+<tr><td>Descrição:</td><td><textarea id="descricao" rows="3" cols="40"></textarea></td></tr>
+<tr><td></td><td><button onclick="criar()">Criar projeto</button></td></tr>
+</table>
+</div>
+
+<script src="/api.js"></script>
+<script>
+async function carregar() {
+  var projetos = (await chamar('GET', '/projetos')).corpo;
+  el('lista').innerHTML = tabela(['Id', 'Título', 'Coordenador', 'Status', ''],
+      projetos.map(function (p) {
+        return [p.id, esc(p.titulo), esc(p.coordenador), p.status,
+                '<a href="/projeto.html?id=' + p.id + '">abrir</a>'];
+      }),
+      usuario.papel === 'aluno' ? 'Você ainda não participa de nenhum projeto.' : 'Nenhum projeto cadastrado.');
+}
+
+async function criar() {
+  var r = await escrever('POST', '/projetos', { titulo: v('titulo'), descricao: v('descricao') });
+  if (r.ok) location.href = '/projeto.html?id=' + r.corpo.id;
+}
+
+iniciar().then(function (u) {
+  el('criar').hidden = u.papel !== 'professor';
+  carregar();
+});
+</script>
+</body>
+</html>

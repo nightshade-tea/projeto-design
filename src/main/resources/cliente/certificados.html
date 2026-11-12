@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Meus certificados - Projetos de Extensão</title></head>
+<body>
+<div id="topo"></div>
+<h2>Meus certificados</h2>
+<p>Os certificados são emitidos quando o projeto é encerrado, para os alunos que atendem aos critérios.</p>
+<div id="certificados"></div>
+<script src="/api.js"></script>
+<script>
+iniciar().then(async function () {
+  var certificados = (await chamar('GET', '/me/certificados')).corpo;
+  el('certificados').innerHTML = tabela(['Nº', 'Projeto', 'Horas', 'Emitido em', ''],
+      certificados.map(function (c) {
+        return [c.id, esc(c.projeto), c.cargaHoraria, c.emitidoEm,
+                '<a href="/certificados/' + c.id + '/arquivo">baixar</a>'];
+      }), 'Nenhum certificado emitido.');
+});
+</script>
+</body>
+</html>

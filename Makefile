@@ -9,7 +9,7 @@ DADOS      := src/dados
 PORTA      := 8080
 PORTA_LOGIN := 8081
 USUARIOS   := src/main/resources/usuarios-institucionais.csv
-CLIENTE    := src/main/resources/cliente.html
+CLIENTE    := src/main/resources/cliente
 JAVAC      := javac --release 21 -encoding UTF-8
 
 MAIN := $(shell find src/main/java -name '*.java')

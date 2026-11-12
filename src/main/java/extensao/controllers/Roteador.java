@@ -91,9 +91,7 @@ public class Roteador implements HttpHandler {
     }
 
     private static void enviar(HttpExchange troca, Resposta resposta) throws IOException {
-        if (resposta.local() != null) {
-            troca.getResponseHeaders().set("Location", resposta.local());
-        }
+        resposta.cabecalhos().forEach((nome, valor) -> troca.getResponseHeaders().set(nome, valor));
         if (resposta.corpo() == null) {
             troca.sendResponseHeaders(resposta.status(), -1);
             troca.close();

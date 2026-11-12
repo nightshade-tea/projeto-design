@@ -106,6 +106,7 @@ public class ProjetoController extends Controller {
         dados.put("titulo", p.getTitulo());
         dados.put("status", p.getStatus().name());
         dados.put("coordenador", p.getCoordenador().getNome());
+        dados.put("matriculaCoordenador", p.getCoordenador().getMatricula());
         return dados;
     }
 

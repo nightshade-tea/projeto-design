@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Minhas horas - Projetos de Extensão</title></head>
+<body>
+<div id="topo"></div>
+<h2>Minhas horas</h2>
+<div id="horas"></div>
+<p id="total"></p>
+<script src="/api.js"></script>
+<script>
+iniciar().then(async function () {
+  var horas = (await chamar('GET', '/me/horas')).corpo;
+  el('horas').innerHTML = tabela(['Projeto', 'Horas', 'Presenças', 'Presença'],
+      horas.map(function (h) {
+        return [esc(h.projeto), h.horasCumpridas, h.presencas + ' de ' + h.atividades, h.percentualPresenca + '%'];
+      }), 'Você ainda não participa de nenhum projeto.');
+  var total = horas.reduce(function (s, h) { return s + h.horasCumpridas; }, 0);
+  el('total').innerHTML = '<b>Total: ' + total + ' horas</b>';
+});
+</script>
+</body>
+</html>

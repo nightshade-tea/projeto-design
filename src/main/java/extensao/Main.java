@@ -37,7 +37,7 @@ public final class Main {
         int porta = Integer.parseInt(System.getProperty("porta", "8080"));
         String urlLogin = System.getProperty("urlLogin", "http://localhost:8081");
         Path dados = Path.of(System.getProperty("dados", "src/dados"));
-        Path cliente = Path.of(System.getProperty("cliente", "src/main/resources/cliente.html"));
+        Path cliente = Path.of(System.getProperty("cliente", "src/main/resources/cliente"));
 
         HttpServer servidor = iniciar(porta, urlLogin, dados, cliente);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> servidor.stop(0)));
@@ -50,7 +50,7 @@ public final class Main {
     public static HttpServer iniciar(int porta, String urlLogin, Path dados, Path cliente)
             throws IOException {
         HttpServer servidor = HttpServer.create(new InetSocketAddress(porta), 0);
-        String urlCliente = "http://localhost:" + servidor.getAddress().getPort() + "/";
+        String urlCliente = "http://localhost:" + servidor.getAddress().getPort() + "/sessao";
 
         ProvedorIdentidadeInstitucional provedor = new ProvedorIdentidadeInstitucional(
                 urlLogin, urlCliente, dados);

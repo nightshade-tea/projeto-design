@@ -4,9 +4,11 @@ import com.sun.net.httpserver.HttpExchange;
 import extensao.dominio.identidade.Usuario;
 import extensao.services.AutenticacaoService;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -22,14 +24,46 @@ public abstract class Controller {
     /** Registra as rotas do controller. */
     abstract void rotas(Roteador roteador);
 
-    /** Lê o token do cabeçalho Authorization: Bearer token. */
+    /**
+     * Lê o token do cabeçalho Authorization: Bearer token, ou do cookie
+     * token, usado pelas páginas do cliente web.
+     */
     protected Usuario identificar(HttpExchange troca) {
         String cabecalho = troca.getRequestHeaders().getFirst("Authorization");
         String token = null;
         if (cabecalho != null && cabecalho.regionMatches(true, 0, "Bearer ", 0, 7)) {
             token = cabecalho.substring(7).trim();
+        } else {
+            token = cookie(troca, "token");
         }
         return autenticacao.identificar(token);
+    }
+
+    protected static String cookie(HttpExchange troca, String nome) {
+        for (String cabecalho : troca.getRequestHeaders().getOrDefault("Cookie", List.of())) {
+            for (String par : cabecalho.split(";")) {
+                String[] p = par.trim().split("=", 2);
+                if (p.length == 2 && p[0].equals(nome)) {
+                    return p[1];
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Valor de um parâmetro da URL (?nome=valor). */
+    protected static String parametro(HttpExchange troca, String nome) {
+        String consulta = troca.getRequestURI().getRawQuery();
+        if (consulta == null) {
+            return null;
+        }
+        for (String par : consulta.split("&")) {
+            String[] p = par.split("=", 2);
+            if (p.length == 2 && p[0].equals(nome)) {
+                return URLDecoder.decode(p[1], StandardCharsets.UTF_8);
+            }
+        }
+        return null;
     }
 
     protected static Map<String, String> corpo(HttpExchange troca) throws IOException {

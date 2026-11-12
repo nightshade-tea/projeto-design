@@ -6,24 +6,32 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** GET /  serve a página do cliente web (um arquivo HTML que usa a API). */
+/** Serve as páginas do cliente web (arquivos HTML e JS que usam a API). */
 public class ClienteController extends Controller {
 
-    private final Path pagina;
+    private final Path pasta;
 
-    public ClienteController(Path pagina) {
+    public ClienteController(Path pasta) {
         super(null);
-        this.pagina = pagina;
+        this.pasta = pasta;
     }
 
     @Override
     void rotas(Roteador r) {
-        r.rota("GET", "/", (troca, p) -> {
-            try {
-                return Resposta.texto("text/html", Files.readString(pagina, StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
+        r.rota("GET", "/", (troca, p) -> arquivo("index.html"));
+        r.rota("GET", "/([a-z]+\\.(?:html|js))", (troca, p) -> arquivo(p.get(0)));
+    }
+
+    private Resposta arquivo(String nome) {
+        Path arquivo = pasta.resolve(nome);
+        if (!Files.exists(arquivo)) {
+            return Resposta.erro(404, "página não encontrada");
+        }
+        try {
+            String tipo = nome.endsWith(".js") ? "text/javascript" : "text/html";
+            return Resposta.texto(tipo, Files.readString(arquivo, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
