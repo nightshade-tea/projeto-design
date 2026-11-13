@@ -175,7 +175,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - O servidor não guarda sessão, cada requisição envia o token do login
   institucional, validado pelo `AutenticacaoService`
 - O cliente só conversa com os controllers, e nunca com o banco de dados ou
-  o provedor de identidade; o servidor só inicia o login, redirecionando o
+  o provedor de identidade, o servidor só inicia o login, redirecionando o
   navegador para a página de login institucional
 
 ## Persistência
@@ -186,9 +186,9 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - Um repository por agregado, e cada agregado é salvo como uma unidade
 - Cada operação salva os dados em uma transação
   - ao encerrar um projeto, o projeto é salvo primeiro, e os certificados
-    são emitidos em outra operação; se a emissão falhar, ela é tentada de
+    são emitidos em outra operação, se a emissão falhar, ela é tentada de
     novo sem duplicar certificados
-- O arquivo do certificado não é guardado; ele é gerado a cada download a
+- O arquivo do certificado não é guardado, ele é gerado a cada download a
   partir dos dados salvos em `Certificado`
 - Usuários vem do provedor de identidade
 
@@ -207,7 +207,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 
 **Provedor de identidade institucional**
 - O servidor redireciona o navegador para o serviço de login único da
-  universidade (`urlLogin()`); depois do login, o serviço gera o token e
+  universidade (`urlLogin()`), depois do login, o serviço gera o token e
   devolve o navegador ao cliente com ele
 - O servidor valida o token a cada requisição (`identificar(token)`), só
   para confirmar a sessão e saber de qual usuário ela é
@@ -222,7 +222,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 ## API
 
 Todas as rotas, exceto `GET /login`, exigem o token no cabeçalho
-`Authorization: Bearer <token>`. Consultas (`GET`) respondem com os dados;
+`Authorization: Bearer <token>`. Consultas (`GET`) respondem com os dados,
 escritas respondem `202 Accepted` depois de verificadas, e são salvas em
 seguida pela fila.
 
