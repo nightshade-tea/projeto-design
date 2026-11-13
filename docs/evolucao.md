@@ -1,131 +1,106 @@
 # Análise de evolução
 
-Se uma das principais tecnologias ou integrações do sistema precisasse ser
-substituída, quais partes seriam afetadas? Esta seção analisa três
-mudanças possíveis
+Essa seção analisa o que aconteceria se tecnologias/integrações do sistema
+precisassem ser substituídas. A análise foi feita com 3 possíveis mudanças.
 
-## 1. Banco de dados relacional → outro mecanismo de persistência
+## 1. Alteração no mecanismo de persistência
 
-Ex.: trocar o banco relacional por um banco de documentos (como MongoDB)
+Por exemplo, trocar o banco relacional por um banco de documentos (ex. MongoDB)
 
 **Elementos afetados**
 - `ProjetoRepositorySql` e `CertificadoRepositorySql`, substituídos por
   novas implementações de `ProjetoRepository` e `CertificadoRepository`
 - A cópia local dos usuários, guardada por `ProvedorIdentidadeInstitucional`
-- A fila de escritas, que hoje é uma tabela no banco de dados: precisa de
-  outro lugar para ficar (uma coleção no novo banco ou um serviço de fila)
-- A garantia de que cada operação é salva em uma transação, se o novo
-  mecanismo não tiver transações com a mesma garantia
-- A montagem da aplicação, que escolhe as implementações
+- A fila de escritas, que hoje é uma tabela no banco de dados, precisa ser
+  feita de outra forma. Dependendo do mecanismo escolhido (caso não implemente),
+  um novo serviço de fila será necessário
+- Preciso garantir que o novo mecanismo salve operações como transações
+- O "deploy" da aplicação, garantindo o provisionamento do novo mecanismo
 
 **Elementos inalterados**
-- O domínio (`identidade`, `projetos` e `certificacao`), incluindo as
-  interfaces dos repositories
+- O domínio (`identidade`, `projetos` e `certificacao`)
+- As interfaces dos repositories
 - Os services e os controllers
 - A API REST e o cliente web
 - O provedor de identidade e a geração do certificado
 
 **Decisões que ajudam**
-- Repositories como interfaces no domínio, com as implementações na camada
-  de infraestrutura: o domínio e os services não conhecem o banco
-- Um repository por agregado, salvo como uma unidade: um agregado
-  (`Projeto` com atividades, participações e critérios) vira um documento
-  com naturalidade
-- Cada módulo tem as próprias tabelas, sem acessar as de outro: os dados
-  de cada módulo podem ser migrados separadamente
-- Escritas idempotentes: a migração pode reprocessar operações sem duplicar
-  dados
+- Uso de Repositories como interfaces no domínio, desacoplando qualquer
+  tecnologia de persistência de como o sistema opera em alto nível
+- Um repository por "recurso", diminuindo a abrangência da mudança de código
+  a ser feita e separando a eventual migração
+- Pelas escritas serem idempotentes, a migração não precisa ter "medo" de
+  duplicar dados ao reprocessar as operações
 
 **Decisões que dificultam**
-- A fila no próprio banco de dados: simplifica a operação, mas acopla a
-  fila ao mecanismo de persistência, e ela precisa ser refeita junto
-- Consultas que cruzam agregados (ex.: `listarPorAluno`, que busca os
-  projetos de que o aluno participa) dependem de recursos do banco e
-  precisam ser reescritas e testadas de novo
+- Ter a fila no próprio banco (acoplamento). Simplifica as operações mas também
+  precisa ser refeita junto com o banco
+- Consultas entre recursos (ex. `listarPorAluno`) dependem do mecanismo de
+  persistência e precisam ser reescritas e testadas
 
-## 2. Login institucional → outro provedor de identidade
+## 2. Alteração no provedor de identidade
 
-Ex.: a universidade troca o serviço de login único por um provedor OAuth
-2.0/OpenID Connect, ou o sistema passa a aceitar o gov.br
+Por exemplo, troca do login único por OAuth, ou usar autenticação do gov.br
 
 **Elementos afetados**
-- `ProvedorIdentidadeInstitucional`, substituído por uma nova implementação
+- `ProvedorIdentidadeInstitucional` é substituído por uma nova implementação
   de `ProvedorIdentidade`
-- O mapeamento do vínculo (aluno, professor, administrador) para a
-  subclasse de `Usuario`, se o novo provedor informar o vínculo de outra
-  forma
-- A montagem da aplicação e a configuração (endereço do provedor,
-  credenciais do sistema junto ao provedor)
-- O cliente web, só se o fluxo de retorno do login mudar (ex.: receber um
-  código e trocá-lo pelo token)
+- Se o novo provedor mudar a maneira de enviar o tipo de vínculo com a
+  universidade, será necessário alterar esse mapeamento
+- A configuração da conexão com o provedor novo (endereço e credenciais)
+- O cliente web, só se o mecanismo de retorno do login mudar
 
 **Elementos inalterados**
-- O domínio: o papel continua sendo a subclasse de `Usuario`, e a matrícula
-  continua sendo a chave
+- O domínio (`Usuario`)
 - `AutenticacaoService` e os controllers, que só usam `urlLogin()` e
   `identificar(token)`
 - Os services e as regras de permissão
 - A persistência, os certificados e a API
 
 **Decisões que ajudam**
-- `ProvedorIdentidade` como interface no domínio, com três operações
-  (`urlLogin`, `identificar` e `buscarPorMatricula`): é tudo o que o novo
-  provedor precisa oferecer
-- O servidor não guarda senhas nem sessão: não há credenciais para migrar
-- O papel não vem do token, e sim da cópia local: mudar o formato do token
-  não muda as permissões
-- A cópia local dos usuários com a matrícula como chave: os usuários já
-  conhecidos continuam com os mesmos projetos e certificados
+- Uso de `ProvedorIdentidade` como interface no domínio, apenas precisará
+  de novas implementações
+- Não existe persistência nessa parte e, portanto, não precisa migrar nada
+- O papel do usuário fica nele mesmo e não no token recebido, então mudar o
+  formato do token não muda as permissões dos usuários
 
 **Decisões que dificultam**
-- A matrícula como chave do usuário: se o novo provedor identificar as
-  pessoas de outra forma (ex.: CPF no gov.br), é preciso uma tabela de
-  correspondência ou migrar as referências a alunos em todos os módulos
-- `buscarPorMatricula`, usada para vincular alunos: um provedor externo à
-  universidade pode não oferecer busca de outras pessoas, e o vínculo
-  passaria a depender só da cópia local
-- Validar o token no provedor a cada requisição: um provedor mais lento
-  ou com limite de requisições afeta todas as operações
+- Dependendo da chave utilizada pelo novo provedor (ex. CPF pro gov.br), será
+  necessário um mapeamento dessa chave para a matrícula ou alterar a chave
+  utilizada
+- Dependendo do rate limit de um provedor, a velocidade de todas as operações
+  pode ser afetada, uma vez que validamos todas as requisições
 
-## 3. Web → inclusão de um aplicativo mobile
+## 3. Adicionando um aplicativo mobile
 
-Ex.: um aplicativo para o aluno consultar horas e baixar certificados, e
-para o coordenador registrar presenças durante a atividade
+Por exemplo, surgiu a necessidade de ter um aplicativo de celular para essa
+aplicação.
 
 **Elementos afetados**
-- Um novo cliente (o aplicativo), que usa a mesma API
-- O fluxo de login: o aplicativo abre o login institucional no navegador do
-  sistema e precisa receber o token de volta (ex.: por um endereço próprio
-  do aplicativo), o que depende do provedor aceitar esse retorno
-- O download do certificado, se o aplicativo exibir o certificado em vez de
-  baixar o PDF
-- O registro de presenças, se ele precisar funcionar sem internet: o
-  aplicativo guardaria as presenças e as enviaria depois
+- Um novo cliente, que usa a mesma API
+- O fluxo de login, necessitando autenticação nativa ou abrir abas no navegador
+- O registro de presenças, caso ele precise funcionar sem internet; acumulando
+  localmente e enviando depois
 
 **Elementos inalterados**
-- O servidor inteiro: domínio, services, controllers, persistência e
-  integrações
-- A API REST, que já é a única forma de acessar o sistema
-- O cliente web, que continua funcionando ao lado do aplicativo
+- O sistema inteiro, seria apenas uma expansão que utiliza das interfaces já
+  existentes
 
 **Decisões que ajudam**
-- Cliente-servidor com uma API REST em JSON: qualquer cliente que fale HTTP
-  usa a mesma API, sem regras de negócio no cliente
-- Servidor sem sessão, com o token em cada requisição: funciona igual para
-  o navegador e para o aplicativo
-- Erros devolvidos na própria requisição, com códigos HTTP padronizados
-  (`401`, `403`, `404`, `409`): o aplicativo trata os erros do mesmo jeito
+- Cliente-servidor com uma API REST em JSON, já que qualquer cliente que fale
+  HTTP usa a mesma API
+- Token verificado em cada requisição: funciona igual para o navegador e para
+  o aplicativo
+- Erros são devolvidos na própria requisição, então o aplicativo trata os erros
+  do mesmo jeito
 - Escritas idempotentes: o aplicativo pode reenviar uma presença em uma
   conexão instável sem registrá-la duas vezes
-- O arquivo do certificado é gerado a cada download a partir dos dados
-  salvos: dá para oferecer outro formato sem mudar o que é guardado
+- Já que o certificado é gerado a cada download, outros formatos podem ser
+  oferecidos sem mudar como é guardado
 
 **Decisões que dificultam**
-- O login por redirecionamento do navegador foi pensado para o cliente web;
-  no aplicativo, o retorno com o token precisa de configuração no provedor
-  institucional, que não é controlado pelo grupo
-- A presença só é aceita se o aluno estava vinculado na data da atividade,
-  verificada no envio: presenças enviadas depois, sem internet, podem ser
-  recusadas se o vínculo mudou nesse meio-tempo
-- Escritas respondem `202 Accepted` e são processadas pela fila: o
-  aplicativo precisa consultar de novo para mostrar o estado atualizado
+- O login por redirecionamento do navegador foi pensado para o cliente web. No
+  aplicativo isso provavelmente precisará ser revisto e, talvez, atualizado
+- O "buffering" de presenças caso sem internet precisará ser testado pois
+  casos de borda podem aparecer se estados do servidor mudam antes do envio
+  pelo cliente
