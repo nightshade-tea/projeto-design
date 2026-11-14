@@ -9,6 +9,7 @@
 # - uma propriedade aparece como atributo ou como ponta de associação, nunca
 #   as duas; tipos de outro módulo aparecem como atributos e a dependência
 #   entre os módulos é mostrada entre os pacotes
+# - multiplicidade nas duas pontas das composições
 from uml import Classe, Svg, pacote, sem_sobreposicao, ABA_H
 
 GV = 60      # comprimento das ligações verticais
@@ -24,8 +25,10 @@ certificado_repo = Classe("CertificadoRepository", tipo="interface", operacoes=[
     "+ salvar(certificado : Certificado)",
     "+ buscarPorId(id : Integer) : Certificado",
     "+ listarPorAluno(aluno : Aluno) : Certificado [0..*]",
+    "+ existe(projeto : Projeto, aluno : Aluno) : Boolean",
 ])
 certificado = Classe("Certificado", atributos=[
+    "- id : Integer",
     "- projeto : Projeto",
     "- aluno : Aluno",
     "- nomeAluno : String",
@@ -55,6 +58,7 @@ projeto_repo = Classe("ProjetoRepository", tipo="interface", operacoes=[
     "+ listarPorAluno(aluno : Aluno) : Projeto [0..*]",
 ])
 projeto = Classe("Projeto", atributos=[
+    "- id : Integer",
     "- titulo : String",
     "- descricao : String",
     "- coordenador : Professor",
@@ -64,8 +68,12 @@ projeto = Classe("Projeto", atributos=[
     "coordenador : Professor)",
     "+ editar(titulo : String, descricao : String)",
     "+ encerrar()",
+    "+ podeGerenciar(usuario : Usuario) : Boolean",
     "+ adicionarAtividade(titulo : String, descricao : String, data : Date, "
     "cargaHoraria : Integer) : Atividade",
+    "+ atividade(id : Integer) : Atividade",
+    "+ editarAtividade(atividade : Atividade, titulo : String, "
+    "descricao : String, data : Date, cargaHoraria : Integer)",
     "+ removerAtividade(atividade : Atividade)",
     "+ vincular(aluno : Aluno)",
     "+ desvincular(aluno : Aluno)",
@@ -74,17 +82,21 @@ projeto = Classe("Projeto", atributos=[
     "+ removerPresenca(atividade : Atividade, aluno : Aluno)",
     "+ vinculado(aluno : Aluno, data : Date) : Boolean",
     "+ resumoFrequencia(aluno : Aluno) : ResumoFrequencia",
+    "+ resumos() : ResumoFrequencia [0..*]",
     "+ aprovados() : ResumoFrequencia [0..*]",
 ])
 status = Classe("StatusProjeto", tipo="enumeracao",
                 literais=["ATIVO", "ENCERRADO"])
 atividade = Classe("Atividade", atributos=[
+    "- id : Integer",
     "- titulo : String",
     "- descricao : String",
     "- data : Date",
     "- cargaHoraria : Integer",
     "- presentes : Aluno [0..*]",
 ], operacoes=[
+    "+ editar(titulo : String, descricao : String, data : Date, "
+    "cargaHoraria : Integer)",
     "+ registrarPresenca(aluno : Aluno)",
     "+ removerPresenca(aluno : Aluno)",
     "+ estevePresente(aluno : Aluno) : Boolean",
@@ -201,7 +213,9 @@ for nome, cs in modulos:
     quadros.append((nome, y, h + 2 * PAD))
     y += ABA_H + h + 2 * PAD + GP
 
-W = larg_pacote + 2 * MARGEM
+DESVIO = 40  # espaço à direita dos pacotes para a dependência
+             # certificacao -> identidade
+W = larg_pacote + 2 * MARGEM + DESVIO
 H = y - GP + MARGEM
 todas = [c for _, cs in modulos for c in cs]
 sem_sobreposicao([(c.x, c.y, c.w, c.h, c.nome) for c in todas])
@@ -213,9 +227,19 @@ for nome, y, h in quadros:
     pacote(svg, MARGEM, y, larg_pacote, h, nome)
 
 # dependências entre pacotes: certificacao -> projetos -> identidade
+cx_pacotes = MARGEM + larg_pacote / 2
 for (_, y1, h1), (_, y2, _) in zip(quadros, quadros[1:]):
-    svg.linha([(W / 2, y1 + ABA_H + h1), (W / 2, y2 + ABA_H)],
+    svg.linha([(cx_pacotes, y1 + ABA_H + h1), (cx_pacotes, y2 + ABA_H)],
               tracejado=True, fim="seta")
+# certificacao -> identidade (Certificado usa Aluno e Usuario), pela
+# direita dos pacotes
+dir_pacotes = MARGEM + larg_pacote
+(_, yc, hc), _, (_, yi, hi) = quadros
+y_cert = yc + ABA_H + hc / 2
+y_ident = yi + ABA_H + hi / 2
+svg.linha([(dir_pacotes, y_cert), (dir_pacotes + DESVIO / 2 + 5, y_cert),
+           (dir_pacotes + DESVIO / 2 + 5, y_ident), (dir_pacotes, y_ident)],
+          tracejado=True, fim="seta")
 
 for c in todas:
     c.desenhar(svg)
@@ -258,6 +282,14 @@ def composicao(todo, parte, papel, mult):
         pontos = [(x, y), (parte.cx, y), (parte.cx, parte.topo)]
     svg.linha(pontos, inicio="losango")
     rotulos_ponta(parte.cx, parte.topo, papel, mult)
+    # multiplicidade no todo: cada parte pertence a um único todo
+    x0, y0 = pontos[0]
+    if len(pontos) == 2:
+        svg.texto(x0 + 9, y0 + 20, "1", 12)
+    elif x0 == todo.esq:
+        svg.texto(x0 - 28, y0 - 7, "1", 12, "end")
+    else:
+        svg.texto(x0 + 28, y0 - 7, "1", 12)
 
 
 def arvore(geral, especificas, tracejado=False):

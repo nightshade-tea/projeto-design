@@ -21,7 +21,7 @@
 ### Módulo `projetos`
 
 **Projeto** (objeto)
-- Atributos: `titulo`, `descricao`, `coordenador`, `status`
+- Atributos: `id`, `titulo`, `descricao`, `coordenador`, `status`
   (`ATIVO` | `ENCERRADO`), `atividades`, `participacoes`, `criterios`
   (`CriteriosCertificacao`)
 - Responsabilidades:
@@ -29,20 +29,25 @@
     (`new Projeto(titulo, descricao, coordenador): Projeto`)
   - editar e encerrar o projeto (`encerrar()`)
     - depois de encerrado, o projeto não aceita mais alterações
+  - checar se um usuário pode gerenciá-lo (`podeGerenciar(usuario)`).
   - gerenciar atividades, participantes e critérios
+    - buscar uma atividade pelo id (`atividade(id)`)
+    - editar uma atividade (`editarAtividade(atividade, titulo, descricao,
+      data, cargaHoraria)`)
     - remover uma atividade remove também as presenças dela
     - desvincular um aluno só encerra a participação
   - registrar e remover presenças, recusando alunos não vinculados na data
     da atividade (`vinculado(aluno, data)`)
-  - informar a frequência de um aluno (`resumoFrequencia(aluno)`) e os
-    alunos aprovados (`aprovados()`), incluindo os que já foram
-    desvinculados
+  - informar a frequência de um aluno (`resumoFrequencia(aluno)`), a de
+    todos os participantes (`resumos()`) e os alunos aprovados
+    (`aprovados()`), incluindo os que já foram desvinculados
     - os cálculos ficam em `Participacao` e `CriteriosCertificacao`
 
 **Atividade** (objeto)
-- Atributos: `titulo`, `descricao`, `data`, `cargaHoraria`, `presentes`
+- Atributos: `id`, `titulo`, `descricao`, `data`, `cargaHoraria`, `presentes`
 - Responsabilidades:
   - manter os próprios dados
+    (`editar(titulo, descricao, data, cargaHoraria)`)
   - registrar e remover a presença de um aluno
     (`registrarPresenca(aluno)`, `removerPresenca(aluno)`)
   - informar se um aluno esteve presente (`estevePresente(aluno)`)
@@ -81,7 +86,7 @@
 ### Módulo `certificacao`
 
 **Certificado** (objeto)
-- Atributos: `projeto`, `aluno`, `nomeAluno`, `tituloProjeto`,
+- Atributos: `id`, `projeto`, `aluno`, `nomeAluno`, `tituloProjeto`,
   `nomeCoordenador`, `cargaHoraria`, `emitidoEm`
 - Responsabilidades:
   - ser criado a partir do resumo de frequência de um aluno aprovado
@@ -105,6 +110,8 @@ Cada agregado é alterado e salvo como uma unidade
 
 - `ProjetoRepository`
 - `CertificadoRepository`
+  - `existe(projeto, aluno)`: checa se o aluno já tem certificado do projeto,
+    para a emissão não duplicar certificados
 
 São interfaces, e as implementações ficam fora do domínio
 
@@ -112,6 +119,7 @@ São interfaces, e as implementações ficam fora do domínio
 
 **Information Expert**
 - Cada objeto responde com os dados que já possui: `Projeto.vinculado`,
+  `Projeto.podeGerenciar`,
   `Participacao.ativaEm`, `Participacao.resumoFrequencia`,
   `Atividade.estevePresente`, `CriteriosCertificacao.atende`,
   `ResumoFrequencia.percentualPresenca` e `Certificado.pertenceA`
@@ -143,7 +151,8 @@ São interfaces, e as implementações ficam fora do domínio
 
 **Acoplamento**
 - Os módulos dependem em um único sentido: `certificacao` → `projetos` →
-  `identidade`
+  `identidade`, e `certificacao` → `identidade` (`Certificado` usa `Aluno`
+  e `Usuario`)
 - Sistemas externos e persistência são acessados só por interfaces
 
 **Pontos de atenção**

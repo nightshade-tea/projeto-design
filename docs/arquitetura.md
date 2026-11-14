@@ -72,27 +72,37 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - criar, editar e consultar projetos
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
+- recusa (`409`) a vinculação de uma matrícula que não é de um `Aluno`
 - só aceita a criação de projetos por um `Professor` ou `Administrador`
 - só aceita alterações do coordenador do projeto ou de um administrador
+  (`projeto.podeGerenciar(usuario)`)
 
 **EncerramentoService**
 - encerrar o projeto e emitir os certificados, em duas operações da fila
   - a primeira encerra e salva o projeto, e coloca a emissão na fila
   - a emissão cria e salva um `Certificado` para cada resumo em
     `projeto.aprovados()` que ainda não tem certificado
+    (`CertificadoRepository.existe(projeto, aluno)`)
 - só aceita o coordenador do projeto ou um administrador
+  (`projeto.podeGerenciar(usuario)`)
 
 **FrequenciaService**
 - registrar e remover presenças
-- consultar as horas do aluno, por projeto e no total, e as horas de todos
-  os participantes para o coordenador
+  - busca o aluno com `ProvedorIdentidade.buscarPorMatricula` e a
+    atividade com `projeto.atividade(atividadeId)`
+  - recusa (`409`) uma matrícula que não é de um `Aluno`
+- consultar as horas do aluno, por projeto (`projeto.resumoFrequencia`) e
+  no total (soma das horas dos resumos), e as horas de todos os
+  participantes para o coordenador (`projeto.resumos()`)
 - só o coordenador do projeto ou um administrador registra presenças e
   consulta as horas de todos os participantes
+  (`projeto.podeGerenciar(usuario)`)
 
 **CertificadoService**
 - listar os certificados do aluno
 - gerar o arquivo para download com `GeradorDocumentoCertificado`
-  - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`)
+  - só entrega certificados que pertencem ao usuário (`pertenceA(usuario)`),
+    e responde `404` se o certificado não existe e `403` se não pertence
 
 **AutenticacaoService**
 - obter o endereço do login institucional, com
@@ -125,8 +135,8 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - Entre camadas: controllers → services → domínio
 - Entre implementações e domínio: as implementações dependem das
   interfaces definidas no domínio
-- Entre módulos: `certificacao` → `projetos` → `identidade`, sem
-  dependências no sentido contrário
+- Entre módulos: `certificacao` -> `projetos` -> `identidade`, e
+  `certificacao` -> `identidade` (`Certificado` usa `Aluno` e `Usuario`).
 
 ## Interfaces relevantes
 
@@ -218,6 +228,11 @@ Todos recebem as requisições do cliente e identificam o usuário com
   (`buscarPorMatricula(matricula)`)
 - Se o provedor estiver indisponível, não é possível entrar no sistema nem
   vincular alunos que ainda não estão na cópia local
+- Nos diagramas de sequência e de comunicação, a validação do token no
+  login institucional (`validar(token)`) e a resposta `401` aparecem só no
+  login e no cenário completo; nos diagramas por caso de uso,
+  `identificar(token)` é mostrado devolvendo o usuário, para não repetir
+  esse trecho em todos eles
 
 ## API
 
@@ -231,12 +246,18 @@ seguida pela fila.
 - `GET` e `PUT /projetos/{id}`: consultar e editar um projeto
 - `POST /projetos/{id}/encerramento`: encerrar o projeto e emitir os
   certificados
-- `/projetos/{id}/atividades`, `/participantes` e `/criterios`: gerenciar
-  atividades, participantes (pela matrícula) e critérios
+- `POST /projetos/{id}/atividades`: cadastrar uma atividade
+- `PUT` e `DELETE /projetos/{id}/atividades/{atividadeId}`: editar e remover
+  uma atividade
+- `POST /projetos/{id}/participantes`: vincular um aluno pela matrícula
+- `DELETE /projetos/{id}/participantes/{matricula}`: desvincular um aluno
+- `PUT /projetos/{id}/criterios`: definir os critérios de certificação
 
 **Frequência** (`FrequenciaController`)
 - `POST /projetos/{id}/atividades/{atividadeId}/presencas`: registrar
   presença pela matrícula
+- `DELETE /projetos/{id}/atividades/{atividadeId}/presencas/{matricula}`:
+  remover uma presença
 - `GET /projetos/{id}/horas` e `GET /me/horas`: horas dos participantes, para
   o coordenador, e as do próprio aluno
 

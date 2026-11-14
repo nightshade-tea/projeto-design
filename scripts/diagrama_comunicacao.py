@@ -2,17 +2,22 @@
 # Gera os diagramas de comunicação (os mesmos de scripts/diagrama_sequencia.py):
 # - docs/diagramas/comunicacao.svg: cenário completo, com autenticação: o
 #   professor faz login pelo login institucional, cria um projeto e vincula
-#   um aluno; as mensagens 4 e 5 têm a guarda [token válido], e uma nota
-#   indica o fluxo de exceção (401)
+#   um aluno; notas indicam os fluxos de exceção (401, 403 e 409)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/comunicacao/login.svg
 # - docs/diagramas/comunicacao/criar_projeto.svg (RF01)
 # - docs/diagramas/comunicacao/vincular_aluno.svg (RF03)
 # - docs/diagramas/comunicacao/registrar_presenca.svg (RF04)
-# - docs/diagramas/comunicacao/consultar_horas.svg (RF05)
+# - docs/diagramas/comunicacao/consultar_horas.svg (RF05, horas do aluno)
+# - docs/diagramas/comunicacao/consultar_horas_projeto.svg (RF05, horas dos
+#   participantes, para o coordenador)
 # - docs/diagramas/comunicacao/encerrar_projeto.svg (RF07)
 # - docs/diagramas/comunicacao/baixar_certificado.svg (RF08)
 # Uso: python3 scripts/diagrama_comunicacao.py
+#
+# Como nos diagramas de sequência, a validação do token no login
+# institucional e o 401 só aparecem no login e no cenário completo. As
+# recusas (403, 404 e 409) ficam em uma nota abaixo da interação.
 #
 # Notação UML 2:
 # - linhas de vida "nome : Tipo", sem sublinhado, ligadas por links
@@ -55,6 +60,14 @@ def acima(a, b, msgs):
     b.x, b.y = a.cx - b.w / 2, a.topo - gap_v(msgs) - b.h
 
 
+def excecoes(objetos, linhas, alvo=None):
+    """nota com os fluxos de exceção, abaixo de todos os objetos e alinhada
+    à esquerda deles"""
+    x = min(o.esq for o in objetos)
+    y = max(o.base for o in objetos) + 60
+    return (x, y, linhas, alvo)
+
+
 def desenhar(nome, arquivo, objetos, links, notas=(), rotas=()):
     svg = Svg()
     caixas = [(o.esq, o.topo, o.dir, o.base) for o in objetos]
@@ -70,6 +83,14 @@ def desenhar(nome, arquivo, objetos, links, notas=(), rotas=()):
         o.desenhar(svg)
     salvar_interacao(svg, caixas, nome, arquivo)
 
+
+EXC_GERENCIAR = [
+    "[não pode]: o controller responde 403 Forbidden e a interação termina",
+    "[projeto encerrado]: o controller responde 409 Conflict e a interação"
+    " termina"]
+EXC_ALUNO = [
+    "[matricula não é de um Aluno]: o controller responde 409 Conflict e a",
+    "interação termina"]
 
 M_AUTH = ["1.1: usuario := identificar(token)"]
 M_IDP = ["1.1.1: usuario := identificar(token)"]
@@ -107,17 +128,21 @@ projeto = Objeto("projeto : Projeto")
 repo = Objeto(": ProjetoRepository")
 m_ctrl = ["1: criar(token, titulo, descricao)"]
 m_svc = ["1.2: projeto := criar(titulo, descricao, usuario)"]
-m_proj = ["1.2.1: «create» Projeto(titulo, descricao, coordenador)"]
+m_proj = ["1.2.1 [usuario é Professor ou Administrador]:",
+          "«create» Projeto(titulo, descricao, coordenador)"]
 m_repo = ["1.2.2: salvar(projeto)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
 abaixo(svc, projeto, m_proj)
 auth, idp, l_auth = autenticacao(ctrl)
-desenhar("Criar projeto", "comunicacao/criar_projeto.svg",
-         [cliente, ctrl, auth, idp, svc, projeto, repo],
+objs = [cliente, ctrl, auth, idp, svc, projeto, repo]
+desenhar("Criar projeto", "comunicacao/criar_projeto.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
-          (svc, repo, m_repo, 1), (svc, projeto, m_proj, 1)])
+          (svc, repo, m_repo, 1), (svc, projeto, m_proj, 1)],
+         notas=[excecoes(objs, [
+             "[usuario não é Professor nem Administrador]: o controller",
+             "responde 403 Forbidden e a interação termina"])])
 
 # -------------------------------------------------- vincular aluno (RF03)
 
@@ -128,18 +153,21 @@ repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 m_ctrl = ["1: vincular(token, id, matricula)"]
 m_svc = ["1.2: vincular(id, matricula, usuario)"]
-m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.4: salvar(projeto)"]
-m_idp = ["1.2.2: aluno := buscarPorMatricula(matricula)"]
-m_proj = ["1.2.3: vincular(aluno)"]
+m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.5: salvar(projeto)"]
+m_idp = ["1.2.3 [pode e projeto ativo]:",
+         "aluno := buscarPorMatricula(matricula)"]
+m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
+          "1.2.4 [aluno é Aluno]: vincular(aluno)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
 acima(svc, projeto, m_proj)
 auth, idp, l_auth = autenticacao_lado(ctrl, svc, m_idp)
-desenhar("Vincular aluno", "comunicacao/vincular_aluno.svg",
-         [cliente, ctrl, auth, idp, svc, repo, projeto],
+objs = [cliente, ctrl, auth, idp, svc, repo, projeto]
+desenhar("Vincular aluno", "comunicacao/vincular_aluno.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
-          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)])
+          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)],
+         notas=[excecoes(objs, EXC_GERENCIAR + EXC_ALUNO)])
 
 # ---------------------------------------------- registrar presença (RF04)
 
@@ -150,18 +178,22 @@ repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 m_ctrl = ["1: registrarPresenca(token, id, atividadeId, matricula)"]
 m_svc = ["1.2: registrarPresenca(id, atividadeId, matricula, usuario)"]
-m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.4: salvar(projeto)"]
-m_idp = ["1.2.2: aluno := buscarPorMatricula(matricula)"]
-m_proj = ["1.2.3: registrarPresenca(atividade, aluno)"]
+m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.6: salvar(projeto)"]
+m_idp = ["1.2.4: aluno := buscarPorMatricula(matricula)"]
+m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
+          "1.2.3 [pode e projeto ativo]:",
+          "atividade := atividade(atividadeId)",
+          "1.2.5 [aluno é Aluno]: registrarPresenca(atividade, aluno)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
 acima(svc, projeto, m_proj)
 auth, idp, l_auth = autenticacao_lado(ctrl, svc, m_idp)
-desenhar("Registrar presença", "comunicacao/registrar_presenca.svg",
-         [cliente, ctrl, auth, idp, svc, repo, projeto],
+objs = [cliente, ctrl, auth, idp, svc, repo, projeto]
+desenhar("Registrar presença", "comunicacao/registrar_presenca.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
-          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)])
+          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)],
+         notas=[excecoes(objs, EXC_GERENCIAR + EXC_ALUNO)])
 
 # ------------------------------------------------ encerrar projeto (RF07)
 
@@ -174,12 +206,16 @@ cert = Objeto("certificado : Certificado")
 crepo = Objeto(": CertificadoRepository")
 m_ctrl = ["1: encerrar(token, id)"]
 m_svc = ["1.2: encerrar(id, usuario)"]
-m_prepo = ["1.2.1: projeto := buscarPorId(id)", "1.2.4: salvar(projeto)"]
-m_proj = ["1.2.2: encerrar()", "1.2.3: aprovados := aprovados()"]
-m_cert = ["1.2.5 *[para cada resumo em aprovados]:",
-          "«create» Certificado(resumo)"]
+m_prepo = ["1.2.1: projeto := buscarPorId(id)", "1.2.5: salvar(projeto)"]
+m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
+          "1.2.3 [pode e projeto ativo]: encerrar()",
+          "1.2.4: aprovados := aprovados()"]
+m_cert = ["1.2.7 *[para cada resumo em aprovados]",
+          "[não existe]: «create» Certificado(resumo)"]
 m_crepo = ["1.2.6 *[para cada resumo em aprovados]:",
-           "salvar(certificado)"]
+           "existe := existe(projeto, resumo.aluno)",
+           "1.2.8 *[para cada resumo em aprovados]",
+           "[não existe]: salvar(certificado)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 # afasta o service para os rótulos do link do certificado (à esquerda) não
@@ -194,11 +230,14 @@ y = svc.base + max(gap_v(m_cert), gap_v(m_crepo))
 cert.x, cert.y = x_cert + 25 - cert.w, y
 crepo.x, crepo.y = x_crepo - 25, y
 auth, idp, l_auth = autenticacao(ctrl)
-desenhar("Encerrar projeto", "comunicacao/encerrar_projeto.svg",
-         [cliente, ctrl, auth, idp, svc, prepo, projeto, cert, crepo],
+objs = [cliente, ctrl, auth, idp, svc, prepo, projeto, cert, crepo]
+desenhar("Encerrar projeto", "comunicacao/encerrar_projeto.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
           (svc, prepo, m_prepo, 1), (svc, projeto, m_proj, -1),
-          (svc, cert, m_cert, -1, x_cert), (svc, crepo, m_crepo, 1, x_crepo)])
+          (svc, cert, m_cert, -1, x_cert), (svc, crepo, m_crepo, 1, x_crepo)],
+         notas=[excecoes(objs, EXC_GERENCIAR + [
+             "1.2.6 a 1.2.8 acontecem na mesma iteração, uma vez para cada",
+             "resumo; o certificado só é criado se o aluno ainda não tem um"])])
 
 # ------------------------------------------------- consultar horas (RF05)
 
@@ -208,19 +247,47 @@ svc = Objeto(": FrequenciaService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 m_ctrl = ["1: consultarHoras(token)"]
-m_svc = ["1.2: resumos := consultarHoras(usuario)"]
-m_repo = ["1.2.1: projetos := listarPorAluno(aluno)"]
+m_svc = ["1.2: resumos, total := consultarHoras(usuario)"]
+m_repo = ["1.2.1 [usuario é Aluno]:",
+          "projetos := listarPorAluno(usuario)"]
 m_proj = ["1.2.2 *[para cada projeto em projetos]:",
-          "resumo := resumoFrequencia(aluno)"]
+          "resumo := resumoFrequencia(usuario)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
 acima(svc, projeto, m_proj)
 auth, idp, l_auth = autenticacao(ctrl)
-desenhar("Consultar horas", "comunicacao/consultar_horas.svg",
-         [cliente, ctrl, auth, idp, svc, repo, projeto],
+objs = [cliente, ctrl, auth, idp, svc, repo, projeto]
+desenhar("Consultar horas", "comunicacao/consultar_horas.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
-          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)])
+          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)],
+         notas=[excecoes(objs, [
+             "[usuario não é Aluno]: o controller responde 403 Forbidden e a",
+             "interação termina; o total é a soma das horas dos resumos"])])
+
+# ------------------------- consultar horas dos participantes (RF05, coordenador)
+
+cliente = Objeto(": Cliente web")
+ctrl = Objeto(": FrequenciaController")
+svc = Objeto(": FrequenciaService")
+repo = Objeto(": ProjetoRepository")
+projeto = Objeto("projeto : Projeto")
+m_ctrl = ["1: consultarHorasProjeto(token, id)"]
+m_svc = ["1.2: resumos := consultarHorasProjeto(id, usuario)"]
+m_repo = ["1.2.1: projeto := buscarPorId(id)"]
+m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
+          "1.2.3 [pode]: resumos := resumos()"]
+lado_a_lado(cliente, ctrl, m_ctrl)
+lado_a_lado(ctrl, svc, m_svc)
+lado_a_lado(svc, repo, m_repo)
+acima(svc, projeto, m_proj)
+auth, idp, l_auth = autenticacao(ctrl)
+objs = [cliente, ctrl, auth, idp, svc, repo, projeto]
+desenhar("Consultar horas dos participantes",
+         "comunicacao/consultar_horas_projeto.svg", objs,
+         [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
+          (svc, repo, m_repo, 1), (svc, projeto, m_proj, -1)],
+         notas=[excecoes(objs, EXC_GERENCIAR[:1])])
 
 # ---------------------------------------------- baixar certificado (RF08)
 
@@ -233,19 +300,24 @@ ger = Objeto(": GeradorDocumentoCertificado")
 m_ctrl = ["1: baixar(token, id)"]
 m_svc = ["1.2: arquivo := gerarArquivo(id, usuario)"]
 m_repo = ["1.2.1: certificado := buscarPorId(id)"]
-m_cert = ["1.2.2: pertence := pertenceA(usuario)"]
-m_ger = ["1.2.3: arquivo := gerar(certificado)"]
+m_cert = ["1.2.2 [certificado encontrado]:",
+          "pertence := pertenceA(usuario)"]
+m_ger = ["1.2.3 [pertence]: arquivo := gerar(certificado)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
 acima(svc, cert, m_cert)
 abaixo(svc, ger, m_ger)
 auth, idp, l_auth = autenticacao(ctrl)
-desenhar("Baixar certificado", "comunicacao/baixar_certificado.svg",
-         [cliente, ctrl, auth, idp, svc, repo, cert, ger],
+objs = [cliente, ctrl, auth, idp, svc, repo, cert, ger]
+desenhar("Baixar certificado", "comunicacao/baixar_certificado.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
           (svc, repo, m_repo, 1), (svc, cert, m_cert, -1),
-          (svc, ger, m_ger, 1)])
+          (svc, ger, m_ger, 1)],
+         notas=[excecoes(objs, [
+             "[certificado não encontrado]: o controller responde 404 Not Found",
+             "[não pertence]: o controller responde 403 Forbidden",
+             "em ambos os casos, a interação termina"])])
 
 # ----------------------------------------------------------------- login
 #
@@ -305,26 +377,29 @@ m_cli_ext = ["2: entrar(matricula, senha)"]
 m_cli_actrl = ["1: login()",
                "3: consultarUsuario(token)"]
 m_actrl_auth = ["1.1: url := urlLogin()",
-                "3.1: professor := identificar(token)"]
+                "3.1: usuario := identificar(token)"]
 m_auth_idp = ["1.1.1: url := urlLogin()",
-              "3.1.1: professor := identificar(token)",
+              "3.1.1: usuario := identificar(token)",
               "4.1.1: usuario := identificar(token)",
               "5.1.1: usuario := identificar(token)"]
-m_cli_pctrl = ["4 [token válido]: criar(token, titulo, descricao)",
-               "5 [token válido]: vincular(token, id, matricula)"]
+m_cli_pctrl = ["4: criar(token, titulo, descricao)",
+               "5: vincular(token, id, matricula)"]
 m_pctrl_auth = ["4.1: usuario := identificar(token)",
                 "5.1: usuario := identificar(token)"]
 m_pctrl_svc = ["4.2: projeto := criar(titulo, descricao, usuario)",
                "5.2: vincular(id, matricula, usuario)"]
-m_svc_idp = ["5.2.2: aluno := buscarPorMatricula(matricula)"]
+m_svc_idp = ["5.2.3 [pode e projeto ativo]:",
+             "aluno := buscarPorMatricula(matricula)"]
 m_idp_ext = ["3.1.1.1: matricula := validar(token)",
              "4.1.1.1: matricula := validar(token)",
              "5.1.1.1: matricula := validar(token)"]
 m_svc_repo = ["4.2.2: salvar(projeto)",
               "5.2.1: projeto := buscarPorId(id)",
-              "5.2.4: salvar(projeto)"]
-m_svc_proj = ["4.2.1: «create» Projeto(titulo, descricao, coordenador)",
-              "5.2.3: vincular(aluno)"]
+              "5.2.5: salvar(projeto)"]
+m_svc_proj = ["4.2.1 [usuario é Professor ou Administrador]:",
+              "«create» Projeto(titulo, descricao, coordenador)",
+              "5.2.2: pode := podeGerenciar(usuario)",
+              "5.2.4 [aluno é Aluno]: vincular(aluno)"]
 
 
 def lw(msgs):
@@ -371,4 +446,9 @@ desenhar("Professor cria projeto e vincula aluno", "comunicacao.svg",
                  ["[token inválido]: validar(token) recusa o token,",
                   "consultarUsuario devolve 401 Unauthorized e a",
                   "interação termina (4 e 5 não ocorrem)"],
-                 (idp.dir, idp.cy))])
+                 (idp.dir, idp.cy)),
+                excecoes([ext, actrl, auth, idp, cliente, pctrl, svc, repo,
+                          projeto], [
+                    "[usuario não é Professor nem Administrador], em 4.2: o",
+                    "controller responde 403 Forbidden e a interação termina"]
+                    + EXC_GERENCIAR + EXC_ALUNO)])

@@ -9,17 +9,25 @@
 # - docs/diagramas/sequencia/criar_projeto.svg (RF01)
 # - docs/diagramas/sequencia/vincular_aluno.svg (RF03)
 # - docs/diagramas/sequencia/registrar_presenca.svg (RF04)
-# - docs/diagramas/sequencia/consultar_horas.svg (RF05)
+# - docs/diagramas/sequencia/consultar_horas.svg (RF05, horas do aluno)
+# - docs/diagramas/sequencia/consultar_horas_projeto.svg (RF05, horas dos
+#   participantes, para o coordenador)
 # - docs/diagramas/sequencia/encerrar_projeto.svg (RF07)
 # - docs/diagramas/sequencia/baixar_certificado.svg (RF08)
 # Uso: python3 scripts/diagrama_sequencia.py
+#
+# A validação do token no login institucional (validar(token)) e o 401 só
+# aparecem no login e no cenário completo; nos diagramas por caso de uso,
+# identificar(token) devolve o usuário direto, para não repetir esse trecho.
+# As recusas por permissão (403), recurso inexistente (404) e regra de
+# negócio (409) aparecem como fragmentos break.
 #
 # Notação UML 2:
 # - linhas de vida "nome : Tipo", sem sublinhado
 # - chamadas síncronas com seta cheia, retornos tracejados com seta aberta
 # - criação de objeto com seta tracejada até a cabeça da linha de vida
-# - fragmentos combinados loop e break; a guarda é uma condição, sobre a linha de
-#   vida que envia a primeira mensagem do loop
+# - fragmentos combinados loop, opt e break; a guarda é uma condição, sobre a
+#   linha de vida que envia a primeira mensagem do fragmento
 from uml import Sequencia
 
 
@@ -37,6 +45,62 @@ def identificar(ctrl, ext=False):
 
 AUTH = [("auth", ": AutenticacaoService"), ("idp", ": ProvedorIdentidade")]
 
+
+def recusa(svc, ctrl, guarda, motivo, status):
+    """break: o service recusa a requisição e o controller responde com o
+    status de erro; a interação termina"""
+    s.inicio("break", guarda)
+    s.retorno(svc, ctrl, motivo)
+    s.retorno(ctrl, "cliente", status)
+    s.fim()
+
+
+def gerenciar(svc, ctrl, projeto="projeto"):
+    """RN02/RN03: só o coordenador ou um administrador gerencia o projeto,
+    e um projeto encerrado não aceita alterações"""
+    s.chamada(svc, projeto, "podeGerenciar(usuario)")
+    s.retorno(projeto, svc, "pode")
+    recusa(svc, ctrl, "[não pode]", "sem permissão", "403 Forbidden")
+    recusa(svc, ctrl, "[projeto encerrado]", "projeto encerrado",
+           "409 Conflict")
+
+
+def buscar_aluno(svc, ctrl):
+    """busca pela matrícula; a matrícula precisa ser de um Aluno"""
+    s.chamada(svc, "idp", "buscarPorMatricula(matricula)")
+    s.retorno("idp", svc, "aluno")
+    recusa(svc, ctrl, "[matricula não é de um Aluno]", "não é aluno", "409 Conflict")
+
+
+def criar(ctrl):
+    s.chamada("cliente", ctrl, "criar(token, titulo, descricao)")
+    identificar(ctrl, ext=ctrl == "pctrl")
+    s.chamada(ctrl, "svc", "criar(titulo, descricao, usuario)")
+    recusa("svc", ctrl, "[usuario não é Professor nem Administrador]",
+           "sem permissão", "403 Forbidden")
+    s.criacao("svc", "projeto", "Projeto(titulo, descricao, coordenador)")
+    s.chamada("svc", "repo", "salvar(projeto)")
+    s.retorno("repo", "svc")
+    s.retorno("svc", ctrl, "projeto")
+    s.retorno(ctrl, "cliente", "202 Accepted")
+
+
+def vincular(ctrl):
+    s.chamada("cliente", ctrl, "vincular(token, id, matricula)")
+    identificar(ctrl, ext=ctrl == "pctrl")
+    s.chamada(ctrl, "svc", "vincular(id, matricula, usuario)")
+    s.chamada("svc", "repo", "buscarPorId(id)")
+    s.retorno("repo", "svc", "projeto")
+    gerenciar("svc", ctrl)
+    buscar_aluno("svc", ctrl)
+    s.chamada("svc", "projeto", "vincular(aluno)")
+    s.retorno("projeto", "svc")
+    s.chamada("svc", "repo", "salvar(projeto)")
+    s.retorno("repo", "svc")
+    s.retorno("svc", ctrl)
+    s.retorno(ctrl, "cliente", "202 Accepted")
+
+
 # --------------------------------------------------- criar projeto (RF01)
 
 s = Sequencia("Criar projeto", [
@@ -46,14 +110,7 @@ s = Sequencia("Criar projeto", [
     ("projeto", "projeto : Projeto"),
     ("repo", ": ProjetoRepository"),
 ])
-s.chamada("cliente", "ctrl", "criar(token, titulo, descricao)")
-identificar("ctrl")
-s.chamada("ctrl", "svc", "criar(titulo, descricao, usuario)")
-s.criacao("svc", "projeto", "Projeto(titulo, descricao, coordenador)")
-s.chamada("svc", "repo", "salvar(projeto)")
-s.retorno("repo", "svc")
-s.retorno("svc", "ctrl", "projeto")
-s.retorno("ctrl", "cliente", "202 Accepted")
+criar("ctrl")
 s.desenhar("sequencia/criar_projeto.svg")
 
 # -------------------------------------------------- vincular aluno (RF03)
@@ -65,19 +122,7 @@ s = Sequencia("Vincular aluno", [
     ("repo", ": ProjetoRepository"),
     ("projeto", "projeto : Projeto"),
 ])
-s.chamada("cliente", "ctrl", "vincular(token, id, matricula)")
-identificar("ctrl")
-s.chamada("ctrl", "svc", "vincular(id, matricula, usuario)")
-s.chamada("svc", "repo", "buscarPorId(id)")
-s.retorno("repo", "svc", "projeto")
-s.chamada("svc", "idp", "buscarPorMatricula(matricula)")
-s.retorno("idp", "svc", "aluno")
-s.chamada("svc", "projeto", "vincular(aluno)")
-s.retorno("projeto", "svc")
-s.chamada("svc", "repo", "salvar(projeto)")
-s.retorno("repo", "svc")
-s.retorno("svc", "ctrl")
-s.retorno("ctrl", "cliente", "202 Accepted")
+vincular("ctrl")
 s.desenhar("sequencia/vincular_aluno.svg")
 
 # ---------------------------------------------- registrar presença (RF04)
@@ -96,8 +141,10 @@ s.chamada("ctrl", "svc",
           "registrarPresenca(id, atividadeId, matricula, usuario)")
 s.chamada("svc", "repo", "buscarPorId(id)")
 s.retorno("repo", "svc", "projeto")
-s.chamada("svc", "idp", "buscarPorMatricula(matricula)")
-s.retorno("idp", "svc", "aluno")
+gerenciar("svc", "ctrl")
+s.chamada("svc", "projeto", "atividade(atividadeId)")
+s.retorno("projeto", "svc", "atividade")
+buscar_aluno("svc", "ctrl")
 s.chamada("svc", "projeto", "registrarPresenca(atividade, aluno)")
 s.retorno("projeto", "svc")
 s.chamada("svc", "repo", "salvar(projeto)")
@@ -122,22 +169,28 @@ identificar("ctrl")
 s.chamada("ctrl", "svc", "encerrar(id, usuario)")
 s.chamada("svc", "prepo", "buscarPorId(id)")
 s.retorno("prepo", "svc", "projeto")
+gerenciar("svc", "ctrl")
 s.chamada("svc", "projeto", "encerrar()")
 s.retorno("projeto", "svc")
 s.chamada("svc", "projeto", "aprovados()")
 s.retorno("projeto", "svc", "aprovados")
 s.chamada("svc", "prepo", "salvar(projeto)")
 s.retorno("prepo", "svc")
-s.inicio("loop", "[há resumo em aprovados sem certificado]")
+# no máximo um certificado por aluno e projeto (a emissão pode ser repetida)
+s.inicio("loop", "[para cada resumo em aprovados]")
+s.chamada("svc", "crepo", "existe(projeto, resumo.aluno)")
+s.retorno("crepo", "svc", "existe")
+s.inicio("opt", "[não existe]")
 s.criacao("svc", "cert", "Certificado(resumo)")
 s.chamada("svc", "crepo", "salvar(certificado)")
 s.retorno("crepo", "svc")
+s.fim()
 s.fim()
 s.retorno("svc", "ctrl")
 s.retorno("ctrl", "cliente", "202 Accepted")
 s.desenhar("sequencia/encerrar_projeto.svg")
 
-# ------------------------------------------------- consultar horas (RF05)
+# ------------------------------------------ consultar horas do aluno (RF05)
 
 s = Sequencia("Consultar horas", [
     ("cliente", ": Cliente web"),
@@ -149,15 +202,41 @@ s = Sequencia("Consultar horas", [
 s.chamada("cliente", "ctrl", "consultarHoras(token)")
 identificar("ctrl")
 s.chamada("ctrl", "svc", "consultarHoras(usuario)")
-s.chamada("svc", "repo", "listarPorAluno(aluno)")
+recusa("svc", "ctrl", "[usuario não é Aluno]", "sem permissão",
+       "403 Forbidden")
+s.chamada("svc", "repo", "listarPorAluno(usuario)")
 s.retorno("repo", "svc", "projetos")
-s.inicio("loop", "[há projeto em projetos sem resumo]")
-s.chamada("svc", "projeto", "resumoFrequencia(aluno)")
+s.inicio("loop", "[para cada projeto em projetos]")
+s.chamada("svc", "projeto", "resumoFrequencia(usuario)")
 s.retorno("projeto", "svc", "resumo")
 s.fim()
-s.retorno("svc", "ctrl", "resumos")
+# o total é a soma de horasCumpridas dos resumos, feita no service
+s.retorno("svc", "ctrl", "resumos, total")
 s.retorno("ctrl", "cliente", "200 OK")
 s.desenhar("sequencia/consultar_horas.svg")
+
+# ------------------------- consultar horas dos participantes (RF05, coordenador)
+
+s = Sequencia("Consultar horas dos participantes", [
+    ("cliente", ": Cliente web"),
+    ("ctrl", ": FrequenciaController"), *AUTH,
+    ("svc", ": FrequenciaService"),
+    ("repo", ": ProjetoRepository"),
+    ("projeto", "projeto : Projeto"),
+])
+s.chamada("cliente", "ctrl", "consultarHorasProjeto(token, id)")
+identificar("ctrl")
+s.chamada("ctrl", "svc", "consultarHorasProjeto(id, usuario)")
+s.chamada("svc", "repo", "buscarPorId(id)")
+s.retorno("repo", "svc", "projeto")
+s.chamada("svc", "projeto", "podeGerenciar(usuario)")
+s.retorno("projeto", "svc", "pode")
+recusa("svc", "ctrl", "[não pode]", "sem permissão", "403 Forbidden")
+s.chamada("svc", "projeto", "resumos()")
+s.retorno("projeto", "svc", "resumos")
+s.retorno("svc", "ctrl", "resumos")
+s.retorno("ctrl", "cliente", "200 OK")
+s.desenhar("sequencia/consultar_horas_projeto.svg")
 
 # ---------------------------------------------- baixar certificado (RF08)
 
@@ -174,8 +253,11 @@ identificar("ctrl")
 s.chamada("ctrl", "svc", "gerarArquivo(id, usuario)")
 s.chamada("svc", "repo", "buscarPorId(id)")
 s.retorno("repo", "svc", "certificado")
+recusa("svc", "ctrl", "[certificado não encontrado]", "não encontrado",
+       "404 Not Found")
 s.chamada("svc", "cert", "pertenceA(usuario)")
-s.retorno("cert", "svc", "true")
+s.retorno("cert", "svc", "pertence")
+recusa("svc", "ctrl", "[não pertence]", "sem permissão", "403 Forbidden")
 s.chamada("svc", "ger", "gerar(certificado)")
 s.retorno("ger", "svc", "arquivo")
 s.retorno("svc", "ctrl", "arquivo")
@@ -253,26 +335,7 @@ s.retorno("idp", "auth", "usuario")
 s.retorno("auth", "actrl", "usuario")
 s.retorno("actrl", "cliente", "200 OK (nome, papel)")
 # criar projeto
-s.chamada("cliente", "pctrl", "criar(token, titulo, descricao)")
-identificar("pctrl", ext=True)
-s.chamada("pctrl", "svc", "criar(titulo, descricao, usuario)")
-s.criacao("svc", "projeto", "Projeto(titulo, descricao, coordenador)")
-s.chamada("svc", "repo", "salvar(projeto)")
-s.retorno("repo", "svc")
-s.retorno("svc", "pctrl", "projeto")
-s.retorno("pctrl", "cliente", "202 Accepted")
+criar("pctrl")
 # vincular aluno
-s.chamada("cliente", "pctrl", "vincular(token, id, matricula)")
-identificar("pctrl", ext=True)
-s.chamada("pctrl", "svc", "vincular(id, matricula, usuario)")
-s.chamada("svc", "repo", "buscarPorId(id)")
-s.retorno("repo", "svc", "projeto")
-s.chamada("svc", "idp", "buscarPorMatricula(matricula)")
-s.retorno("idp", "svc", "aluno")
-s.chamada("svc", "projeto", "vincular(aluno)")
-s.retorno("projeto", "svc")
-s.chamada("svc", "repo", "salvar(projeto)")
-s.retorno("repo", "svc")
-s.retorno("svc", "pctrl")
-s.retorno("pctrl", "cliente", "202 Accepted")
+vincular("pctrl")
 s.desenhar("sequencia.svg")
