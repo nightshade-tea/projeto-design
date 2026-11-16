@@ -1,7 +1,7 @@
 # Análise de evolução
 
 Essa seção analisa o que aconteceria se tecnologias/integrações do sistema
-precisassem ser substituídas. A análise foi feita com 3 possíveis mudanças.
+precisassem ser substituídas. A análise foi feita com 2 possíveis mudanças.
 
 ## 1. Alteração no mecanismo de persistência
 
@@ -70,37 +70,3 @@ Por exemplo, troca do login único por OAuth, ou usar autenticação do gov.br
   utilizada
 - Dependendo do rate limit de um provedor, a velocidade de todas as operações
   pode ser afetada, uma vez que validamos todas as requisições
-
-## 3. Adicionando um aplicativo mobile
-
-Por exemplo, surgiu a necessidade de ter um aplicativo de celular para essa
-aplicação.
-
-**Elementos afetados**
-- Um novo cliente, que usa a mesma API
-- O fluxo de login, necessitando autenticação nativa ou abrir abas no navegador
-- O registro de presenças, caso ele precise funcionar sem internet; acumulando
-  localmente e enviando depois
-
-**Elementos inalterados**
-- O sistema inteiro, seria apenas uma expansão que utiliza das interfaces já
-  existentes
-
-**Decisões que ajudam**
-- Cliente-servidor com uma API REST em JSON, já que qualquer cliente que fale
-  HTTP usa a mesma API
-- Token verificado em cada requisição: funciona igual para o navegador e para
-  o aplicativo
-- Erros são devolvidos na própria requisição, então o aplicativo trata os erros
-  do mesmo jeito
-- Escritas idempotentes: o aplicativo pode reenviar uma presença em uma
-  conexão instável sem registrá-la duas vezes
-- Já que o certificado é gerado a cada download, outros formatos podem ser
-  oferecidos sem mudar como é guardado
-
-**Decisões que dificultam**
-- O login por redirecionamento do navegador foi pensado para o cliente web. No
-  aplicativo isso provavelmente precisará ser revisto e, talvez, atualizado
-- O "buffering" de presenças caso sem internet precisará ser testado pois
-  casos de borda podem aparecer se estados do servidor mudam antes do envio
-  pelo cliente
