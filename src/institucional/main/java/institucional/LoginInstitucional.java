@@ -43,7 +43,7 @@ public class LoginInstitucional {
     public static void main(String[] args) throws IOException {
         int porta = Integer.parseInt(System.getProperty("porta", "8081"));
         Path usuarios = Path.of(System.getProperty("usuarios",
-                "src/main/resources/usuarios-institucionais.csv"));
+                "src/institucional/main/resources/usuarios.csv"));
         new LoginInstitucional(usuarios).iniciar(porta);
         System.out.println("Login institucional (simulado): http://localhost:" + porta
                 + "/login, usuários em " + usuarios);

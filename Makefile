@@ -3,53 +3,65 @@
 #   make login / make servidor   cada um separado
 #   make test     testes
 #   make cenario  reproduz o diagrama de sequência completo por HTTP
+#
+# Dois programas separados, cada um com o seu código:
+#   src/extensao       servidor do sistema (com o cliente web)
+#   src/institucional  login institucional simulado
 
-OUT        := src/out
-DADOS      := src/dados
-PORTA      := 8080
+BUILD       := build
+DADOS       := dados
+PORTA       := 8080
 PORTA_LOGIN := 8081
-USUARIOS   := src/main/resources/usuarios-institucionais.csv
-CLIENTE    := src/main/resources/cliente
-JAVAC      := javac --release 21 -encoding UTF-8
+USUARIOS    := src/institucional/main/resources/usuarios.csv
+CLIENTE     := src/extensao/main/resources/cliente
+JAVAC       := javac --release 21 -encoding UTF-8
 
-MAIN := $(shell find src/main/java -name '*.java')
-TEST := $(shell find src/test/java -name '*.java')
+EXTENSAO      := $(shell find src/extensao/main/java -name '*.java')
+INSTITUCIONAL := $(shell find src/institucional/main/java -name '*.java')
+TESTES        := $(shell find src/extensao/test/java -name '*.java')
+
+# os testes sobem os dois programas
+CP_TESTES := $(BUILD)/extensao:$(BUILD)/institucional:$(BUILD)/testes
 
 .PHONY: build run login servidor test cenario clean
 
-build: $(OUT)/.main
+build: $(BUILD)/.extensao $(BUILD)/.institucional
 
-$(OUT)/.main: $(MAIN)
-	rm -rf $(OUT)/main
-	$(JAVAC) -d $(OUT)/main $(MAIN)
+$(BUILD)/.extensao: $(EXTENSAO)
+	rm -rf $(BUILD)/extensao
+	$(JAVAC) -d $(BUILD)/extensao $(EXTENSAO)
 	touch $@
 
-$(OUT)/.test: $(OUT)/.main $(TEST)
-	rm -rf $(OUT)/test
-	$(JAVAC) -cp $(OUT)/main -d $(OUT)/test $(TEST)
+$(BUILD)/.institucional: $(INSTITUCIONAL)
+	rm -rf $(BUILD)/institucional
+	$(JAVAC) -d $(BUILD)/institucional $(INSTITUCIONAL)
 	touch $@
 
-# login institucional e servidor são programas separados; run sobe os dois
-# (Ctrl+C para os dois)
+$(BUILD)/.testes: build $(TESTES)
+	rm -rf $(BUILD)/testes
+	$(JAVAC) -cp $(BUILD)/extensao:$(BUILD)/institucional -d $(BUILD)/testes $(TESTES)
+	touch $@
+
+# Ctrl+C para os dois
 run: build
 	trap 'kill 0' EXIT; \
-	java -Dporta=$(PORTA_LOGIN) -Dusuarios=$(USUARIOS) -cp $(OUT)/main institucional.LoginInstitucional & \
+	java -Dporta=$(PORTA_LOGIN) -Dusuarios=$(USUARIOS) -cp $(BUILD)/institucional institucional.LoginInstitucional & \
 	java -Dporta=$(PORTA) -DurlLogin=http://localhost:$(PORTA_LOGIN) -Ddados=$(DADOS) \
-		-Dcliente=$(CLIENTE) -cp $(OUT)/main extensao.Main & \
+		-Dcliente=$(CLIENTE) -cp $(BUILD)/extensao extensao.Main & \
 	wait
 
-login: build
-	java -Dporta=$(PORTA_LOGIN) -Dusuarios=$(USUARIOS) -cp $(OUT)/main institucional.LoginInstitucional
+login: $(BUILD)/.institucional
+	java -Dporta=$(PORTA_LOGIN) -Dusuarios=$(USUARIOS) -cp $(BUILD)/institucional institucional.LoginInstitucional
 
-servidor: build
+servidor: $(BUILD)/.extensao
 	java -Dporta=$(PORTA) -DurlLogin=http://localhost:$(PORTA_LOGIN) -Ddados=$(DADOS) \
-		-Dcliente=$(CLIENTE) -cp $(OUT)/main extensao.Main
+		-Dcliente=$(CLIENTE) -cp $(BUILD)/extensao extensao.Main
 
-test: $(OUT)/.test
-	java -cp $(OUT)/main:$(OUT)/test extensao.Testes
+test: $(BUILD)/.testes
+	java -cp $(CP_TESTES) extensao.Testes
 
-cenario: $(OUT)/.test
-	java -cp $(OUT)/main:$(OUT)/test extensao.Cenario
+cenario: $(BUILD)/.testes
+	java -cp $(CP_TESTES) extensao.Cenario
 
 clean:
-	rm -rf $(OUT)
+	rm -rf $(BUILD)

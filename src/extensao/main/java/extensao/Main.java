@@ -36,8 +36,8 @@ public final class Main {
     public static void main(String[] args) throws IOException {
         int porta = Integer.parseInt(System.getProperty("porta", "8080"));
         String urlLogin = System.getProperty("urlLogin", "http://localhost:8081");
-        Path dados = Path.of(System.getProperty("dados", "src/dados"));
-        Path cliente = Path.of(System.getProperty("cliente", "src/main/resources/cliente"));
+        Path dados = Path.of(System.getProperty("dados", "dados"));
+        Path cliente = Path.of(System.getProperty("cliente", "src/extensao/main/resources/cliente"));
 
         HttpServer servidor = iniciar(porta, urlLogin, dados, cliente);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> servidor.stop(0)));

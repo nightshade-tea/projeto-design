@@ -43,10 +43,10 @@ public final class Cenario {
     static void executar(boolean imprimir) throws Exception {
         Path dados = Files.createTempDirectory("cenario");
         LoginInstitucional login = new LoginInstitucional(
-                Path.of("src/main/resources/usuarios-institucionais.csv"));
+                Path.of("src/institucional/main/resources/usuarios.csv"));
         login.iniciar(0);
         HttpServer servidor = Main.iniciar(0, "http://localhost:" + login.porta(), dados,
-                Path.of("src/main/resources/cliente"));
+                Path.of("src/extensao/main/resources/cliente"));
         try {
             new Cenario(imprimir).executar("http://localhost:" + servidor.getAddress().getPort());
             if (imprimir) {
@@ -70,7 +70,7 @@ public final class Cenario {
         String retorno = java.net.URLDecoder.decode(urlLogin.replaceAll(".*retorno=", ""),
                 StandardCharsets.UTF_8);
         String loginPost = urlLogin.replaceAll("\\?.*", "");
-        r = postForm(loginPost, "matricula=P001&senha=senha123&retorno="
+        r = postForm(loginPost, "matricula=carla&senha=sapato&retorno="
                 + URLEncoder.encode(retorno, StandardCharsets.UTF_8));
         esperar(r, 302, "entrar(matricula, senha)");
         String volta = r.headers().firstValue("Location").orElseThrow();
@@ -103,14 +103,14 @@ public final class Cenario {
 
         passo("Vincular aluno: buscarPorMatricula(matricula) no provedor de identidade");
         String projeto = servidor + "/projetos/" + id.group(1);
-        r = postJson(projeto + "/participantes", token, "{\"matricula\":\"2021001\"}");
+        r = postJson(projeto + "/participantes", token, "{\"matricula\":\"ana\"}");
         esperar(r, 202, "vincular(token, id, matricula)");
         mostrar("202 Accepted " + r.body());
 
         passo("Conferência: o projeto salvo tem o aluno vinculado");
         r = get(projeto, token);
         esperar(r, 200, "consultar(token, id)");
-        if (!r.body().contains("\"matricula\":\"2021001\"")) {
+        if (!r.body().contains("\"matricula\":\"ana\"")) {
             throw new AssertionError("aluno não vinculado: " + r.body());
         }
         mostrar("200 OK " + r.body());

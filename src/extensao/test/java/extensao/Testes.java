@@ -163,20 +163,20 @@ public final class Testes {
         testes.put("login institucional: senha, validar e cópia local", () -> {
             Path pasta = Files.createTempDirectory("teste");
             LoginInstitucional login = new LoginInstitucional(
-                    Path.of("src/main/resources/usuarios-institucionais.csv"));
+                    Path.of("src/institucional/main/resources/usuarios.csv"));
             login.iniciar(0);
             try {
                 ProvedorIdentidadeInstitucional provedor = new ProvedorIdentidadeInstitucional(
                         "http://localhost:" + login.porta(), "http://cliente/", pasta);
-                igual(null, login.entrar("P001", "errada"));
-                Usuario u = provedor.identificar(login.entrar("P001", "senha123")).orElseThrow();
+                igual(null, login.entrar("carla", "errada"));
+                Usuario u = provedor.identificar(login.entrar("carla", "sapato")).orElseThrow();
                 verdade(u instanceof Professor && u.getNome().equals("Carla Souza"));
                 verdade(provedor.identificar("invalido").isEmpty());
-                verdade(provedor.buscarPorMatricula("2021001").orElseThrow() instanceof Aluno);
-                verdade(provedor.buscarPorMatricula("9999999").isEmpty());
+                verdade(provedor.buscarPorMatricula("ana").orElseThrow() instanceof Aluno);
+                verdade(provedor.buscarPorMatricula("ninguem").isEmpty());
                 login.parar();
                 // provedor fora do ar: alunos da cópia local ainda são encontrados
-                verdade(provedor.buscarPorMatricula("2021001").isPresent());
+                verdade(provedor.buscarPorMatricula("ana").isPresent());
             } finally {
                 login.parar();
             }
