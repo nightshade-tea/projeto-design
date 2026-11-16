@@ -70,15 +70,15 @@
 <polyline points="502.4,212.0 688.7,212.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
 <text x="595.5" y="205.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
 <polyline points="688.7,248.0 502.4,248.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="595.5" y="241.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
+<text x="595.5" y="241.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario = identificar()</text>
 <polyline points="492.4,284.0 314.7,284.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="403.6" y="277.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
+<text x="403.6" y="277.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario = identificar()</text>
 <polyline points="314.7,320.0 867.0,320.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
 <text x="590.9" y="313.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(titulo, descricao, usuario)</text>
 <polyline points="867.0,402.0 314.7,402.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="590.9" y="395.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">sem permissão</text>
+<text x="590.9" y="395.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(): sem permissão</text>
 <polyline points="304.7,438.0 114.0,438.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="209.4" y="431.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">403 Forbidden</text>
+<text x="209.4" y="431.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(): 403 Forbidden</text>
 <polyline points="877.0,496.0 1125.4,496.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <text x="1001.2" y="489.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">Projeto(titulo, descricao, coordenador)</text>
 <polyline points="877.0,542.0 1354.7,542.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
@@ -86,7 +86,7 @@
 <polyline points="1354.7,578.0 877.0,578.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <text x="1115.9" y="571.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111"></text>
 <polyline points="867.0,614.0 314.7,614.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="590.9" y="607.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">projeto</text>
+<text x="590.9" y="607.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">projeto = criar()</text>
 <polyline points="304.7,650.0 114.0,650.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="209.4" y="643.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">202 Accepted</text>
+<text x="209.4" y="643.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">criar(): 202 Accepted</text>
 </svg>

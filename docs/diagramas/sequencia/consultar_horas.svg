@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1347" height="800" viewBox="0 0 1347 800" font-family="Helvetica, Arial, 'Liberation Sans', sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1397" height="800" viewBox="0 0 1397 800" font-family="Helvetica, Arial, 'Liberation Sans', sans-serif">
 <defs>
 <marker id="seta" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12"
  markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
@@ -25,75 +25,75 @@
  stroke-width="1.2"/>
 </marker>
 </defs>
-<rect width="1347" height="800" fill="#fff"/>
-<rect x="30.0" y="30.0" width="1287.2" height="740.0" fill="none" stroke="#222" stroke-width="1.2"/>
+<rect width="1397" height="800" fill="#fff"/>
+<rect x="30.0" y="30.0" width="1337.1" height="740.0" fill="none" stroke="#222" stroke-width="1.2"/>
 <path d="M30.0,30.0 H162.6 V44.0 L156.6,50.0 H30.0 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="37.0" y="45.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">sd</text>
 <text x="55.8" y="45.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">Consultar horas</text>
 <line x1="109.0" y1="106.0" x2="109.0" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="285.2" y1="106.0" x2="285.2" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="485.7" y1="106.0" x2="485.7" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="682.0" y1="106.0" x2="682.0" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="873.2" y1="106.0" x2="873.2" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="1058.9" y1="106.0" x2="1058.9" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
-<line x1="1231.8" y1="106.0" x2="1231.8" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="331.7" y1="106.0" x2="331.7" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="532.3" y1="106.0" x2="532.3" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="728.5" y1="106.0" x2="728.5" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="919.7" y1="106.0" x2="919.7" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="1108.8" y1="106.0" x2="1108.8" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
+<line x1="1281.7" y1="106.0" x2="1281.7" y2="754.0" stroke="#222" stroke-width="1" stroke-dasharray="6,4"/>
 <rect x="54.0" y="70.0" width="110.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="109.0" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: Cliente web</text>
-<rect x="204.0" y="70.0" width="162.4" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="285.2" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaController</text>
-<rect x="406.4" y="70.0" width="158.6" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="485.7" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: AutenticacaoService</text>
-<rect x="605.0" y="70.0" width="153.9" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="682.0" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProvedorIdentidade</text>
-<rect x="799.0" y="70.0" width="148.5" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="873.2" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaService</text>
-<rect x="987.4" y="70.0" width="143.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="1058.9" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProjetoRepository</text>
-<rect x="1170.4" y="70.0" width="122.8" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="1231.8" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">projeto : Projeto</text>
-<rect x="677.0" y="212.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="480.7" y="176.0" width="10.0" height="108.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="868.2" y="320.0" width="10.0" height="82.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="280.2" y="140.0" width="10.0" height="298.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="1053.9" y="488.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="1226.8" y="606.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="868.2" y="320.0" width="10.0" height="372.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="280.2" y="140.0" width="10.0" height="588.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="250.5" y="70.0" width="162.4" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="331.7" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaController</text>
+<rect x="453.0" y="70.0" width="158.6" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="532.3" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: AutenticacaoService</text>
+<rect x="651.6" y="70.0" width="153.9" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="728.5" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProvedorIdentidade</text>
+<rect x="845.5" y="70.0" width="148.5" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="919.7" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: FrequenciaService</text>
+<rect x="1037.3" y="70.0" width="143.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1108.8" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">: ProjetoRepository</text>
+<rect x="1220.3" y="70.0" width="122.8" height="36.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1281.7" y="93.0" font-size="14" text-anchor="middle" font-weight="normal" font-style="normal" fill="#111">projeto : Projeto</text>
+<rect x="723.5" y="212.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="527.3" y="176.0" width="10.0" height="108.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="914.7" y="320.0" width="10.0" height="82.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="326.7" y="140.0" width="10.0" height="298.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1103.8" y="488.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="1276.7" y="606.0" width="10.0" height="36.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="914.7" y="320.0" width="10.0" height="372.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
+<rect x="326.7" y="140.0" width="10.0" height="588.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
 <rect x="104.0" y="128.0" width="10.0" height="616.0" fill="#fff" stroke="#222" stroke-width="1.1"/>
-<rect x="83.0" y="340.0" width="1174.8" height="118.0" fill="none" stroke="#222" stroke-width="1.2"/>
+<rect x="83.0" y="340.0" width="1224.7" height="118.0" fill="none" stroke="#222" stroke-width="1.2"/>
 <path d="M83.0,340.0 H139.7 V354.0 L133.7,360.0 H83.0 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="90.0" y="355.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">break</text>
-<text x="887.2" y="374.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">[usuario não é Aluno]</text>
-<rect x="847.2" y="544.0" width="410.6" height="118.0" fill="none" stroke="#222" stroke-width="1.2"/>
-<path d="M847.2,544.0 H896.6 V558.0 L890.6,564.0 H847.2 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="854.2" y="559.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">loop</text>
-<text x="887.2" y="578.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">[para cada projeto em projetos]</text>
-<polyline points="114.0,140.0 280.2,140.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="197.1" y="133.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(token)</text>
-<polyline points="290.2,176.0 480.7,176.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="385.5" y="169.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
-<polyline points="490.7,212.0 677.0,212.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="583.9" y="205.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
-<polyline points="677.0,248.0 490.7,248.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="583.9" y="241.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
-<polyline points="480.7,284.0 290.2,284.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="385.5" y="277.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario</text>
-<polyline points="290.2,320.0 868.2,320.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="579.2" y="313.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(usuario)</text>
-<polyline points="868.2,402.0 290.2,402.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="579.2" y="395.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">sem permissão</text>
-<polyline points="280.2,438.0 114.0,438.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="197.1" y="431.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">403 Forbidden</text>
-<polyline points="878.2,488.0 1053.9,488.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="966.1" y="481.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">listarPorAluno(usuario)</text>
-<polyline points="1053.9,524.0 878.2,524.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="966.1" y="517.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">projetos</text>
-<polyline points="878.2,606.0 1226.8,606.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
-<text x="1052.5" y="599.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumoFrequencia(usuario)</text>
-<polyline points="1226.8,642.0 878.2,642.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="1052.5" y="635.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumo</text>
-<polyline points="868.2,692.0 290.2,692.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="579.2" y="685.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumos, total</text>
-<polyline points="280.2,728.0 114.0,728.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<text x="197.1" y="721.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">200 OK</text>
+<text x="933.7" y="374.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">[usuario não é Aluno]</text>
+<rect x="893.7" y="544.0" width="414.0" height="118.0" fill="none" stroke="#222" stroke-width="1.2"/>
+<path d="M893.7,544.0 H943.1 V558.0 L937.1,564.0 H893.7 Z" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="900.7" y="559.0" font-size="13" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">loop</text>
+<text x="933.7" y="578.0" font-size="12" text-anchor="start" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">[para cada projeto em projetos]</text>
+<polyline points="114.0,140.0 326.7,140.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="220.4" y="133.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(token)</text>
+<polyline points="336.7,176.0 527.3,176.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="432.0" y="169.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
+<polyline points="537.3,212.0 723.5,212.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="630.4" y="205.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">identificar(token)</text>
+<polyline points="723.5,248.0 537.3,248.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="630.4" y="241.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario = identificar()</text>
+<polyline points="527.3,284.0 336.7,284.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="432.0" y="277.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">usuario = identificar()</text>
+<polyline points="336.7,320.0 914.7,320.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="625.7" y="313.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(usuario)</text>
+<polyline points="914.7,402.0 336.7,402.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="625.7" y="395.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(): sem permissão</text>
+<polyline points="326.7,438.0 114.0,438.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="220.4" y="431.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(): 403 Forbidden</text>
+<polyline points="924.7,488.0 1103.8,488.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1014.2" y="481.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">listarPorAluno(usuario)</text>
+<polyline points="1103.8,524.0 924.7,524.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="1014.2" y="517.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">projetos = listarPorAluno()</text>
+<polyline points="924.7,606.0 1276.7,606.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#seta_cheia)"/>
+<text x="1100.7" y="599.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumoFrequencia(usuario)</text>
+<polyline points="1276.7,642.0 924.7,642.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="1100.7" y="635.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumo = resumoFrequencia()</text>
+<polyline points="914.7,692.0 336.7,692.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="625.7" y="685.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">resumos = consultarHoras()</text>
+<polyline points="326.7,728.0 114.0,728.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="220.4" y="721.0" font-size="12" text-anchor="middle" stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-weight="normal" font-style="normal" fill="#111">consultarHoras(): 200 OK</text>
 </svg>

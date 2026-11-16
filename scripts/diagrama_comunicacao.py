@@ -19,31 +19,48 @@
 # institucional e o 401 só aparecem no login e no cenário completo. As
 # recusas (403, 404 e 409) ficam em uma nota abaixo da interação.
 #
-# Notação UML 2:
+# Notação UML 2.5.1 (17.9):
 # - linhas de vida "nome : Tipo", sem sublinhado, ligadas por links
-# - mensagens com número de sequência aninhado (1, 1.1, 1.1.1...) e seta
-#   no sentido do envio; o resultado aparece como "var := operacao(...)"
-# - repetição indicada por "*[guarda]" e condição por "[guarda]" depois do
-#   número de sequência
+# - mensagens com número de sequência aninhado (1, 1.1, 1.1.1...); a
+#   chamada é "operacao(argumentos)", com uma seta cheia no sentido do envio
+# - o retorno é uma mensagem própria (reply), com o mesmo número da chamada,
+#   uma seta tracejada no sentido contrário, do outro lado do link, e o
+#   rótulo "alvo = operacao()" ou "operacao(): valor" (17.4.4.1);
+#   retornos sem valor não são mostrados
+# - a criação de objeto é a chamada ao construtor «create» da classe (ver o
+#   diagrama de classes)
+# - repetição indicada por "*[iteração]" e condição por "[guarda]" depois do
+#   número de sequência, uma por número
 from uml import Objeto, Svg, ligacao, bloco_mensagens, salvar_interacao, nota, \
-    ligacao_rota
+    ligacao_rota, separar, Resposta as R
 
 GMIN = 80    # comprimento mínimo de um link
 
 
+def lados(msgs):
+    """(largura, altura) das chamadas e das respostas"""
+    return [bloco_mensagens(m) for m in separar(msgs)]
+
+
 def gap_h(msgs):
-    return max(GMIN, bloco_mensagens(msgs)[0] + 40) if msgs else GMIN
+    return max(GMIN, max(w for w, _ in lados(msgs)) + 40) if msgs else GMIN
 
 
 def gap_v(msgs):
-    return max(GMIN, bloco_mensagens(msgs)[1] + 50) if msgs else GMIN
+    return max(GMIN, max(h for _, h in lados(msgs)) + 50) if msgs else GMIN
 
 
-def por_cima(a, b, msgs_abaixo, folga=50):
+def lw(msgs):
+    """largura dos rótulos de um link vertical (chamadas de um lado e
+    respostas do outro)"""
+    return sum(w + 18 for w, _ in lados(msgs) if w)
+
+
+def por_cima(a, b, msgs_abaixo, msgs=(), folga=50):
     """rota de a até b passando acima da linha, sobre as mensagens dos links
-    dessa linha"""
-    y = min(a.topo, b.topo) - max(bloco_mensagens(m)[1]
-                                  for m in msgs_abaixo) - folga
+    dessa linha; as respostas da rota (msgs) ficam abaixo dela"""
+    y = (min(a.topo, b.topo) - max(lados(m)[0][1] for m in msgs_abaixo)
+         - lados(msgs)[1][1] - folga)
     return [(a.cx, a.topo), (a.cx, y), (b.cx, y), (b.cx, b.topo)]
 
 
@@ -92,8 +109,8 @@ EXC_ALUNO = [
     "[matricula não é de um Aluno]: o controller responde 409 Conflict e a",
     "interação termina"]
 
-M_AUTH = ["1.1: usuario := identificar(token)"]
-M_IDP = ["1.1.1: usuario := identificar(token)"]
+M_AUTH = ["1.1: identificar(token)", R("1.1: usuario = identificar()")]
+M_IDP = ["1.1.1: identificar(token)", R("1.1.1: usuario = identificar()")]
 
 
 def autenticacao(ctrl):
@@ -126,10 +143,12 @@ ctrl = Objeto(": ProjetoController")
 svc = Objeto(": ProjetoService")
 projeto = Objeto("projeto : Projeto")
 repo = Objeto(": ProjetoRepository")
-m_ctrl = ["1: criar(token, titulo, descricao)"]
-m_svc = ["1.2: projeto := criar(titulo, descricao, usuario)"]
+m_ctrl = ["1: criar(token, titulo, descricao)",
+          R("1: criar(): 202 Accepted")]
+m_svc = ["1.2: criar(titulo, descricao, usuario)",
+         R("1.2: projeto = criar()")]
 m_proj = ["1.2.1 [usuario é Professor ou Administrador]:",
-          "«create» Projeto(titulo, descricao, coordenador)"]
+          "Projeto(titulo, descricao, coordenador)"]
 m_repo = ["1.2.2: salvar(projeto)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
@@ -151,13 +170,16 @@ ctrl = Objeto(": ProjetoController")
 svc = Objeto(": ProjetoService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
-m_ctrl = ["1: vincular(token, id, matricula)"]
+m_ctrl = ["1: vincular(token, id, matricula)",
+          R("1: vincular(): 202 Accepted")]
 m_svc = ["1.2: vincular(id, matricula, usuario)"]
-m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.5: salvar(projeto)"]
-m_idp = ["1.2.3 [pode e projeto ativo]:",
-         "aluno := buscarPorMatricula(matricula)"]
-m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
-          "1.2.4 [aluno é Aluno]: vincular(aluno)"]
+m_repo = ["1.2.1: buscarPorId(id)", "1.2.5: salvar(projeto)",
+          R("1.2.1: projeto = buscarPorId()")]
+m_idp = ["1.2.3 [pode e projeto ativo]:", "buscarPorMatricula(matricula)",
+         R("1.2.3: aluno = buscarPorMatricula()")]
+m_proj = ["1.2.2: podeGerenciar(usuario)",
+          "1.2.4 [aluno é Aluno]: vincular(aluno)",
+          R("1.2.2: pode = podeGerenciar()")]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -176,14 +198,18 @@ ctrl = Objeto(": FrequenciaController")
 svc = Objeto(": FrequenciaService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
-m_ctrl = ["1: registrarPresenca(token, id, atividadeId, matricula)"]
+m_ctrl = ["1: registrarPresenca(token, id, atividadeId, matricula)",
+          R("1: registrarPresenca(): 202 Accepted")]
 m_svc = ["1.2: registrarPresenca(id, atividadeId, matricula, usuario)"]
-m_repo = ["1.2.1: projeto := buscarPorId(id)", "1.2.6: salvar(projeto)"]
-m_idp = ["1.2.4: aluno := buscarPorMatricula(matricula)"]
-m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
-          "1.2.3 [pode e projeto ativo]:",
-          "atividade := atividade(atividadeId)",
-          "1.2.5 [aluno é Aluno]: registrarPresenca(atividade, aluno)"]
+m_repo = ["1.2.1: buscarPorId(id)", "1.2.6: salvar(projeto)",
+          R("1.2.1: projeto = buscarPorId()")]
+m_idp = ["1.2.4: buscarPorMatricula(matricula)",
+         R("1.2.4: aluno = buscarPorMatricula()")]
+m_proj = ["1.2.2: podeGerenciar(usuario)",
+          "1.2.3 [pode e projeto ativo]: atividade(atividadeId)",
+          "1.2.5 [aluno é Aluno]: registrarPresenca(atividade, aluno)",
+          R("1.2.2: pode = podeGerenciar()"),
+          R("1.2.3: atividade = atividade()")]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -204,24 +230,30 @@ prepo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 cert = Objeto("certificado : Certificado")
 crepo = Objeto(": CertificadoRepository")
-m_ctrl = ["1: encerrar(token, id)"]
+m_ctrl = ["1: encerrar(token, id)", R("1: encerrar(): 202 Accepted")]
 m_svc = ["1.2: encerrar(id, usuario)"]
-m_prepo = ["1.2.1: projeto := buscarPorId(id)", "1.2.5: salvar(projeto)"]
-m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
+m_prepo = ["1.2.1: buscarPorId(id)", "1.2.5: salvar(projeto)",
+           R("1.2.1: projeto = buscarPorId()")]
+m_proj = ["1.2.2: podeGerenciar(usuario)",
           "1.2.3 [pode e projeto ativo]: encerrar()",
-          "1.2.4: aprovados := aprovados()"]
-m_cert = ["1.2.7 *[para cada resumo em aprovados]",
-          "[não existe]: «create» Certificado(resumo)"]
+          "1.2.4: aprovados()",
+          R("1.2.2: pode = podeGerenciar()"),
+          R("1.2.4: aprovados = aprovados()")]
+m_cert = ["1.2.7 *[para cada resumo sem certificado]:",
+          "Certificado(resumo)"]
 m_crepo = ["1.2.6 *[para cada resumo em aprovados]:",
-           "existe := existe(projeto, resumo.aluno)",
-           "1.2.8 *[para cada resumo em aprovados]",
-           "[não existe]: salvar(certificado)"]
+           "existe(projeto, resumo.aluno)",
+           "1.2.8 *[para cada resumo sem certificado]:",
+           "salvar(certificado)",
+           R("1.2.6: existe = existe()")]
+# o service fica largo o bastante para a resposta 1.2.6 (à esquerda do link do
+# repository) caber entre os dois links que descem dele
+svc.w = max(svc.w, 50 + lados(m_crepo)[1][0] + 18 + 30)
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 # afasta o service para os rótulos do link do certificado (à esquerda) não
 # encostarem nos da autenticação (à direita do controller)
-svc.x += max(0, ctrl.cx + bloco_mensagens(M_AUTH)[0]
-             + bloco_mensagens(m_cert)[0] + 80 - (svc.esq + 25))
+svc.x += max(0, ctrl.cx + lw(M_AUTH) + lw(m_cert) + 60 - (svc.esq + 25))
 lado_a_lado(svc, prepo, m_prepo)
 acima(svc, projeto, m_proj)
 # certificado e repository abaixo do service, com um link para cada
@@ -237,7 +269,8 @@ desenhar("Encerrar projeto", "comunicacao/encerrar_projeto.svg", objs,
           (svc, cert, m_cert, -1, x_cert), (svc, crepo, m_crepo, 1, x_crepo)],
          notas=[excecoes(objs, EXC_GERENCIAR + [
              "1.2.6 a 1.2.8 acontecem na mesma iteração, uma vez para cada",
-             "resumo; o certificado só é criado se o aluno ainda não tem um"])])
+             "resumo; 1.2.7 e 1.2.8 só ocorrem se o aluno ainda não tem",
+             "certificado (existe é falso)"])])
 
 # ------------------------------------------------- consultar horas (RF05)
 
@@ -246,12 +279,13 @@ ctrl = Objeto(": FrequenciaController")
 svc = Objeto(": FrequenciaService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
-m_ctrl = ["1: consultarHoras(token)"]
-m_svc = ["1.2: resumos, total := consultarHoras(usuario)"]
-m_repo = ["1.2.1 [usuario é Aluno]:",
-          "projetos := listarPorAluno(usuario)"]
+m_ctrl = ["1: consultarHoras(token)", R("1: consultarHoras(): 200 OK")]
+m_svc = ["1.2: consultarHoras(usuario)", R("1.2: resumos = consultarHoras()")]
+m_repo = ["1.2.1 [usuario é Aluno]:", "listarPorAluno(usuario)",
+          R("1.2.1: projetos = listarPorAluno()")]
 m_proj = ["1.2.2 *[para cada projeto em projetos]:",
-          "resumo := resumoFrequencia(usuario)"]
+          "resumoFrequencia(usuario)",
+          R("1.2.2: resumo = resumoFrequencia()")]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -272,11 +306,13 @@ ctrl = Objeto(": FrequenciaController")
 svc = Objeto(": FrequenciaService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
-m_ctrl = ["1: consultarHorasProjeto(token, id)"]
-m_svc = ["1.2: resumos := consultarHorasProjeto(id, usuario)"]
-m_repo = ["1.2.1: projeto := buscarPorId(id)"]
-m_proj = ["1.2.2: pode := podeGerenciar(usuario)",
-          "1.2.3 [pode]: resumos := resumos()"]
+m_ctrl = ["1: consultarHorasProjeto(token, id)",
+          R("1: consultarHorasProjeto(): 200 OK")]
+m_svc = ["1.2: consultarHorasProjeto(id, usuario)",
+         R("1.2: resumos = consultarHorasProjeto()")]
+m_repo = ["1.2.1: buscarPorId(id)", R("1.2.1: projeto = buscarPorId()")]
+m_proj = ["1.2.2: podeGerenciar(usuario)", "1.2.3 [pode]: resumos()",
+          R("1.2.2: pode = podeGerenciar()"), R("1.2.3: resumos = resumos()")]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -297,12 +333,12 @@ svc = Objeto(": CertificadoService")
 repo = Objeto(": CertificadoRepository")
 cert = Objeto("certificado : Certificado")
 ger = Objeto(": GeradorDocumentoCertificado")
-m_ctrl = ["1: baixar(token, id)"]
-m_svc = ["1.2: arquivo := gerarArquivo(id, usuario)"]
-m_repo = ["1.2.1: certificado := buscarPorId(id)"]
-m_cert = ["1.2.2 [certificado encontrado]:",
-          "pertence := pertenceA(usuario)"]
-m_ger = ["1.2.3 [pertence]: arquivo := gerar(certificado)"]
+m_ctrl = ["1: baixar(token, id)", R("1: baixar(): 200 OK (PDF)")]
+m_svc = ["1.2: gerarArquivo(id, usuario)", R("1.2: arquivo = gerarArquivo()")]
+m_repo = ["1.2.1: buscarPorId(id)", R("1.2.1: certificado = buscarPorId()")]
+m_cert = ["1.2.2 [certificado encontrado]: pertenceA(usuario)",
+          R("1.2.2: pertence = pertenceA()")]
+m_ger = ["1.2.3 [pertence]: gerar(certificado)", R("1.2.3: arquivo = gerar()")]
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, svc, m_svc)
 lado_a_lado(svc, repo, m_repo)
@@ -329,36 +365,37 @@ cliente = Objeto(": Cliente web")
 ctrl = Objeto(": AutenticacaoController")
 auth = Objeto(": AutenticacaoService")
 idp = Objeto(": ProvedorIdentidade")
-m_ext = ["2: entrar(matricula, senha)"]
-m_ctrl = ["1: login()",
-          "3: consultarUsuario(token)"]
-m_auth = ["1.1: url := urlLogin()",
-          "3.1: usuario := identificar(token)"]
-m_idp = ["1.1.1: url := urlLogin()",
-         "3.1.1: usuario := identificar(token)"]
+m_ext = ["2: entrar(matricula, senha)", R("2: entrar(): 302 Found (token)")]
+m_ctrl = ["1: login()", "3: consultarUsuario(token)",
+          R("1: login(): 302 Found (url)"),
+          R("3: consultarUsuario(): 200 OK (nome, papel)")]
+m_auth = ["1.1: urlLogin()", "3.1: identificar(token)",
+          R("1.1: url = urlLogin()"), R("3.1: usuario = identificar()")]
+m_idp = ["1.1.1: urlLogin()", "3.1.1: identificar(token)",
+         R("1.1.1: url = urlLogin()"), R("3.1.1: usuario = identificar()")]
 ext.x, ext.y = 0, 0
 lado_a_lado(ext, cliente, m_ext)
 lado_a_lado(cliente, ctrl, m_ctrl)
 lado_a_lado(ctrl, auth, m_auth)
 lado_a_lado(auth, idp, m_idp)
 # o provedor consulta o login institucional
-m_idp_ext = ["3.1.1.1: matricula := validar(token)"]
+m_idp_ext = ["3.1.1.1: validar(token)", R("3.1.1.1: matricula = validar()")]
 desenhar("Login", "comunicacao/login.svg",
          [ext, cliente, ctrl, auth, idp],
          [(cliente, ext, m_ext, 1), (cliente, ctrl, m_ctrl, 1),
           (ctrl, auth, m_auth, 1), (auth, idp, m_idp, 1)],
-         rotas=[(por_cima(idp, ext, [m_ext, m_ctrl, m_auth, m_idp]),
-                 m_idp_ext, 1)],
+         rotas=[(por_cima(idp, ext, [m_ext, m_ctrl, m_auth, m_idp],
+                          m_idp_ext), m_idp_ext, 1)],
          notas=[(idp.dir + 40, idp.y - 10,
-                 ["[token inválido]: validar(token) recusa o token,",
+                 ["[token inválido]: validar devolve token inválido,",
                   "consultarUsuario devolve 401 Unauthorized e a",
                   "interação termina"],
                  (idp.dir, idp.cy))])
 
-# ------------------------------------- cenário completo, com autenticação
+# ---------------------------- cenário completo: login e criação de projeto
 #
 #                   : AutenticacaoController -- : AutenticacaoService -- : ProvedorIdentidade
-#                            |                          |                        |
+#                            |                          |
 # : Login inst. -- : Cliente web ------------ : ProjetoController -- : ProjetoService -- repo
 #                                                                            |
 #                                                                     projeto : Projeto
@@ -373,38 +410,29 @@ svc = Objeto(": ProjetoService")
 repo = Objeto(": ProjetoRepository")
 projeto = Objeto("projeto : Projeto")
 
-m_cli_ext = ["2: entrar(matricula, senha)"]
-m_cli_actrl = ["1: login()",
-               "3: consultarUsuario(token)"]
-m_actrl_auth = ["1.1: url := urlLogin()",
-                "3.1: usuario := identificar(token)"]
-m_auth_idp = ["1.1.1: url := urlLogin()",
-              "3.1.1: usuario := identificar(token)",
-              "4.1.1: usuario := identificar(token)",
-              "5.1.1: usuario := identificar(token)"]
+m_cli_ext = ["2: entrar(matricula, senha)",
+             R("2: entrar(): 302 Found (token)")]
+m_cli_actrl = ["1: login()", "3: consultarUsuario(token)",
+               R("1: login(): 302 Found (url)"),
+               R("3: consultarUsuario(): 200 OK (nome, papel)")]
+m_actrl_auth = ["1.1: urlLogin()", "3.1: identificar(token)",
+                R("1.1: url = urlLogin()"), R("3.1: usuario = identificar()")]
+m_auth_idp = ["1.1.1: urlLogin()", "3.1.1: identificar(token)",
+              "4.1.1: identificar(token)",
+              R("1.1.1: url = urlLogin()"),
+              R("3.1.1: usuario = identificar()"),
+              R("4.1.1: usuario = identificar()")]
+m_idp_ext = ["3.1.1.1: validar(token)", "4.1.1.1: validar(token)",
+             R("3.1.1.1: matricula = validar()"),
+             R("4.1.1.1: matricula = validar()")]
 m_cli_pctrl = ["4: criar(token, titulo, descricao)",
-               "5: vincular(token, id, matricula)"]
-m_pctrl_auth = ["4.1: usuario := identificar(token)",
-                "5.1: usuario := identificar(token)"]
-m_pctrl_svc = ["4.2: projeto := criar(titulo, descricao, usuario)",
-               "5.2: vincular(id, matricula, usuario)"]
-m_svc_idp = ["5.2.3 [pode e projeto ativo]:",
-             "aluno := buscarPorMatricula(matricula)"]
-m_idp_ext = ["3.1.1.1: matricula := validar(token)",
-             "4.1.1.1: matricula := validar(token)",
-             "5.1.1.1: matricula := validar(token)"]
-m_svc_repo = ["4.2.2: salvar(projeto)",
-              "5.2.1: projeto := buscarPorId(id)",
-              "5.2.5: salvar(projeto)"]
+               R("4: criar(): 202 Accepted")]
+m_pctrl_auth = ["4.1: identificar(token)", R("4.1: usuario = identificar()")]
+m_pctrl_svc = ["4.2: criar(titulo, descricao, usuario)",
+               R("4.2: projeto = criar()")]
+m_svc_repo = ["4.2.2: salvar(projeto)"]
 m_svc_proj = ["4.2.1 [usuario é Professor ou Administrador]:",
-              "«create» Projeto(titulo, descricao, coordenador)",
-              "5.2.2: pode := podeGerenciar(usuario)",
-              "5.2.4 [aluno é Aluno]: vincular(aluno)"]
-
-
-def lw(msgs):
-    return bloco_mensagens(msgs)[0]
-
+              "Projeto(titulo, descricao, coordenador)"]
 
 # distância entre os centros das colunas: cabe o link mais longo de cada
 # linha e os rótulos dos links verticais entre as duas colunas
@@ -412,7 +440,7 @@ linhas = [[None, actrl, auth, idp, None],
           [ext, cliente, pctrl, svc, repo]]
 msgs_h = [[None, m_actrl_auth, m_auth_idp, None],
           [m_cli_ext, m_cli_pctrl, m_pctrl_svc, m_svc_repo]]
-entre_v = [0, lw(m_cli_actrl) + 50, lw(m_pctrl_auth) + lw(m_svc_idp) + 80, 0]
+entre_v = [0, lw(m_cli_actrl) + 50, lw(m_pctrl_auth) + 50, 0]
 cols = [0]
 for i in range(4):
     d = entre_v[i]
@@ -421,15 +449,21 @@ for i in range(4):
         if a and b:
             d = max(d, a.w / 2 + gap_h(m) + b.w / 2)
     cols.append(cols[-1] + d)
-GV = max(gap_v(m) for m in (m_cli_actrl, m_pctrl_auth, m_svc_idp))
+# rótulos abaixo dos links da linha de cima (respostas) e acima dos da linha
+# de baixo (respostas, nos links com lado=-1, e chamadas, em svc -> repo)
+abaixo_0 = max(lados(m)[1][1] for m in (m_actrl_auth, m_auth_idp))
+acima_1 = max([lados(m)[1][1] for m in (m_cli_ext, m_cli_pctrl, m_pctrl_svc)]
+              + [lados(m_svc_repo)[0][1]])
+GV = max([gap_v(m) for m in (m_cli_actrl, m_pctrl_auth)]
+         + [abaixo_0 + acima_1 + 70])
 for r, linha in enumerate(linhas):
     for c, o in zip(cols, linha):
         if o:
             o.x, o.y = c - o.w / 2, r * (36 + GV)
 abaixo(svc, projeto, m_svc_proj)
 
-desenhar("Professor cria projeto e vincula aluno", "comunicacao.svg",
-         [ext, actrl, auth, idp, cliente, pctrl, svc, repo, projeto],
+objs = [ext, actrl, auth, idp, cliente, pctrl, svc, repo, projeto]
+desenhar("Professor entra e cria projeto", "comunicacao.svg", objs,
          [(cliente, ext, m_cli_ext, -1),
           (cliente, actrl, m_cli_actrl, 1),
           (actrl, auth, m_actrl_auth, 1),
@@ -437,18 +471,10 @@ desenhar("Professor cria projeto e vincula aluno", "comunicacao.svg",
           (cliente, pctrl, m_cli_pctrl, -1),
           (pctrl, auth, m_pctrl_auth, 1),
           (pctrl, svc, m_pctrl_svc, -1),
-          (svc, idp, m_svc_idp, -1),
           (svc, repo, m_svc_repo, 1),
           (svc, projeto, m_svc_proj, 1)],
-         rotas=[(por_cima(idp, ext, [m_actrl_auth, m_auth_idp]),
+         rotas=[(por_cima(idp, ext, [m_actrl_auth, m_auth_idp], m_idp_ext),
                  m_idp_ext, 1)],
-         notas=[(idp.dir + 40, idp.y - 10,
-                 ["[token inválido]: validar(token) recusa o token,",
-                  "consultarUsuario devolve 401 Unauthorized e a",
-                  "interação termina (4 e 5 não ocorrem)"],
-                 (idp.dir, idp.cy)),
-                excecoes([ext, actrl, auth, idp, cliente, pctrl, svc, repo,
-                          projeto], [
-                    "[usuario não é Professor nem Administrador], em 4.2: o",
-                    "controller responde 403 Forbidden e a interação termina"]
-                    + EXC_GERENCIAR + EXC_ALUNO)])
+         notas=[excecoes(objs, [
+             "[usuario não é Professor nem Administrador], em 4.2: o",
+             "controller responde 403 Forbidden e a interação termina"])])

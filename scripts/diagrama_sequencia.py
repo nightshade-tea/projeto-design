@@ -2,8 +2,7 @@
 # Gera os diagramas de sequência (ver docs/arquitetura.md e docs/dominio.md):
 # - docs/diagramas/sequencia.svg: cenário completo, com
 #   autenticação: o professor faz login pelo login institucional, cria um
-#   projeto e vincula um aluno; se o token for inválido, a
-#   interação termina com 401 (fragmento break)
+#   projeto e vincula um aluno (sem o caso de token inválido)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/sequencia/login.svg
 # - docs/diagramas/sequencia/criar_projeto.svg (RF01)
@@ -16,15 +15,17 @@
 # - docs/diagramas/sequencia/baixar_certificado.svg (RF08)
 # Uso: python3 scripts/diagrama_sequencia.py
 #
-# A validação do token no login institucional (validar(token)) e o 401 só
-# aparecem no login e no cenário completo; nos diagramas por caso de uso,
+# A validação do token no login institucional (validar(token)) aparece no
+# login e no cenário completo, e o 401 só no login; nos diagramas por caso de uso,
 # identificar(token) devolve o usuário direto, para não repetir esse trecho.
 # As recusas por permissão (403), recurso inexistente (404) e regra de
 # negócio (409) aparecem como fragmentos break.
 #
 # Notação UML 2:
 # - linhas de vida "nome : Tipo", sem sublinhado
-# - chamadas síncronas com seta cheia, retornos tracejados com seta aberta
+# - chamadas síncronas com seta cheia, retornos tracejados com seta aberta;
+#   o rótulo do retorno é "alvo = operacao()" ou "operacao(): valor"
+#   (reply-message-label, UML 2.5.1, 17.4.4.1)
 # - criação de objeto com seta tracejada até a cabeça da linha de vida
 # - fragmentos combinados loop, opt e break; a guarda é uma condição, sobre a
 #   linha de vida que envia a primeira mensagem do fragmento
@@ -50,8 +51,8 @@ def recusa(svc, ctrl, guarda, motivo, status):
     """break: o service recusa a requisição e o controller responde com o
     status de erro; a interação termina"""
     s.inicio("break", guarda)
-    s.retorno(svc, ctrl, motivo)
-    s.retorno(ctrl, "cliente", status)
+    s.retorno(svc, ctrl, valor=motivo)
+    s.retorno(ctrl, "cliente", valor=status)
     s.fim()
 
 
@@ -82,7 +83,7 @@ def criar(ctrl):
     s.chamada("svc", "repo", "salvar(projeto)")
     s.retorno("repo", "svc")
     s.retorno("svc", ctrl, "projeto")
-    s.retorno(ctrl, "cliente", "202 Accepted")
+    s.retorno(ctrl, "cliente", valor="202 Accepted")
 
 
 def vincular(ctrl):
@@ -98,7 +99,7 @@ def vincular(ctrl):
     s.chamada("svc", "repo", "salvar(projeto)")
     s.retorno("repo", "svc")
     s.retorno("svc", ctrl)
-    s.retorno(ctrl, "cliente", "202 Accepted")
+    s.retorno(ctrl, "cliente", valor="202 Accepted")
 
 
 # --------------------------------------------------- criar projeto (RF01)
@@ -150,7 +151,7 @@ s.retorno("projeto", "svc")
 s.chamada("svc", "repo", "salvar(projeto)")
 s.retorno("repo", "svc")
 s.retorno("svc", "ctrl")
-s.retorno("ctrl", "cliente", "202 Accepted")
+s.retorno("ctrl", "cliente", valor="202 Accepted")
 s.desenhar("sequencia/registrar_presenca.svg")
 
 # ------------------------------------------------ encerrar projeto (RF07)
@@ -187,7 +188,7 @@ s.retorno("crepo", "svc")
 s.fim()
 s.fim()
 s.retorno("svc", "ctrl")
-s.retorno("ctrl", "cliente", "202 Accepted")
+s.retorno("ctrl", "cliente", valor="202 Accepted")
 s.desenhar("sequencia/encerrar_projeto.svg")
 
 # ------------------------------------------ consultar horas do aluno (RF05)
@@ -211,8 +212,8 @@ s.chamada("svc", "projeto", "resumoFrequencia(usuario)")
 s.retorno("projeto", "svc", "resumo")
 s.fim()
 # o total é a soma de horasCumpridas dos resumos, feita no service
-s.retorno("svc", "ctrl", "resumos, total")
-s.retorno("ctrl", "cliente", "200 OK")
+s.retorno("svc", "ctrl", "resumos")
+s.retorno("ctrl", "cliente", valor="200 OK")
 s.desenhar("sequencia/consultar_horas.svg")
 
 # ------------------------- consultar horas dos participantes (RF05, coordenador)
@@ -235,7 +236,7 @@ recusa("svc", "ctrl", "[não pode]", "sem permissão", "403 Forbidden")
 s.chamada("svc", "projeto", "resumos()")
 s.retorno("projeto", "svc", "resumos")
 s.retorno("svc", "ctrl", "resumos")
-s.retorno("ctrl", "cliente", "200 OK")
+s.retorno("ctrl", "cliente", valor="200 OK")
 s.desenhar("sequencia/consultar_horas_projeto.svg")
 
 # ---------------------------------------------- baixar certificado (RF08)
@@ -261,7 +262,7 @@ recusa("svc", "ctrl", "[não pertence]", "sem permissão", "403 Forbidden")
 s.chamada("svc", "ger", "gerar(certificado)")
 s.retorno("ger", "svc", "arquivo")
 s.retorno("svc", "ctrl", "arquivo")
-s.retorno("ctrl", "cliente", "200 OK (PDF)")
+s.retorno("ctrl", "cliente", valor="200 OK (PDF)")
 s.desenhar("sequencia/baixar_certificado.svg")
 
 # ----------------------------------------------------------------- login
@@ -277,24 +278,24 @@ s.chamada("ctrl", "auth", "urlLogin()")
 s.chamada("auth", "idp", "urlLogin()")
 s.retorno("idp", "auth", "url")
 s.retorno("auth", "ctrl", "url")
-s.retorno("ctrl", "cliente", "302 Found (url)")
+s.retorno("ctrl", "cliente", valor="302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
-s.retorno("ext", "cliente", "302 Found (token)")
+s.retorno("ext", "cliente", valor="302 Found (token)")
 # usuário logado; o token é validado no login institucional
 s.chamada("cliente", "ctrl", "consultarUsuario(token)")
 s.chamada("ctrl", "auth", "identificar(token)")
 s.chamada("auth", "idp", "identificar(token)")
 s.chamada("idp", "ext", "validar(token)")
 s.inicio("break", "[token inválido]")
-s.retorno("ext", "idp", "token inválido")
-s.retorno("idp", "auth", "token inválido")
-s.retorno("auth", "ctrl", "token inválido")
-s.retorno("ctrl", "cliente", "401 Unauthorized")
+s.retorno("ext", "idp", valor="token inválido")
+s.retorno("idp", "auth", valor="token inválido")
+s.retorno("auth", "ctrl", valor="token inválido")
+s.retorno("ctrl", "cliente", valor="401 Unauthorized")
 s.fim()
 s.retorno("ext", "idp", "matricula")
 s.retorno("idp", "auth", "usuario")
 s.retorno("auth", "ctrl", "usuario")
-s.retorno("ctrl", "cliente", "200 OK (nome, papel)")
+s.retorno("ctrl", "cliente", valor="200 OK (nome, papel)")
 s.desenhar("sequencia/login.svg")
 
 # ------------------------------------- cenário completo, com autenticação
@@ -316,24 +317,18 @@ s.chamada("actrl", "auth", "urlLogin()")
 s.chamada("auth", "idp", "urlLogin()")
 s.retorno("idp", "auth", "url")
 s.retorno("auth", "actrl", "url")
-s.retorno("actrl", "cliente", "302 Found (url)")
+s.retorno("actrl", "cliente", valor="302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
-s.retorno("ext", "cliente", "302 Found (token)")
+s.retorno("ext", "cliente", valor="302 Found (token)")
 # usuário logado; o token é validado no login institucional
 s.chamada("cliente", "actrl", "consultarUsuario(token)")
 s.chamada("actrl", "auth", "identificar(token)")
 s.chamada("auth", "idp", "identificar(token)")
 s.chamada("idp", "ext", "validar(token)")
-s.inicio("break", "[token inválido]")
-s.retorno("ext", "idp", "token inválido")
-s.retorno("idp", "auth", "token inválido")
-s.retorno("auth", "actrl", "token inválido")
-s.retorno("actrl", "cliente", "401 Unauthorized")
-s.fim()
 s.retorno("ext", "idp", "matricula")
 s.retorno("idp", "auth", "usuario")
 s.retorno("auth", "actrl", "usuario")
-s.retorno("actrl", "cliente", "200 OK (nome, papel)")
+s.retorno("actrl", "cliente", valor="200 OK (nome, papel)")
 # criar projeto
 criar("pctrl")
 # vincular aluno

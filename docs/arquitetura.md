@@ -24,7 +24,7 @@ sistema escalável
 
 ## Diagrama
 
-![Diagrama da arquitetura](img/arquitetura.svg)
+![Diagrama da arquitetura](diagramas/arquitetura.svg)
 
 
 ## Camadas
@@ -35,7 +35,7 @@ sistema escalável
   repository, chamam o domínio e salvam o resultado
 - **Domínio**: objetos e regras de negócio, descritos em
   `dominio.md`
-- **Interfaces e Implementações**: interfaces e implementações dos
+- **Interfaces e Infraestrutura**: interfaces e implementações dos
   repositories, do login institucional e da geração do arquivo do
   certificado
 
@@ -113,7 +113,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - recusar tokens ausentes ou inválidos (`401`), e o cliente então direciona
   o usuário para o login institucional
 
-### Implementações
+### Infraestrutura
 
 - `ProjetoRepositorySql` e `CertificadoRepositorySql`, implementações dos
   repositories, que acessam o banco de dados
@@ -133,7 +133,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 ## Dependências
 
 - Entre camadas: controllers → services → domínio
-- Entre implementações e domínio: as implementações dependem das
+- Entre infraestrutura e domínio: as implementações dependem das
   interfaces definidas no domínio
 - Entre módulos: `certificacao` -> `projetos` -> `identidade`, e
   `certificacao` -> `identidade` (`Certificado` usa `Aluno` e `Usuario`).

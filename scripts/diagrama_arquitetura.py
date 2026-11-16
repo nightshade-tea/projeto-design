@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Gera docs/img/arquitetura.svg (diagrama UML de pacotes e classes)
+# Gera docs/diagramas/arquitetura.svg (diagrama UML de pacotes e classes)
 # Uso: python3 scripts/diagrama_arquitetura.py
 from pathlib import Path
 
@@ -57,6 +57,21 @@ def measure(s, size=14, bold=False, italic=False):
     return len(s) * size * (0.72 if bold else 0.64)
 
 
+def measure_tab(s, size=14):
+    """Largura do texto em negrito na primeira fonte com métricas de
+    Helvetica/Arial (Arial ou Liberation Sans); DejaVu só se não houver"""
+    if ImageFont:
+        for f in FONT_FILES[(True, False)]:
+            for d in FONT_DIRS:
+                path = Path(d) / f
+                if path.exists():
+                    key = (str(path), size)
+                    if key not in _font_cache:
+                        _font_cache[key] = ImageFont.truetype(str(path), size)
+                    return _font_cache[key].getlength(s)
+    return measure(s, size, bold=True)
+
+
 def fit_size(names, w, size=14, bold=True, italic=False, pad=16, min_size=10):
     """Maior tamanho de fonte <= size em que todos os nomes cabem em w"""
     while size > min_size and any(
@@ -80,7 +95,7 @@ def rect(x, y, w, h, fill="#fff", stroke="#222", sw=1.2, dash=None):
 def package(x, y, w, h, name, fill="#f7f7f7", tab_w=None, size=14):
     """UML package: aba com o nome + corpo; y é o topo da aba"""
     tab_h = 22
-    tab_w = max(tab_w or 0, measure(name, size, bold=True) + 22)
+    tab_w = max(tab_w or 0, measure_tab(name, size) + 20)
     rect(x, y, tab_w, tab_h, fill=fill)
     rect(x, y + tab_h, w, h, fill=fill)
     text(x + 10, y + 16, name, size=size, anchor="start", weight="bold")
@@ -90,7 +105,16 @@ def package(x, y, w, h, name, fill="#f7f7f7", tab_w=None, size=14):
 def cls(x, y, w, h, name, stereo=None, italic=False, size=14):
     rect(x, y, w, h, fill="#fff")
     cx = x + w / 2
-    if stereo:
+    st = "italic" if italic else "normal"
+    if stereo and "::" in name:
+        # nome qualificado quebrado depois do "::" para caber na caixa
+        pacote, nome = name.split("::")
+        text(cx, y + h / 2 - 13, f"«{stereo}»", size=12, fill="#444")
+        text(cx, y + h / 2 + 5, pacote + "::", size=size, weight="bold",
+             style=st)
+        text(cx, y + h / 2 + 5 + size + 4, nome, size=size, weight="bold",
+             style=st)
+    elif stereo:
         text(cx, y + h / 2 - 4, f"«{stereo}»", size=12, fill="#444")
         text(cx, y + h / 2 + 14, name, size=size, weight="bold",
              style="italic" if italic else "normal")
@@ -101,7 +125,8 @@ def cls(x, y, w, h, name, stereo=None, italic=False, size=14):
 
 def cls_row(cols, names, y, h, **kw):
     """Linha de classes com o mesmo tamanho de fonte, ajustado para caber"""
-    size = fit_size(names, min(w for _, w in cols),
+    partes = [p for n in names for p in n.replace("::", ":: ").split(" ")]
+    size = fit_size(partes, min(w for _, w in cols),
                     italic=kw.get("italic", False))
     for (x, w), n in zip(cols, names):
         cls(x, y, w, h, n, size=size, **kw)
@@ -219,15 +244,18 @@ prev_bottom = b + 150
 icols = columns(4, CX0, CW, 24)
 y = prev_bottom + 50
 line(MID, prev_bottom, MID, y + 22, dash="6,4", head="open")
-b = package(LX, y, LW, 90, "Interfaces")
-ifaces = ["ProjetoRepository", "CertificadoRepository", "ProvedorIdentidade",
-          "GeradorDocumentoCertificado"]
-cls_row(icols, ifaces, b + 18, 54, stereo="interface", italic=True)
-iface_bottom = b + 18 + 54
-prev_bottom = b + 90
+b = package(LX, y, LW, 110, "Interfaces")
+# nomes qualificados (pacote::Interface): cada interface pertence a um
+# módulo do domínio
+ifaces = ["projetos::ProjetoRepository", "certificacao::CertificadoRepository",
+          "identidade::ProvedorIdentidade",
+          "certificacao::GeradorDocumentoCertificado"]
+cls_row(icols, ifaces, b + 18, 74, stereo="interface", italic=True)
+iface_bottom = b + 18 + 74
+prev_bottom = b + 110
 
 y = prev_bottom + 60
-b = package(LX, y, LW, 80, "Implementações")
+b = package(LX, y, LW, 80, "Infraestrutura")
 impls = ["ProjetoRepositorySql", "CertificadoRepositorySql",
          "ProvedorIdentidadeInstitucional", "GeradorPdf"]
 cls_row(icols, impls, b + 20, 40)
@@ -273,6 +301,6 @@ add('</svg>')
 H2 = int(ey + 80)
 out[0] = out[0].replace(f'height="{H}" viewBox="0 0 {W} {H}"', f'height="{H2}" viewBox="0 0 {W} {H2}"')
 out = [o.replace(f'<rect width="{W}" height="{H}"', f'<rect width="{W}" height="{H2}"') for o in out]
-dest = Path(__file__).resolve().parent.parent / "docs" / "img" / "arquitetura.svg"
+dest = Path(__file__).resolve().parent.parent / "docs" / "diagramas" / "arquitetura.svg"
 dest.write_text("\n".join(out) + "\n", encoding="utf-8")
 print(dest)

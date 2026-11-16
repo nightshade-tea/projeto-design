@@ -412,8 +412,12 @@ class Sequencia:
 
     - linhas de vida com a cabeça "nome : Tipo" (sem sublinhado) e a linha
       tracejada; barras de ativação empilhadas nas chamadas aninhadas
-    - chamada síncrona: linha cheia com seta cheia
-    - retorno: linha tracejada com seta aberta
+    - chamada síncrona: linha cheia com seta cheia; o rótulo é
+      "operacao(argumentos)"
+    - retorno: linha tracejada com seta aberta; o rótulo segue a gramática
+      reply-message-label (UML 2.5.1, 17.4.4.1) e é montado a partir da
+      chamada respondida: "alvo = operacao()" ou "operacao(): valor"; sem
+      alvo nem valor, o rótulo é omitido
     - criação: linha tracejada com seta aberta até a cabeça do objeto criado
     - fragmentos combinados (loop, alt, opt, break); a guarda de cada operando,
       uma condição entre colchetes, fica sobre a linha de vida do primeiro
@@ -426,25 +430,43 @@ class Sequencia:
         self.chaves = [k for k, _ in participantes]
         self.rotulos = dict(participantes)
         self.eventos = []
+        # chamadas ainda sem retorno, por linha de vida (para os rótulos
+        # dos retornos); os fragmentos guardam uma cópia, como no layout
+        self._pendentes = {k: [] for k in self.chaves}
+        self._copias = []
 
     # --- registro dos eventos, na ordem da interação
 
     def chamada(self, de, para, rotulo):
+        self._pendentes[para].append(rotulo.split("(")[0])
         self.eventos.append(("chamada", de, para, rotulo))
 
-    def retorno(self, de, para, rotulo=""):
+    def retorno(self, de, para, alvo="", valor=""):
+        """retorno da última chamada recebida por `de`; alvo: variável que
+        recebe o valor devolvido; valor: o valor devolvido"""
+        op = self._pendentes[de].pop()
+        rotulo = ""
+        if alvo or valor:
+            rotulo = (f"{alvo} = " if alvo else "") + f"{op}()" + (
+                f": {valor}" if valor else "")
         self.eventos.append(("retorno", de, para, rotulo))
 
     def criacao(self, de, para, rotulo):
         self.eventos.append(("criacao", de, para, rotulo))
 
     def inicio(self, operador, guarda):
+        self._copias.append((operador, {k: list(v) for k, v in
+                                        self._pendentes.items()}))
         self.eventos.append(("inicio", operador, guarda))
 
     def separador(self, guarda):
+        self._pendentes = {k: list(v) for k, v in self._copias[-1][1].items()}
         self.eventos.append(("separador", guarda))
 
     def fim(self):
+        operador, copia = self._copias.pop()
+        if operador == "break":
+            self._pendentes = copia
         self.eventos.append(("fim",))
 
     # --- layout e desenho
@@ -636,18 +658,32 @@ class Objeto(Caixa):
 LH_MSG = 17
 
 
+class Resposta(str):
+    """mensagem de retorno (reply) em um diagrama de comunicação"""
+
+
+def separar(mensagens):
+    """(chamadas, respostas) de uma lista de mensagens"""
+    return ([m for m in mensagens if not isinstance(m, Resposta)],
+            [m for m in mensagens if isinstance(m, Resposta)])
+
+
 def bloco_mensagens(mensagens):
-    """largura e altura do bloco de mensagens de uma ligação"""
+    """largura e altura do bloco de mensagens de um lado da ligação"""
+    if not mensagens:
+        return 0, 0
     return (max(largura(m, 12) for m in mensagens),
             len(mensagens) * LH_MSG)
 
 
 def ligacao(svg, a, b, mensagens=(), lado=1, x=None, y=None):
-    """ligação reta (horizontal ou vertical) de a para b, com as mensagens
-    enviadas de a para b e uma seta indicando o sentido.
-    horizontal: y comum (padrão: centro de a); mensagens acima (lado=1) ou
+    """ligação reta (horizontal ou vertical) de a para b.
+    As chamadas (enviadas de a para b) ficam do lado indicado, com uma seta
+    cheia no sentido do envio; as respostas (Resposta, de b para a) ficam do
+    outro lado, com uma seta tracejada no sentido contrário.
+    horizontal: y comum (padrão: centro de a); chamadas acima (lado=1) ou
     abaixo (lado=-1).
-    vertical: x comum (padrão: centro de a); mensagens à direita (lado=1)
+    vertical: x comum (padrão: centro de a); chamadas à direita (lado=1)
     ou à esquerda (lado=-1).
     Devolve a caixa (x0, y0, x1, y1) ocupada pelas mensagens."""
     horizontal = a.base > b.topo and b.base > a.topo
@@ -673,17 +709,32 @@ def ligacao_rota(svg, pontos, mensagens=(), lado=1, trecho=None):
 
 
 def _rotular(svg, p1, p2, mensagens, lado):
-    """mensagens e seta de sentido sobre o trecho reto p1 -> p2"""
+    """chamadas e respostas, com as setas de sentido, sobre o trecho reto
+    p1 -> p2"""
+    chamadas, respostas = separar(mensagens)
+    caixas = [_bloco(svg, p1, p2, chamadas, lado, False),
+              _bloco(svg, p2, p1, respostas, -lado, True)]
+    caixas = [c for c in caixas if c]
+    if not caixas:
+        return None
+    return (min(c[0] for c in caixas), min(c[1] for c in caixas),
+            max(c[2] for c in caixas), max(c[3] for c in caixas))
+
+
+def _bloco(svg, p1, p2, mensagens, lado, resposta):
+    """um bloco de mensagens no sentido p1 -> p2, do lado indicado (lado
+    em relação ao sentido da chamada: acima/à direita = 1)"""
     if not mensagens:
         return None
+    seta = dict(tracejado=resposta, fim="seta" if resposta else "seta_cheia")
     (x1, y1), (x2, y2) = p1, p2
+    bw, bh = bloco_mensagens(mensagens)
     if y1 == y2:
         y = y1
         s = 1 if x2 > x1 else -1
         cx = (x1 + x2) / 2
-        bw, bh = bloco_mensagens(mensagens)
         ys = y - 9 * lado
-        svg.linha([(cx - s * 14, ys), (cx + s * 14, ys)], fim="seta_cheia")
+        svg.linha([(cx - s * 14, ys), (cx + s * 14, ys)], **seta)
         if lado == 1:
             base = ys - 10 - (len(mensagens) - 1) * LH_MSG
         else:
@@ -695,9 +746,8 @@ def _rotular(svg, p1, p2, mensagens, lado):
     x = x1
     s = 1 if y2 > y1 else -1
     cy = (y1 + y2) / 2
-    bw, bh = bloco_mensagens(mensagens)
     xs = x + 9 * lado
-    svg.linha([(xs, cy - s * 14), (xs, cy + s * 14)], fim="seta_cheia")
+    svg.linha([(xs, cy - s * 14), (xs, cy + s * 14)], **seta)
     y0 = cy - bh / 2 + 12
     for i, m in enumerate(mensagens):
         svg.texto(xs + 9 * lado, y0 + i * LH_MSG, m, 12,
