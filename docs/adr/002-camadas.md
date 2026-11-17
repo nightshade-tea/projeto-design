@@ -1,35 +1,44 @@
 # ADR 002: Uso de Camadas
 
-## Status
-
-Aceito
-
 ## Contexto
 
+- O sistema é um monólito modular, de porte médio, mantido por uma equipe
+  pequena
 - O sistema depende de partes que podem mudar: o banco de dados, o login
   institucional e o formato do arquivo do certificado
 - As regras de certificação devem poder mudar e crescer
-- O domínio deve ser testável sem o banco e sem o provedor de identidade
-- O domínio não deve depender de banco, HTTP ou serviços externos
-- A equipe é pequena e o sistema é de porte médio
+
+## Problemas envolvidos
+
+É preciso decidir como organizar o código dentro da aplicação:
+- o domínio não deve depender de banco, HTTP ou serviços externos
+- o domínio deve ser testável sem o banco e sem o provedor de identidade
+- trocar o banco, o provedor ou o formato do arquivo não deve afetar as
+  regras de negócio
+- a organização não deve trazer mais conceitos e código do que a equipe
+  consegue manter
 
 ## Alternativas consideradas
 
-- **Camadas**: controllers -> services -> dominio -> acesso a dados
+- **Camadas tradicionais**: controllers -> services -> domínio -> acesso a
+  dados, com o domínio dependendo do acesso a dados
+- **Camadas com inversão de dependência**: as interfaces de acesso a dados e
+  a serviços externos ficam no domínio, e as implementações dependem delas
 - **Arquitetura Hexagonal ou Clean completa**: portas de entrada e saída,
   casos de uso e adaptadores separados para tudo
 
 ## Decisão
 
-O código é organizado em **camadas**, e as dependências apontam para o
-domínio:
+O código é organizado em **camadas com inversão de dependência**, e as
+dependências apontam para o domínio:
 - **Controllers** recebem requisições e identificam o usuário, sem regras de
   negócio
 - **Services** executam os casos de uso
 - **Domínio** tem os objetos e as regras
 - **Interfaces** tem as interfaces mais generalizadas para tecnologias externas
   ou separadas
-- **Implementações** dependem das interfaces para implementações mais concretas
+- **Infraestrutura** tem as implementações concretas dessas interfaces, e
+  depende delas
 
 As regras de certificação são implementações de `CriterioCertificacao`
 
@@ -50,4 +59,6 @@ As regras de certificação são implementações de `CriterioCertificacao`
 
 - Os controllers e services não têm interfaces próprias, então trocar a
   forma de acesso exige mais mudanças do que na arquitetura Hexagonal
-- Manter as dependências no sentido certo depende da disciplina da equipe
+- Mais interfaces e classes para manter do que nas camadas tradicionais
+- Nada impede que um controller ou service use a infraestrutura
+  diretamente, o que depende da disciplina da equipe

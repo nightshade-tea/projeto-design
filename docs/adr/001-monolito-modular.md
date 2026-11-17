@@ -1,20 +1,23 @@
 # ADR 001: Monólito modular
 
-## Status
-
-Aceito
-
 ## Contexto
 
 - O sistema gerencia projetos de extensão, frequência e certificados, com o
   domínio dividido em 3 partes: `identidade`, `projetos` e `certificacao`
 - Deve suportar até 4.000 acessos simultâneos com disponibilidade de 99,5%
-- As regras de certificação e os processos da universidade devem poder mudar
-  sem afetar o resto do sistema
 - A equipe de desenvolvimento é pequena
-- A emissão de certificados usa dados de `projetos` e `identidade`, então os
-  módulos conversam com frequência
 
+## Problemas envolvidos
+
+É preciso decidir como dividir o sistema em unidades de implantação:
+- as regras de certificação e os processos da universidade devem poder mudar
+  sem afetar o resto do sistema
+- a emissão de certificados usa dados de `projetos` e `identidade`, então os
+  módulos conversam com frequência, e chamadas pela rede pesam no limite de
+  1 s das consultas
+- o sistema precisa escalar e continuar disponível nos picos de acesso
+- cada unidade a mais precisa ser implantada, monitorada e operada pela
+  mesma equipe pequena
 
 ## Alternativas consideradas
 
@@ -26,10 +29,10 @@ Aceito
 
 ## Decisão
 
-
-Utilizar **monólito modular**: uma única aplicação dividida em com as seguintes
-divisões e dependências: `certificacao` -> `projetos` -> `identidade`. Os
-módulos conversam por chamadas de método.
+Utilizar **monólito modular**: uma única aplicação dividida nos módulos
+`certificacao`, `projetos` e `identidade`, com as dependências
+`certificacao` -> `projetos` -> `identidade`. Os módulos conversam por
+chamadas de método.
 
 ## Consequências
 
