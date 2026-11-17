@@ -1,2 +1,3 @@
 build/
 dados/
+__pycache__/

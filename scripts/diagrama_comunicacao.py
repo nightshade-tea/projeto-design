@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Gera os diagramas de comunicação (os mesmos de scripts/diagrama_sequencia.py):
-# - docs/diagramas/comunicacao.svg: cenário completo, com autenticação: o
-#   professor faz login pelo login institucional, cria um projeto e vincula
-#   um aluno; notas indicam os fluxos de exceção (401, 403 e 409)
+# - docs/diagramas/comunicacao.svg: cenário completo, com autenticação, em
+#   que o professor faz login pelo login institucional, cria um projeto e
+#   vincula um aluno. Notas indicam os fluxos de exceção (401, 403 e 409)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/comunicacao/login.svg
 # - docs/diagramas/comunicacao/criar_projeto.svg (RF01)
@@ -21,12 +21,12 @@
 #
 # Notação UML 2.5.1 (17.9):
 # - linhas de vida "nome : Tipo", sem sublinhado, ligadas por links
-# - mensagens com número de sequência aninhado (1, 1.1, 1.1.1...); a
+# - mensagens com número de sequência aninhado (1, 1.1, 1.1.1...). A
 #   chamada é "operacao(argumentos)", com uma seta cheia no sentido do envio
 # - o retorno é uma mensagem própria (reply), com o mesmo número da chamada,
 #   uma seta tracejada no sentido contrário, do outro lado do link, e o
-#   rótulo "alvo = operacao()" ou "operacao(): valor" (17.4.4.1);
-#   retornos sem valor não são mostrados
+#   rótulo "alvo = operacao()" ou "operacao(): valor" (17.4.4.1). Retornos
+#   sem valor não são mostrados
 # - a criação de objeto é a chamada ao construtor «create» da classe (ver o
 #   diagrama de classes)
 # - repetição indicada por "*[iteração]" e condição por "[guarda]" depois do
@@ -58,7 +58,7 @@ def lw(msgs):
 
 def por_cima(a, b, msgs_abaixo, msgs=(), folga=50):
     """rota de a até b passando acima da linha, sobre as mensagens dos links
-    dessa linha; as respostas da rota (msgs) ficam abaixo dela"""
+    dessa linha. As respostas da rota (msgs) ficam abaixo dela"""
     y = (min(a.topo, b.topo) - max(lados(m)[0][1] for m in msgs_abaixo)
          - lados(msgs)[1][1] - folga)
     return [(a.cx, a.topo), (a.cx, y), (b.cx, y), (b.cx, b.topo)]
@@ -115,7 +115,7 @@ M_IDP = ["1.1.1: identificar(token)", R("1.1.1: usuario = identificar()")]
 
 def autenticacao(ctrl):
     """AutenticacaoService abaixo do controller e ProvedorIdentidade
-    abaixo dele; devolve os objetos e os links"""
+    abaixo dele. Devolve os objetos e os links"""
     auth = Objeto(": AutenticacaoService")
     idp = Objeto(": ProvedorIdentidade")
     abaixo(ctrl, auth, M_AUTH)
@@ -147,7 +147,7 @@ m_ctrl = ["1: criar(token, titulo, descricao)",
           R("1: criar(): 202 Accepted")]
 m_svc = ["1.2: criar(titulo, descricao, usuario)",
          R("1.2: projeto = criar()")]
-m_proj = ["1.2.1 [usuario é Professor ou Administrador]:",
+m_proj = ["1.2.1 [usuario é Professor]:",
           "Projeto(titulo, descricao, coordenador)"]
 m_repo = ["1.2.2: salvar(projeto)"]
 lado_a_lado(cliente, ctrl, m_ctrl)
@@ -160,8 +160,8 @@ desenhar("Criar projeto", "comunicacao/criar_projeto.svg", objs,
          [(cliente, ctrl, m_ctrl, 1), *l_auth, (ctrl, svc, m_svc, 1),
           (svc, repo, m_repo, 1), (svc, projeto, m_proj, 1)],
          notas=[excecoes(objs, [
-             "[usuario não é Professor nem Administrador]: o controller",
-             "responde 403 Forbidden e a interação termina"])])
+             "[usuario não é Professor]: o controller responde",
+             "403 Forbidden e a interação termina"])])
 
 # -------------------------------------------------- vincular aluno (RF03)
 
@@ -431,7 +431,7 @@ m_pctrl_auth = ["4.1: identificar(token)", R("4.1: usuario = identificar()")]
 m_pctrl_svc = ["4.2: criar(titulo, descricao, usuario)",
                R("4.2: projeto = criar()")]
 m_svc_repo = ["4.2.2: salvar(projeto)"]
-m_svc_proj = ["4.2.1 [usuario é Professor ou Administrador]:",
+m_svc_proj = ["4.2.1 [usuario é Professor]:",
               "Projeto(titulo, descricao, coordenador)"]
 
 # distância entre os centros das colunas: cabe o link mais longo de cada
@@ -476,5 +476,5 @@ desenhar("Professor entra e cria projeto", "comunicacao.svg", objs,
          rotas=[(por_cima(idp, ext, [m_actrl_auth, m_auth_idp], m_idp_ext),
                  m_idp_ext, 1)],
          notas=[excecoes(objs, [
-             "[usuario não é Professor nem Administrador], em 4.2: o",
-             "controller responde 403 Forbidden e a interação termina"])])
+             "[usuario não é Professor], em 4.2: o controller",
+             "responde 403 Forbidden e a interação termina"])])

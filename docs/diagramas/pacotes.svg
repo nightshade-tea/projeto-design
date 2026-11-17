@@ -83,4 +83,5 @@
 <polyline points="601.0,795.0 601.0,713.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <polyline points="356.0,508.5 456.0,508.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <polyline points="745.9,508.5 845.9,508.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<polyline points="211.0,544.0 211.0,695.0 990.9,695.0 990.9,582.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 </svg>

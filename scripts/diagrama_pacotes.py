@@ -37,7 +37,7 @@ modulos = [certificacao, projetos, identidade]
 todos = [controllers, services] + modulos + [infraestrutura]
 
 # mesma largura para todos (e o centro de cada um fica fora da aba, para as
-# setas chegarem ao corpo); a altura de cada um vem dos membros
+# setas chegarem ao corpo). A altura de cada um vem dos membros
 w = max(max(p.w for p in todos), 2 * max(p.aba_w for p in todos) + 60)
 for p in todos:
     p.w = w
@@ -80,5 +80,10 @@ dep([(cx, infraestrutura.topo_corpo), (cx, dom_base)])
 yc = modulos[0].topo_corpo + (min(p.h for p in modulos) - ABA_H) / 2
 for a, b in zip(modulos, modulos[1:]):
     dep([(a.dir, yc), (b.esq, yc)])
+# certificacao -> identidade (Certificado usa Aluno e Usuario), por baixo
+# de projetos
+yb = dom_base - PAD / 2
+dep([(certificacao.cx, certificacao.base), (certificacao.cx, yb),
+     (identidade.cx, yb), (identidade.cx, identidade.base)])
 
 svg.salvar("pacotes.svg", W, H)

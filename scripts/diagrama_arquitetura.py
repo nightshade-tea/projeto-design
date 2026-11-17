@@ -59,7 +59,7 @@ def measure(s, size=14, bold=False, italic=False):
 
 def measure_tab(s, size=14):
     """Largura do texto em negrito na primeira fonte com métricas de
-    Helvetica/Arial (Arial ou Liberation Sans); DejaVu só se não houver"""
+    Helvetica/Arial (Arial ou Liberation Sans), ou DejaVu se não houver"""
     if ImageFont:
         for f in FONT_FILES[(True, False)]:
             for d in FONT_DIRS:
@@ -93,7 +93,7 @@ def rect(x, y, w, h, fill="#fff", stroke="#222", sw=1.2, dash=None):
 
 
 def package(x, y, w, h, name, fill="#f7f7f7", tab_w=None, size=14):
-    """UML package: aba com o nome + corpo; y é o topo da aba"""
+    """Pacote UML com aba (nome) e corpo. y é o topo da aba"""
     tab_h = 22
     tab_w = max(tab_w or 0, measure_tab(name, size) + 20)
     rect(x, y, tab_w, tab_h, fill=fill)
@@ -221,24 +221,52 @@ prev_bottom = b + 80
 # Domínio
 y = prev_bottom + 50
 line(MID, prev_bottom, MID, y + 22, dash="6,4", head="open")
-b = package(LX, y, LW, 150, "Domínio")
-mods = [("certificacao", [("Certificado", False)]),
-        ("projetos", [("Projeto", False), ("Atividade", False),
-                      ("Participacao", False),
-                      ("CriterioCertificacao", True)]),
-        ("identidade", [("Usuario", True)])]
-cols = columns(3, CX0 + 40, CW - 80, 110)
+# membros de cada módulo: classe, classe abstrata (itálico) ou interface
+# («interface» e o nome em itálico)
+mods = [("certificacao", [("Certificado", "classe"),
+                          ("CertificadoRepository", "interface"),
+                          ("GeradorDocumentoCertificado", "interface")]),
+        ("projetos", [("Projeto", "classe"), ("Atividade", "classe"),
+                      ("Participacao", "classe"),
+                      ("CriterioCertificacao", "interface"),
+                      ("ProjetoRepository", "interface")]),
+        ("identidade", [("Usuario", "abstrata"),
+                        ("ProvedorIdentidade", "interface")])]
+LH = 20                                         # altura de cada membro
+mod_h = max(len(items) for _, items in mods) * LH + 30
+dom_h = 14 + 22 + mod_h + 16
+b = package(LX, y, LW, dom_h, "Domínio")
+cols = columns(3, CX0, CW, 70)
+KW = "«interface» "
+
+
+def largura_membro(nome, tipo, size):
+    if tipo == "interface":
+        return measure(KW, 12) + measure(nome, size, italic=True)
+    return measure(nome, size, italic=tipo == "abstrata")
+
+
+size = 14
+while size > 10 and any(largura_membro(n, t, size) > cols[0][1] - 20
+                        for _, items in mods for n, t in items):
+    size -= 0.5
 for (x, w), (name, items) in zip(cols, mods):
-    body = package(x, b + 14, w, 100, name, fill="#fff", size=13)
-    yy = body + 100 / 2 - (len(items) - 1) * 10 + 5
-    for i, (it, ital) in enumerate(items):
-        text(x + w / 2, yy + i * 20, it, size=14,
-             style="italic" if ital else "normal")
-mid_y = b + 14 + 22 + 50
+    body = package(x, b + 14, w, mod_h, name, fill="#fff", size=13)
+    yy = body + mod_h / 2 - (len(items) - 1) * LH / 2 + 5
+    for i, (it, tipo) in enumerate(items):
+        if tipo == "interface":
+            add(f'<text x="{x + w / 2}" y="{yy + i * LH}" font-size="{size}" '
+                f'text-anchor="middle" fill="#111">'
+                f'<tspan font-size="12" fill="#444">{KW}</tspan>'
+                f'<tspan font-style="italic">{it}</tspan></text>')
+        else:
+            text(x + w / 2, yy + i * LH, it, size=size,
+                 style="italic" if tipo == "abstrata" else "normal")
+mid_y = b + 14 + 22 + mod_h / 2
 for i in range(2):
     (x1, w1), (x2, _) = cols[i], cols[i + 1]
     line(x1 + w1, mid_y, x2, mid_y, dash="6,4", head="open")
-prev_bottom = b + 150
+prev_bottom = b + dom_h
 
 # Interfaces e implementações
 icols = columns(4, CX0, CW, 24)

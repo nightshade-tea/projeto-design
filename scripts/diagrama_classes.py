@@ -7,7 +7,7 @@
 #   entre colchetes no lugar de coleções (ex.: presentes : Aluno [0..*])
 # - construtores marcados com «create»
 # - uma propriedade aparece como atributo ou como ponta de associação, nunca
-#   as duas; tipos de outro módulo aparecem como atributos e a dependência
+#   as duas. Tipos de outro módulo aparecem como atributos, e a dependência
 #   entre os módulos é mostrada entre os pacotes
 # - multiplicidade nas duas pontas das composições
 from uml import Classe, Svg, pacote, sem_sobreposicao, ABA_H
@@ -95,10 +95,10 @@ atividade = Classe("Atividade", atributos=[
     "- cargaHoraria : Integer",
     "- presentes : Aluno [0..*]",
 ], operacoes=[
-    "+ editar(titulo : String, descricao : String, data : Date, "
+    "~ editar(titulo : String, descricao : String, data : Date, "
     "cargaHoraria : Integer)",
-    "+ registrarPresenca(aluno : Aluno)",
-    "+ removerPresenca(aluno : Aluno)",
+    "~ registrarPresenca(aluno : Aluno)",
+    "~ removerPresenca(aluno : Aluno)",
     "+ estevePresente(aluno : Aluno) : Boolean",
 ])
 participacao = Classe("Participacao", atributos=[
@@ -106,13 +106,13 @@ participacao = Classe("Participacao", atributos=[
     "- inicio : Date",
     "- fim : Date [0..1]",
 ], operacoes=[
-    "+ encerrar()",
+    "~ encerrar()",
     "+ ativaEm(data : Date) : Boolean",
     "+ resumoFrequencia(projeto : Projeto, atividades : Atividade [0..*])"
     " : ResumoFrequencia",
 ])
 criterios = Classe("CriteriosCertificacao", operacoes=[
-    "+ definir(criterios : CriterioCertificacao [0..*])",
+    "~ definir(criterios : CriterioCertificacao [0..*])",
     "+ atende(resumo : ResumoFrequencia) : Boolean",
 ])
 resumo = Classe("ResumoFrequencia", atributos=[
@@ -132,12 +132,14 @@ minimo_horas = Classe("MinimoHoras", atributos=[
 ], operacoes=[
     "«create» + MinimoHoras(cargaHoraria : Integer)",
     "+ avaliar(resumo : ResumoFrequencia) : Boolean",
+    "+ toString() : String",
 ])
 percentual = Classe("PercentualMinimoPresenca", atributos=[
     "- pct : Real",
 ], operacoes=[
     "«create» + PercentualMinimoPresenca(pct : Real)",
     "+ avaliar(resumo : ResumoFrequencia) : Boolean",
+    "+ toString() : String",
 ])
 
 # linha das partes de Projeto
@@ -172,9 +174,8 @@ usuario = Classe("Usuario", tipo="abstrata", atributos=[
     "- nome : String",
 ], operacoes=[
     "+ getMatricula() : String",
-    "+ setMatricula(matricula : String)",
     "+ getNome() : String",
-    "+ setNome(nome : String)",
+    "+ equals(outro : Object) : Boolean",
 ])
 aluno = Classe("Aluno")
 professor = Classe("Professor")
@@ -272,8 +273,8 @@ def rotulos_ponta(x, y, papel, mult):
 
 
 def composicao(todo, parte, papel, mult):
-    """losango no todo; reta se a parte está abaixo, senão sai pela lateral
-    do todo e desce até a parte"""
+    """losango no todo, com uma reta se a parte está abaixo, ou saindo pela
+    lateral do todo e descendo até a parte"""
     if todo.esq + 20 <= parte.cx <= todo.dir - 20:
         pontos = [(parte.cx, todo.base), (parte.cx, parte.topo)]
     else:

@@ -4,8 +4,8 @@
 # Uso: python3 scripts/diagrama_componentes.py
 #
 # Notação UML 2:
-# - componentes com a palavra-chave «component» e o ícone de componente;
-#   o compartimento «realizations» lista as classes que realizam o componente
+# - componentes com a palavra-chave «component» e o ícone de componente. O
+#   compartimento «realizations» lista as classes que realizam o componente
 # - interfaces do domínio como conectores de montagem: soquete no componente
 #   que requer a interface e bola no componente que a fornece
 # - a API REST é fornecida por uma porta do Servidor, ligada aos controllers
@@ -136,6 +136,12 @@ svg.linha([(services.esq, yd), (dom_x + dom_w, yd)], tracejado=True,
 # certificacao -> projetos -> identidade
 for a, b in zip(modulos, modulos[1:]):
     svg.linha([(a.cx, a.base), (b.cx, b.topo)], tracejado=True, fim="seta")
+# certificacao -> identidade (Certificado usa Aluno e Usuario), pela
+# esquerda dos módulos
+cert, ident = modulos[0], modulos[-1]
+xe = cert.esq - PAD / 2
+svg.linha([(cert.esq, cert.cy), (xe, cert.cy), (xe, ident.cy),
+           (ident.esq, ident.cy)], tracejado=True, fim="seta")
 
 # Services requer as interfaces do domínio fornecidas pelos adaptadores
 for a, interface in ligacoes:

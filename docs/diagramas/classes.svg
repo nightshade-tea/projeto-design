@@ -30,14 +30,14 @@
 <rect x="30.0" y="52.0" width="1846.1" height="308.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
 <text x="40.0" y="46.0" font-size="14" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">certificacao</text>
 <rect x="30.0" y="440.0" width="79.2" height="22.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
-<rect x="30.0" y="462.0" width="1846.1" height="982.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
+<rect x="30.0" y="462.0" width="1846.1" height="1001.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
 <text x="40.0" y="456.0" font-size="14" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">projetos</text>
-<rect x="30.0" y="1524.0" width="94.0" height="22.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
-<rect x="30.0" y="1546.0" width="1846.1" height="366.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
-<text x="40.0" y="1540.0" font-size="14" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">identidade</text>
+<rect x="30.0" y="1543.0" width="94.0" height="22.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
+<rect x="30.0" y="1565.0" width="1846.1" height="347.0" fill="#f7f7f7" stroke="#222" stroke-width="1.2"/>
+<text x="40.0" y="1559.0" font-size="14" text-anchor="start" font-weight="bold" font-style="normal" fill="#111">identidade</text>
 <polyline points="953.1,360.0 953.1,462.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<polyline points="953.1,1444.0 953.1,1546.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<polyline points="1876.1,206.0 1901.1,206.0 1901.1,1729.0 1876.1,1729.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<polyline points="953.1,1463.0 953.1,1565.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<polyline points="1876.1,206.0 1901.1,206.0 1901.1,1738.5 1876.1,1738.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <rect x="423.0" y="88.0" width="306.6" height="130.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="576.3" y="107.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">«interface»</text>
 <text x="576.3" y="126.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">CertificadoRepository</text>
@@ -115,9 +115,9 @@
 <text x="76.0" y="1146.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- cargaHoraria : Integer</text>
 <text x="76.0" y="1165.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- presentes : Aluno [0..*]</text>
 <line x1="66.0" y1="1174.0" x2="522.9" y2="1174.0" stroke="#222" stroke-width="1.2"/>
-<text x="76.0" y="1192.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ editar(titulo : String, descricao : String, data : Date, cargaHoraria : Integer)</text>
-<text x="76.0" y="1211.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ registrarPresenca(aluno : Aluno)</text>
-<text x="76.0" y="1230.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ removerPresenca(aluno : Aluno)</text>
+<text x="76.0" y="1192.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">~ editar(titulo : String, descricao : String, data : Date, cargaHoraria : Integer)</text>
+<text x="76.0" y="1211.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">~ registrarPresenca(aluno : Aluno)</text>
+<text x="76.0" y="1230.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">~ removerPresenca(aluno : Aluno)</text>
 <text x="76.0" y="1249.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ estevePresente(aluno : Aluno) : Boolean</text>
 <rect x="592.9" y="1022.0" width="524.1" height="160.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="854.9" y="1044.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Participacao</text>
@@ -126,14 +126,14 @@
 <text x="602.9" y="1089.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- inicio : Date</text>
 <text x="602.9" y="1108.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- fim : Date [0..1]</text>
 <line x1="592.9" y1="1117.0" x2="1117.0" y2="1117.0" stroke="#222" stroke-width="1.2"/>
-<text x="602.9" y="1135.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ encerrar()</text>
+<text x="602.9" y="1135.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">~ encerrar()</text>
 <text x="602.9" y="1154.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ ativaEm(data : Date) : Boolean</text>
 <text x="602.9" y="1173.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ resumoFrequencia(projeto : Projeto, atividades : Atividade [0..*]) : ResumoFrequencia</text>
 <rect x="1187.0" y="1022.0" width="305.9" height="90.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="1339.9" y="1044.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">CriteriosCertificacao</text>
 <line x1="1187.0" y1="1052.0" x2="1492.9" y2="1052.0" stroke="#222" stroke-width="1.2"/>
 <line x1="1187.0" y1="1066.0" x2="1492.9" y2="1066.0" stroke="#222" stroke-width="1.2"/>
-<text x="1197.0" y="1084.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ definir(criterios : CriterioCertificacao [0..*])</text>
+<text x="1197.0" y="1084.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">~ definir(criterios : CriterioCertificacao [0..*])</text>
 <text x="1197.0" y="1103.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ atende(resumo : ResumoFrequencia) : Boolean</text>
 <rect x="758.4" y="1242.0" width="193.1" height="160.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="854.9" y="1264.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">ResumoFrequencia</text>
@@ -150,50 +150,51 @@
 <text x="1339.9" y="1210.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">CriterioCertificacao</text>
 <line x1="1187.7" y1="1218.0" x2="1492.1" y2="1218.0" stroke="#222" stroke-width="1.2"/>
 <text x="1197.7" y="1236.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ avaliar(resumo : ResumoFrequencia) : Boolean</text>
-<rect x="1187.7" y="1305.0" width="304.4" height="103.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<rect x="1187.7" y="1305.0" width="304.4" height="122.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="1339.9" y="1327.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">MinimoHoras</text>
 <line x1="1187.7" y1="1335.0" x2="1492.1" y2="1335.0" stroke="#222" stroke-width="1.2"/>
 <text x="1197.7" y="1353.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- cargaHoraria : Integer</text>
 <line x1="1187.7" y1="1362.0" x2="1492.1" y2="1362.0" stroke="#222" stroke-width="1.2"/>
 <text x="1197.7" y="1380.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">«create» + MinimoHoras(cargaHoraria : Integer)</text>
 <text x="1197.7" y="1399.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ avaliar(resumo : ResumoFrequencia) : Boolean</text>
-<rect x="1532.1" y="1305.0" width="308.0" height="103.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1197.7" y="1418.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ toString() : String</text>
+<rect x="1532.1" y="1305.0" width="308.0" height="122.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
 <text x="1686.1" y="1327.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">PercentualMinimoPresenca</text>
 <line x1="1532.1" y1="1335.0" x2="1840.1" y2="1335.0" stroke="#222" stroke-width="1.2"/>
 <text x="1542.1" y="1353.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- pct : Real</text>
 <line x1="1532.1" y1="1362.0" x2="1840.1" y2="1362.0" stroke="#222" stroke-width="1.2"/>
 <text x="1542.1" y="1380.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">«create» + PercentualMinimoPresenca(pct : Real)</text>
 <text x="1542.1" y="1399.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ avaliar(resumo : ResumoFrequencia) : Boolean</text>
-<rect x="583.7" y="1582.0" width="305.1" height="111.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="736.2" y="1601.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">«interface»</text>
-<text x="736.2" y="1620.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">ProvedorIdentidade</text>
-<line x1="583.7" y1="1628.0" x2="888.7" y2="1628.0" stroke="#222" stroke-width="1.2"/>
-<text x="593.7" y="1646.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ identificar(token : String) : Usuario</text>
-<text x="593.7" y="1665.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ buscarPorMatricula(matricula : String) : Usuario</text>
-<text x="593.7" y="1684.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ urlLogin() : String</text>
-<rect x="968.7" y="1582.0" width="207.5" height="176.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="1072.5" y="1604.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">Usuario</text>
-<text x="1072.5" y="1619.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">{abstract}</text>
-<line x1="968.7" y1="1628.0" x2="1176.2" y2="1628.0" stroke="#222" stroke-width="1.2"/>
-<text x="978.7" y="1646.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- matricula : String</text>
-<text x="978.7" y="1665.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- nome : String</text>
-<line x1="968.7" y1="1674.0" x2="1176.2" y2="1674.0" stroke="#222" stroke-width="1.2"/>
-<text x="978.7" y="1692.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ getMatricula() : String</text>
-<text x="978.7" y="1711.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ setMatricula(matricula : String)</text>
-<text x="978.7" y="1730.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ getNome() : String</text>
-<text x="978.7" y="1749.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ setNome(nome : String)</text>
-<rect x="822.5" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="892.5" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Aluno</text>
-<line x1="822.5" y1="1848.0" x2="962.5" y2="1848.0" stroke="#222" stroke-width="1.2"/>
-<line x1="822.5" y1="1862.0" x2="962.5" y2="1862.0" stroke="#222" stroke-width="1.2"/>
-<rect x="1002.5" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="1072.5" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Professor</text>
-<line x1="1002.5" y1="1848.0" x2="1142.5" y2="1848.0" stroke="#222" stroke-width="1.2"/>
-<line x1="1002.5" y1="1862.0" x2="1142.5" y2="1862.0" stroke="#222" stroke-width="1.2"/>
-<rect x="1182.5" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
-<text x="1252.5" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Administrador</text>
-<line x1="1182.5" y1="1848.0" x2="1322.5" y2="1848.0" stroke="#222" stroke-width="1.2"/>
-<line x1="1182.5" y1="1862.0" x2="1322.5" y2="1862.0" stroke="#222" stroke-width="1.2"/>
+<text x="1542.1" y="1418.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ toString() : String</text>
+<rect x="581.8" y="1601.0" width="305.1" height="111.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="734.4" y="1620.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">«interface»</text>
+<text x="734.4" y="1639.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">ProvedorIdentidade</text>
+<line x1="581.8" y1="1647.0" x2="886.9" y2="1647.0" stroke="#222" stroke-width="1.2"/>
+<text x="591.8" y="1665.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ identificar(token : String) : Usuario</text>
+<text x="591.8" y="1684.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ buscarPorMatricula(matricula : String) : Usuario</text>
+<text x="591.8" y="1703.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ urlLogin() : String</text>
+<rect x="966.9" y="1601.0" width="214.8" height="157.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1074.3" y="1623.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="italic" fill="#111">Usuario</text>
+<text x="1074.3" y="1638.0" font-size="12" text-anchor="middle" font-weight="normal" font-style="normal" fill="#444">{abstract}</text>
+<line x1="966.9" y1="1647.0" x2="1181.7" y2="1647.0" stroke="#222" stroke-width="1.2"/>
+<text x="976.9" y="1665.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- matricula : String</text>
+<text x="976.9" y="1684.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">- nome : String</text>
+<line x1="966.9" y1="1693.0" x2="1181.7" y2="1693.0" stroke="#222" stroke-width="1.2"/>
+<text x="976.9" y="1711.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ getMatricula() : String</text>
+<text x="976.9" y="1730.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ getNome() : String</text>
+<text x="976.9" y="1749.0" font-size="13" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">+ equals(outro : Object) : Boolean</text>
+<rect x="824.3" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="894.3" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Aluno</text>
+<line x1="824.3" y1="1848.0" x2="964.3" y2="1848.0" stroke="#222" stroke-width="1.2"/>
+<line x1="824.3" y1="1862.0" x2="964.3" y2="1862.0" stroke="#222" stroke-width="1.2"/>
+<rect x="1004.3" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1074.3" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Professor</text>
+<line x1="1004.3" y1="1848.0" x2="1144.3" y2="1848.0" stroke="#222" stroke-width="1.2"/>
+<line x1="1004.3" y1="1862.0" x2="1144.3" y2="1862.0" stroke="#222" stroke-width="1.2"/>
+<rect x="1184.3" y="1818.0" width="140.0" height="58.0" fill="#fff" stroke="#222" stroke-width="1.2"/>
+<text x="1254.3" y="1840.0" font-size="14" text-anchor="middle" font-weight="bold" font-style="normal" fill="#111">Administrador</text>
+<line x1="1184.3" y1="1848.0" x2="1324.3" y2="1848.0" stroke="#222" stroke-width="1.2"/>
+<line x1="1184.3" y1="1862.0" x2="1324.3" y2="1862.0" stroke="#222" stroke-width="1.2"/>
 <polyline points="729.6,153.0 809.6,153.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <polyline points="1213.5,124.5 1133.5,124.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
 <polyline points="458.3,563.0 538.3,563.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
@@ -217,8 +218,8 @@
 <text x="1348.9" y="1132.0" font-size="12" text-anchor="start" font-weight="normal" font-style="normal" fill="#111">1</text>
 <polyline points="1339.9,1305.0 1339.9,1275.0 1339.9,1275.0 1339.9,1245.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#triangulo)"/>
 <polyline points="1686.1,1305.0 1686.1,1275.0 1339.9,1275.0 1339.9,1245.0" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#triangulo)"/>
-<polyline points="888.7,1637.5 968.7,1637.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
-<polyline points="892.5,1818.0 892.5,1788.0 1072.5,1788.0 1072.5,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
-<polyline points="1072.5,1818.0 1072.5,1788.0 1072.5,1788.0 1072.5,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
-<polyline points="1252.5,1818.0 1252.5,1788.0 1072.5,1788.0 1072.5,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
+<polyline points="886.9,1656.5 966.9,1656.5" fill="none" stroke="#222" stroke-width="1.3" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<polyline points="894.3,1818.0 894.3,1788.0 1074.3,1788.0 1074.3,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
+<polyline points="1074.3,1818.0 1074.3,1788.0 1074.3,1788.0 1074.3,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
+<polyline points="1254.3,1818.0 1254.3,1788.0 1074.3,1788.0 1074.3,1758.0" fill="none" stroke="#222" stroke-width="1.3" marker-end="url(#triangulo)"/>
 </svg>

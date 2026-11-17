@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Gera os diagramas de sequência (ver docs/arquitetura.md e docs/dominio.md):
-# - docs/diagramas/sequencia.svg: cenário completo, com
-#   autenticação: o professor faz login pelo login institucional, cria um
-#   projeto e vincula um aluno (sem o caso de token inválido)
+# - docs/diagramas/sequencia.svg: cenário completo, com autenticação, em
+#   que o professor faz login pelo login institucional, cria um projeto e
+#   vincula um aluno (sem o caso de token inválido)
 # e um diagrama por caso de uso, começando pela identificação do usuário:
 # - docs/diagramas/sequencia/login.svg
 # - docs/diagramas/sequencia/criar_projeto.svg (RF01)
@@ -16,24 +16,25 @@
 # Uso: python3 scripts/diagrama_sequencia.py
 #
 # A validação do token no login institucional (validar(token)) aparece no
-# login e no cenário completo, e o 401 só no login; nos diagramas por caso de uso,
-# identificar(token) devolve o usuário direto, para não repetir esse trecho.
+# login e no cenário completo, e o 401 só no login. Nos diagramas por caso
+# de uso, identificar(token) devolve o usuário direto, para não repetir esse
+# trecho.
 # As recusas por permissão (403), recurso inexistente (404) e regra de
 # negócio (409) aparecem como fragmentos break.
 #
 # Notação UML 2:
 # - linhas de vida "nome : Tipo", sem sublinhado
-# - chamadas síncronas com seta cheia, retornos tracejados com seta aberta;
-#   o rótulo do retorno é "alvo = operacao()" ou "operacao(): valor"
+# - chamadas síncronas com seta cheia, retornos tracejados com seta aberta.
+#   O rótulo do retorno é "alvo = operacao()" ou "operacao(): valor"
 #   (reply-message-label, UML 2.5.1, 17.4.4.1)
 # - criação de objeto com seta tracejada até a cabeça da linha de vida
-# - fragmentos combinados loop, opt e break; a guarda é uma condição, sobre a
-#   linha de vida que envia a primeira mensagem do fragmento
+# - fragmentos combinados loop, opt e break. A guarda é uma condição, sobre
+#   a linha de vida que envia a primeira mensagem do fragmento
 from uml import Sequencia
 
 
 def identificar(ctrl, ext=False):
-    """cada requisição começa identificando o usuário pelo token; com ext, o
+    """cada requisição começa identificando o usuário pelo token. Com ext, o
     provedor valida o token no login institucional"""
     s.chamada(ctrl, "auth", "identificar(token)")
     s.chamada("auth", "idp", "identificar(token)")
@@ -48,8 +49,8 @@ AUTH = [("auth", ": AutenticacaoService"), ("idp", ": ProvedorIdentidade")]
 
 
 def recusa(svc, ctrl, guarda, motivo, status):
-    """break: o service recusa a requisição e o controller responde com o
-    status de erro; a interação termina"""
+    """break em que o service recusa a requisição, o controller responde
+    com o status de erro e a interação termina"""
     s.inicio("break", guarda)
     s.retorno(svc, ctrl, valor=motivo)
     s.retorno(ctrl, "cliente", valor=status)
@@ -67,7 +68,7 @@ def gerenciar(svc, ctrl, projeto="projeto"):
 
 
 def buscar_aluno(svc, ctrl):
-    """busca pela matrícula; a matrícula precisa ser de um Aluno"""
+    """busca pela matrícula, que precisa ser de um Aluno"""
     s.chamada(svc, "idp", "buscarPorMatricula(matricula)")
     s.retorno("idp", svc, "aluno")
     recusa(svc, ctrl, "[matricula não é de um Aluno]", "não é aluno", "409 Conflict")
@@ -77,7 +78,7 @@ def criar(ctrl):
     s.chamada("cliente", ctrl, "criar(token, titulo, descricao)")
     identificar(ctrl, ext=ctrl == "pctrl")
     s.chamada(ctrl, "svc", "criar(titulo, descricao, usuario)")
-    recusa("svc", ctrl, "[usuario não é Professor nem Administrador]",
+    recusa("svc", ctrl, "[usuario não é Professor]",
            "sem permissão", "403 Forbidden")
     s.criacao("svc", "projeto", "Projeto(titulo, descricao, coordenador)")
     s.chamada("svc", "repo", "salvar(projeto)")
@@ -281,7 +282,7 @@ s.retorno("auth", "ctrl", "url")
 s.retorno("ctrl", "cliente", valor="302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
 s.retorno("ext", "cliente", valor="302 Found (token)")
-# usuário logado; o token é validado no login institucional
+# usuário logado, com o token validado no login institucional
 s.chamada("cliente", "ctrl", "consultarUsuario(token)")
 s.chamada("ctrl", "auth", "identificar(token)")
 s.chamada("auth", "idp", "identificar(token)")
@@ -320,7 +321,7 @@ s.retorno("auth", "actrl", "url")
 s.retorno("actrl", "cliente", valor="302 Found (url)")
 s.chamada("cliente", "ext", "entrar(matricula, senha)")
 s.retorno("ext", "cliente", valor="302 Found (token)")
-# usuário logado; o token é validado no login institucional
+# usuário logado, com o token validado no login institucional
 s.chamada("cliente", "actrl", "consultarUsuario(token)")
 s.chamada("actrl", "auth", "identificar(token)")
 s.chamada("auth", "idp", "identificar(token)")

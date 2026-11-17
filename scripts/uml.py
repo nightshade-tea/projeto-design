@@ -62,8 +62,8 @@ class Svg:
                  f'stroke-width="{espessura}"/>')
 
     def linha(self, pontos, tracejado=False, inicio=None, fim=None):
-        """polilinha; inicio/fim: seta, seta_cheia, triangulo, losango,
-        losango_vazio"""
+        """polilinha com inicio e fim entre seta, seta_cheia, triangulo,
+        losango e losango_vazio"""
         d = " ".join(f"{x:.1f},{y:.1f}" for x, y in pontos)
         extra = f' stroke-dasharray="{TRACO}"' if tracejado else ""
         if inicio:
@@ -88,7 +88,7 @@ class Svg:
         print(destino)
 
 
-# marcadores; no início da linha o desenho é invertido (auto-start-reverse),
+# marcadores. No início da linha o desenho é invertido (auto-start-reverse),
 # então a ponta do losango (x=20) encosta na classe
 _MARCADORES = f'''<defs>
 <marker id="seta" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12"
@@ -166,9 +166,9 @@ class Classe(Caixa):
     """Classificador UML com compartimentos.
 
     tipo: "classe", "abstrata", "interface" ou "enumeracao".
-    Classes sempre mostram os dois compartimentos (vazio = sem membros);
-    classes abstratas têm o nome em itálico e a propriedade {abstract};
-    interfaces mostram só operações e enumerações só os literais.
+    Classes sempre mostram os dois compartimentos (vazio = sem membros).
+    Classes abstratas têm o nome em itálico e a propriedade {abstract}.
+    Interfaces mostram só operações, e enumerações só os literais.
     """
 
     def __init__(self, nome, atributos=(), operacoes=(), tipo="classe",
@@ -237,7 +237,7 @@ ABA_VAZIA_W = 40
 
 
 def pacote(svg, x, y, w, h, nome, nome_no_corpo=False, fundo=FUNDO_PACOTE):
-    """Pacote UML: aba e corpo; y é o topo da aba, h a altura do corpo.
+    """Pacote UML com aba e corpo. y é o topo da aba, h a altura do corpo.
     Com nome_no_corpo (pacote sem conteúdo mostrado) o nome fica centrado
     no corpo e a aba fica vazia. Devolve o topo do corpo."""
     aba_w = ABA_VAZIA_W if nome_no_corpo else largura(nome, 14, True) + 24
@@ -252,9 +252,9 @@ def pacote(svg, x, y, w, h, nome, nome_no_corpo=False, fundo=FUNDO_PACOTE):
 
 
 class Pacote(Caixa):
-    """Pacote UML com os membros listados no corpo; o nome fica na aba
+    """Pacote UML com os membros listados no corpo e o nome na aba
     (UML 2.5: com membros mostrados no corpo, o nome vai para a aba).
-    y é o topo da aba; h inclui a aba."""
+    y é o topo da aba, e h inclui a aba."""
 
     def __init__(self, nome, membros=()):
         self.nome = nome
@@ -339,7 +339,7 @@ class Componente(Caixa):
 
 
 def componente_conteiner(svg, x, y, w, h, nome, fundo=FUNDO_PACOTE):
-    """componente que mostra as partes internas; cabeçalho à esquerda"""
+    """componente que mostra as partes internas, com o cabeçalho à esquerda"""
     svg.retangulo(x, y, w, h, fundo=fundo)
     svg.texto(x + 12, y + 19, "«component»", TAM_ESTEREO, cor=SECUNDARIO)
     svg.texto(x + 12, y + 38, nome, TAM_NOME, negrito=True)
@@ -384,7 +384,7 @@ H_PENTAGONO = 20
 
 def moldura(svg, x, y, w, h, operador, rotulo="", fundo="none"):
     """quadro UML (sd, loop, alt, opt...) com o rótulo no pentágono do canto
-    superior esquerdo; devolve a largura do pentágono"""
+    superior esquerdo. Devolve a largura do pentágono"""
     svg.add(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
             f'height="{h:.1f}" fill="{fundo}" stroke="{TINTA}" '
             f'stroke-width="1.2"/>')
@@ -411,15 +411,15 @@ class Sequencia:
     """Diagrama de sequência UML 2.
 
     - linhas de vida com a cabeça "nome : Tipo" (sem sublinhado) e a linha
-      tracejada; barras de ativação empilhadas nas chamadas aninhadas
-    - chamada síncrona: linha cheia com seta cheia; o rótulo é
+      tracejada, com barras de ativação empilhadas nas chamadas aninhadas
+    - chamada síncrona: linha cheia com seta cheia e o rótulo
       "operacao(argumentos)"
-    - retorno: linha tracejada com seta aberta; o rótulo segue a gramática
+    - retorno: linha tracejada com seta aberta. O rótulo segue a gramática
       reply-message-label (UML 2.5.1, 17.4.4.1) e é montado a partir da
-      chamada respondida: "alvo = operacao()" ou "operacao(): valor"; sem
-      alvo nem valor, o rótulo é omitido
+      chamada respondida, como "alvo = operacao()" ou "operacao(): valor".
+      Sem alvo nem valor, o rótulo é omitido
     - criação: linha tracejada com seta aberta até a cabeça do objeto criado
-    - fragmentos combinados (loop, alt, opt, break); a guarda de cada operando,
+    - fragmentos combinados (loop, alt, opt, break). A guarda de cada operando,
       uma condição entre colchetes, fica sobre a linha de vida do primeiro
       evento do operando
     - quadro "sd" em volta da interação
@@ -431,7 +431,7 @@ class Sequencia:
         self.rotulos = dict(participantes)
         self.eventos = []
         # chamadas ainda sem retorno, por linha de vida (para os rótulos
-        # dos retornos); os fragmentos guardam uma cópia, como no layout
+        # dos retornos). Os fragmentos guardam uma cópia, como no layout
         self._pendentes = {k: [] for k in self.chaves}
         self._copias = []
 
@@ -442,8 +442,8 @@ class Sequencia:
         self.eventos.append(("chamada", de, para, rotulo))
 
     def retorno(self, de, para, alvo="", valor=""):
-        """retorno da última chamada recebida por `de`; alvo: variável que
-        recebe o valor devolvido; valor: o valor devolvido"""
+        """retorno da última chamada recebida por `de`. alvo é a variável
+        que recebe o valor devolvido, e valor é o valor devolvido"""
         op = self._pendentes[de].pop()
         rotulo = ""
         if alvo or valor:
@@ -575,7 +575,7 @@ class Sequencia:
                 q = abertos.pop()
                 q[4] = y - 16
                 if q[0] == "break":
-                    # break: o operando encerra a interação; fora dele o
+                    # break: o operando encerra a interação. Fora dele o
                     # fluxo segue com as ativações de antes, e o quadro
                     # cobre todas as linhas de vida
                     for k, v in q[6].items():
@@ -679,12 +679,12 @@ def bloco_mensagens(mensagens):
 def ligacao(svg, a, b, mensagens=(), lado=1, x=None, y=None):
     """ligação reta (horizontal ou vertical) de a para b.
     As chamadas (enviadas de a para b) ficam do lado indicado, com uma seta
-    cheia no sentido do envio; as respostas (Resposta, de b para a) ficam do
+    cheia no sentido do envio. As respostas (Resposta, de b para a) ficam do
     outro lado, com uma seta tracejada no sentido contrário.
-    horizontal: y comum (padrão: centro de a); chamadas acima (lado=1) ou
-    abaixo (lado=-1).
-    vertical: x comum (padrão: centro de a); chamadas à direita (lado=1)
-    ou à esquerda (lado=-1).
+    Na horizontal, y é comum (padrão: centro de a), e as chamadas ficam
+    acima (lado=1) ou abaixo (lado=-1).
+    Na vertical, x é comum (padrão: centro de a), e as chamadas ficam à
+    direita (lado=1) ou à esquerda (lado=-1).
     Devolve a caixa (x0, y0, x1, y1) ocupada pelas mensagens."""
     horizontal = a.base > b.topo and b.base > a.topo
     if horizontal:
@@ -700,7 +700,7 @@ def ligacao(svg, a, b, mensagens=(), lado=1, x=None, y=None):
 
 def ligacao_rota(svg, pontos, mensagens=(), lado=1, trecho=None):
     """ligação em ângulos retos pelos pontos dados (do primeiro objeto ao
-    segundo); as mensagens ficam no trecho indicado (padrão: o mais longo)"""
+    segundo). As mensagens ficam no trecho indicado (padrão: o mais longo)"""
     svg.linha(pontos)
     if trecho is None:
         trecho = max(range(len(pontos) - 1), key=lambda i: abs(
@@ -758,8 +758,8 @@ def _bloco(svg, p1, p2, mensagens, lado, resposta):
 
 
 def salvar_interacao(svg, caixas, nome, arquivo, margem=30, pad=24):
-    """envolve o conteúdo de svg no quadro "sd nome"; caixas: (x0, y0, x1,
-    y1) de tudo o que foi desenhado, em qualquer origem"""
+    """envolve o conteúdo de svg no quadro "sd nome". caixas são as (x0, y0,
+    x1, y1) de tudo o que foi desenhado, em qualquer origem"""
     x0 = min(c[0] for c in caixas)
     y0 = min(c[1] for c in caixas)
     x1 = max(c[2] for c in caixas)
@@ -779,7 +779,7 @@ def salvar_interacao(svg, caixas, nome, arquivo, margem=30, pad=24):
 
 def nota(svg, x, y, linhas, alvo=None):
     """comentário UML: retângulo com o canto dobrado, ligado ao elemento
-    comentado (ponto alvo) por uma linha tracejada; devolve a caixa"""
+    comentado (ponto alvo) por uma linha tracejada. Devolve a caixa"""
     w = max(largura(l, 12) for l in linhas) + 2 * PAD_X + 8
     h = len(linhas) * LH_MSG + 14
     if alvo:
