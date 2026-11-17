@@ -1,4 +1,4 @@
-# Modelo de Domínio e Responsabilidades
+# Modelo de domínio e responsabilidades
 
 ## Conceitos e responsabilidades
 
@@ -6,7 +6,9 @@
 
 **Usuario** (classe abstrata)
 - Atributos: `matricula`, `nome`
-- Apenas getters e setters
+- `matricula` e `nome` não mudam depois de criados, então só há getters
+- `equals(outro)` considera iguais dois usuários com a mesma matrícula (a
+  matrícula é a chave do usuário)
 - Subclasses concretas: `Aluno`, `Professor` e `Administrador`
   - a subclasse instanciada é definida pelo vínculo informado pelo
     provedor de identidade
@@ -82,6 +84,8 @@
 - Implementações disponibilizadas pelo sistema:
   - `MinimoHoras(cargaHoraria)`
   - `PercentualMinimoPresenca(pct)`
+- Cada implementação se descreve em `toString()` (ex.: "mínimo de 20 horas"),
+  texto usado na consulta do projeto
 
 ### Módulo `certificacao`
 
@@ -106,6 +110,10 @@
 
 Cada agregado é alterado e salvo como uma unidade
 
+Só `Projeto` altera as suas partes. Os métodos que alteram `Atividade`,
+`Participacao` e `CriteriosCertificacao` têm visibilidade de pacote (`~` no
+diagrama de classes), e `Projeto` verifica as regras antes de chamá-los
+
 ### Repositories
 
 - `ProjetoRepository`
@@ -118,7 +126,8 @@ São interfaces, e as implementações ficam fora do domínio
 ## Justificativas GRASP
 
 **Information Expert**
-- Cada objeto responde com os dados que já possui: `Projeto.vinculado`,
+- Cada objeto responde com os dados que já possui: `Usuario.equals`,
+  `Projeto.vinculado`,
   `Projeto.podeGerenciar`,
   `Participacao.ativaEm`, `Participacao.resumoFrequencia`,
   `Atividade.estevePresente`, `CriteriosCertificacao.atende`,
@@ -150,8 +159,8 @@ São interfaces, e as implementações ficam fora do domínio
   em `GeradorDocumentoCertificado`
 
 **Acoplamento**
-- Os módulos dependem em um único sentido: `certificacao` → `projetos` →
-  `identidade`, e `certificacao` → `identidade` (`Certificado` usa `Aluno`
+- Os módulos dependem em um único sentido: `certificacao` -> `projetos` ->
+  `identidade`, e `certificacao` -> `identidade` (`Certificado` usa `Aluno`
   e `Usuario`)
 - Sistemas externos e persistência são acessados só por interfaces
 

@@ -31,7 +31,7 @@ sistema escalável
 
 - **Controllers** (`...Controller`): recebem as requisições do cliente,
   identificam o usuário e chamam um service ou colocam a escrita na fila
-- **Services** (`...Service`): executam os casos de uso; buscam os objetos no
+- **Services** (`...Service`): executam os casos de uso. Buscam os objetos no
   repository, chamam o domínio e salvam o resultado
 - **Domínio**: objetos e regras de negócio, descritos em
   `dominio.md`
@@ -73,7 +73,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 - gerenciar atividades, participantes e critérios
   - busca o aluno a vincular com `ProvedorIdentidade.buscarPorMatricula`
 - recusa (`409`) a vinculação de uma matrícula que não é de um `Aluno`
-- só aceita a criação de projetos por um `Professor` ou `Administrador`
+- só aceita a criação de projetos por um `Professor`
 - só aceita alterações do coordenador do projeto ou de um administrador
   (`projeto.podeGerenciar(usuario)`)
 
@@ -121,7 +121,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
   guarda a cópia local dos usuários
 - `GeradorPdf`, que gera o arquivo do certificado
 
-## Módulos no Domínio
+## Módulos do domínio
 
 - **`identidade`**: usuários (`Aluno`, `Professor` e `Administrador`),
   obtidos do provedor de identidade
@@ -132,7 +132,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
 
 ## Dependências
 
-- Entre camadas: controllers → services → domínio
+- Entre camadas: controllers -> services -> domínio
 - Entre infraestrutura e domínio: as implementações dependem das
   interfaces definidas no domínio
 - Entre módulos: `certificacao` -> `projetos` -> `identidade`, e
@@ -154,16 +154,16 @@ Todos recebem as requisições do cliente e identificam o usuário com
 ## Comunicação
 
 **Mecanismos**
-- Cliente → servidor: requisições HTTPS para uma API REST, com dados em JSON
+- Cliente -> servidor: requisições HTTPS para uma API REST, com dados em JSON
   - o arquivo do certificado é devolvido em PDF
 - Dentro do servidor: chamadas de método entre camadas e módulos, na mesma
   aplicação
-- Servidor → banco de dados: pelas implementações dos repositories e de
+- Servidor -> banco de dados: pelas implementações dos repositories e de
   `ProvedorIdentidade` (cópia local dos usuários)
-- Servidor → provedor de identidade: pela implementação de
+- Servidor -> provedor de identidade: pela implementação de
   `ProvedorIdentidade`
-- Fila: uma tabela no banco de dados, lida da mesma aplicação,
-  que chamam os services
+- Fila: uma tabela no banco de dados, lida pela própria aplicação, que
+  executa as escritas chamando os services
 
 **Decisões**
 - A comunicação entre módulos não precisa de eventos, por ser um monólito
@@ -175,7 +175,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
   - como os erros são devolvidos antes de a escrita entrar na fila, o
     cliente não precisa consultar o resultado depois
   - se o estado mudar antes da execução (ex.: o projeto ser encerrado nesse
-    meio-tempo), são verificadas as regras de novo e descarta a escrita
+    meio-tempo), as regras são verificadas de novo e a escrita é descartada
   - a fila fica no próprio banco de dados, sem um serviço a mais para
     operar
   - uma operação que falha é tentada de novo, por isso as escritas são
@@ -200,7 +200,7 @@ Todos recebem as requisições do cliente e identificam o usuário com
     novo sem duplicar certificados
 - O arquivo do certificado não é guardado, ele é gerado a cada download a
   partir dos dados salvos em `Certificado`
-- Usuários vem do provedor de identidade
+- Usuários vêm do provedor de identidade
 
 
 **Idempotência**
@@ -221,16 +221,16 @@ Todos recebem as requisições do cliente e identificam o usuário com
   devolve o navegador ao cliente com ele
 - O servidor valida o token a cada requisição (`identificar(token)`), só
   para confirmar a sessão e saber de qual usuário ela é
-- O papel do usuário não vem do token: é a subclasse de `Usuario` (`Aluno`,
-  `Professor` ou `Administrador`), definida pelo vínculo quando o usuário é
-  obtido do provedor e guardada na cópia local
+- O papel do usuário é a subclasse de `Usuario` (`Aluno`, `Professor` ou
+  `Administrador`), definida pelo vínculo quando o usuário é obtido do
+  provedor e guardada na cópia local. O token só identifica o usuário
 - O servidor busca alunos pela matrícula para vinculá-los a projetos
   (`buscarPorMatricula(matricula)`)
 - Se o provedor estiver indisponível, não é possível entrar no sistema nem
   vincular alunos que ainda não estão na cópia local
 - Nos diagramas de sequência e de comunicação, a validação do token no
   login institucional (`validar(token)`) e a resposta `401` aparecem só no
-  login e no cenário completo; nos diagramas por caso de uso,
+  login e no cenário completo. Nos diagramas por caso de uso,
   `identificar(token)` é mostrado devolvendo o usuário, para não repetir
   esse trecho em todos eles
 
