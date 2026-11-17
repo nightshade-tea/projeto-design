@@ -43,10 +43,10 @@ public final class Cenario {
     static void executar(boolean imprimir) throws Exception {
         Path dados = Files.createTempDirectory("cenario");
         LoginInstitucional login = new LoginInstitucional(
-                Path.of("src/institucional/main/resources/usuarios.csv"));
+                Path.of("src/institucional/resources/usuarios.csv"));
         login.iniciar(0);
-        HttpServer servidor = Main.iniciar(0, "http://localhost:" + login.porta(), dados,
-                Path.of("src/extensao/main/resources/cliente"));
+        HttpServer servidor = ServidorExtensao.iniciar(0, "http://localhost:" + login.porta(),
+                "http://localhost:8080", dados);
         try {
             new Cenario(imprimir).executar("http://localhost:" + servidor.getAddress().getPort());
             if (imprimir) {

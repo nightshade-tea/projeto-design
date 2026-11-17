@@ -39,11 +39,11 @@ public class LoginInstitucional {
     private final Map<String, String> tokens = new ConcurrentHashMap<>();
     private HttpServer servidor;
 
-    /** Uso: java -Dporta=8081 -Dusuarios=arquivo.csv institucional.LoginInstitucional */
+    /** Uso: java -Dporta=9080 -Dusuarios=arquivo.csv institucional.LoginInstitucional */
     public static void main(String[] args) throws IOException {
-        int porta = Integer.parseInt(System.getProperty("porta", "8081"));
+        int porta = Integer.parseInt(System.getProperty("porta", "9080"));
         Path usuarios = Path.of(System.getProperty("usuarios",
-                "src/institucional/main/resources/usuarios.csv"));
+                "src/institucional/resources/usuarios.csv"));
         new LoginInstitucional(usuarios).iniciar(porta);
         System.out.println("Login institucional (simulado): http://localhost:" + porta
                 + "/login, usuários em " + usuarios);

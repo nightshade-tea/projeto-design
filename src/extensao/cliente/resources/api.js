@@ -1,5 +1,6 @@
-// Funções comuns às páginas do cliente web. O token fica em um cookie
-// (guardado pelo servidor na volta do login), enviado em cada requisição.
+// Funções comuns às páginas do cliente web. As páginas chamam a API do
+// servidor (endereço em API, definido por /config.js). O token fica em um
+// cookie do servidor, guardado na volta do login e enviado em cada chamada.
 
 var usuario = null;
 
@@ -13,12 +14,12 @@ function parametro(nome) { return new URLSearchParams(location.search).get(nome)
 
 // chama a API; sem login (401) volta para a página de entrada
 async function chamar(metodo, caminho, dados) {
-  var opcoes = { method: metodo, headers: {} };
+  var opcoes = { method: metodo, headers: {}, credentials: 'include' };
   if (dados) {
     opcoes.headers['Content-Type'] = 'application/json';
     opcoes.body = JSON.stringify(dados);
   }
-  var r = await fetch(caminho, opcoes);
+  var r = await fetch(API + caminho, opcoes);
   if (r.status === 401) {
     location.href = '/';
     throw new Error('não autenticado');
@@ -67,6 +68,6 @@ async function iniciar() {
   }
   el('topo').innerHTML = '<table width="100%"><tr><td><b>Projetos de Extensão</b> &mdash; ' + links
       + '</td><td align="right">' + esc(usuario.nome) + ' (' + esc(usuario.papel) + ', '
-      + esc(usuario.matricula) + ') | <a href="/sair">Sair</a></td></tr></table><hr>';
+      + esc(usuario.matricula) + ') | <a href="' + API + '/sair">Sair</a></td></tr></table><hr>';
   return usuario;
 }

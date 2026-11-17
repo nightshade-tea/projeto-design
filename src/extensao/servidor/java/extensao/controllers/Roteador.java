@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 /**
  * Encaminha cada requisição para a rota do controller e converte as exceções
  * nos códigos HTTP da API (ver arquitetura.md, seção API).
+ * As páginas do cliente web vêm de outro endereço (origem), por isso as
+ * respostas liberam essa origem a chamar a API com o cookie (CORS).
  */
 public class Roteador implements HttpHandler {
 
@@ -34,8 +36,10 @@ public class Roteador implements HttpHandler {
     private static final Logger LOG = Logger.getLogger(Roteador.class.getName());
 
     private final List<Rota> rotas = new ArrayList<>();
+    private final String origemCliente;
 
-    public Roteador(Controller... controllers) {
+    public Roteador(String origemCliente, Controller... controllers) {
+        this.origemCliente = origemCliente;
         for (Controller c : controllers) {
             c.rotas(this);
         }
@@ -47,6 +51,16 @@ public class Roteador implements HttpHandler {
 
     @Override
     public void handle(HttpExchange troca) throws IOException {
+        troca.getResponseHeaders().set("Access-Control-Allow-Origin", origemCliente);
+        troca.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
+        if (troca.getRequestMethod().equals("OPTIONS")) {
+            // o navegador pergunta antes de enviar JSON, PUT ou DELETE
+            troca.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+            troca.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            troca.sendResponseHeaders(204, -1);
+            troca.close();
+            return;
+        }
         Resposta resposta;
         try {
             resposta = encaminhar(troca);

@@ -163,7 +163,7 @@ public final class Testes {
         testes.put("login institucional: senha, validar e cópia local", () -> {
             Path pasta = Files.createTempDirectory("teste");
             LoginInstitucional login = new LoginInstitucional(
-                    Path.of("src/institucional/main/resources/usuarios.csv"));
+                    Path.of("src/institucional/resources/usuarios.csv"));
             login.iniciar(0);
             try {
                 ProvedorIdentidadeInstitucional provedor = new ProvedorIdentidadeInstitucional(

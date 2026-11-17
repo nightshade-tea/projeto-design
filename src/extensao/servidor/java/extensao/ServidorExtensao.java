@@ -3,7 +3,6 @@ package extensao;
 import com.sun.net.httpserver.HttpServer;
 import extensao.controllers.AutenticacaoController;
 import extensao.controllers.CertificadoController;
-import extensao.controllers.ClienteController;
 import extensao.controllers.FrequenciaController;
 import extensao.controllers.ProjetoController;
 import extensao.controllers.Roteador;
@@ -27,33 +26,37 @@ import java.nio.file.Path;
  *
  * O login institucional é um sistema externo, iniciado separadamente
  * (institucional.LoginInstitucional); o servidor só conhece o endereço dele.
+ * O cliente web também é um programa separado (cliente.ClienteExtensao): o
+ * servidor só oferece a API, e conhece o endereço do cliente para liberar as
+ * chamadas das páginas (CORS) e para voltar a ele depois do login.
  */
-public final class Main {
+public final class ServidorExtensao {
 
-    private Main() {
+    private ServidorExtensao() {
     }
 
     public static void main(String[] args) throws IOException {
-        int porta = Integer.parseInt(System.getProperty("porta", "8080"));
-        String urlLogin = System.getProperty("urlLogin", "http://localhost:8081");
+        int porta = Integer.parseInt(System.getProperty("porta", "7080"));
+        String urlLogin = System.getProperty("urlLogin", "http://localhost:9080");
+        String urlCliente = System.getProperty("urlCliente", "http://localhost:8080");
         Path dados = Path.of(System.getProperty("dados", "dados"));
-        Path cliente = Path.of(System.getProperty("cliente", "src/extensao/main/resources/cliente"));
 
-        HttpServer servidor = iniciar(porta, urlLogin, dados, cliente);
+        HttpServer servidor = iniciar(porta, urlLogin, urlCliente, dados);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> servidor.stop(0)));
 
-        System.out.println("Cliente web: http://localhost:" + porta + "/, login em " + urlLogin
-                + ", dados em " + dados.toAbsolutePath());
+        System.out.println("API: http://localhost:" + porta + "/, login em " + urlLogin
+                + ", cliente em " + urlCliente + ", dados em " + dados.toAbsolutePath());
     }
 
     /** Porta 0 escolhe uma porta livre (usado nos testes). */
-    public static HttpServer iniciar(int porta, String urlLogin, Path dados, Path cliente)
+    public static HttpServer iniciar(int porta, String urlLogin, String urlCliente, Path dados)
             throws IOException {
         HttpServer servidor = HttpServer.create(new InetSocketAddress(porta), 0);
-        String urlCliente = "http://localhost:" + servidor.getAddress().getPort() + "/sessao";
+        // o login institucional volta para cá com o token
+        String retorno = "http://localhost:" + servidor.getAddress().getPort() + "/sessao";
 
         ProvedorIdentidadeInstitucional provedor = new ProvedorIdentidadeInstitucional(
-                urlLogin, urlCliente, dados);
+                urlLogin, retorno, dados);
         ProjetoRepositoryCsv projetos = new ProjetoRepositoryCsv(dados);
         CertificadoRepositoryCsv certificados = new CertificadoRepositoryCsv(dados, projetos);
 
@@ -63,9 +66,8 @@ public final class Main {
         FrequenciaService frequencia = new FrequenciaService(projetos, provedor);
         CertificadoService certificado = new CertificadoService(certificados, new GeradorTxt());
 
-        servidor.createContext("/", new Roteador(
-                new ClienteController(cliente),
-                new AutenticacaoController(autenticacao),
+        servidor.createContext("/", new Roteador(urlCliente,
+                new AutenticacaoController(autenticacao, urlCliente),
                 new ProjetoController(autenticacao, projetoService, encerramento),
                 new FrequenciaController(autenticacao, frequencia),
                 new CertificadoController(autenticacao, certificado)));
