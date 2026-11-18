@@ -40,7 +40,7 @@ public class Certificado {
         this.emitidoEm = emitidoEm;
     }
 
-    /** Recria um certificado já salvo; usado só pelas implementações dos repositories. */
+    /** Recria um certificado já salvo. Usado só pelas implementações dos repositories. */
     public static Certificado restaurar(Integer id, Projeto projeto, Aluno aluno, String nomeAluno,
                                         String tituloProjeto, String nomeCoordenador,
                                         int cargaHoraria, LocalDateTime emitidoEm) {
@@ -49,7 +49,7 @@ public class Certificado {
     }
 
     public boolean pertenceA(Usuario usuario) {
-        return aluno.mesmoQue(usuario);
+        return aluno.equals(usuario);
     }
 
     /** O id é atribuído pelo repository ao salvar um certificado novo. */

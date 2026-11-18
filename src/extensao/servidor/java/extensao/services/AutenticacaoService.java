@@ -15,7 +15,7 @@ public class AutenticacaoService {
         return provedor.urlLogin();
     }
 
-    /** Identifica o usuário pelo token; recusa tokens ausentes ou inválidos. */
+    /** Identifica o usuário pelo token e recusa tokens ausentes ou inválidos. */
     public Usuario identificar(String token) {
         if (token == null || token.isBlank()) {
             throw new NaoAutenticadoException("token ausente");

@@ -19,4 +19,9 @@ public class MinimoHoras implements CriterioCertificacao {
     public int getCargaHoraria() {
         return cargaHoraria;
     }
+
+    @Override
+    public String toString() {
+        return "mínimo de " + cargaHoraria + " horas";
+    }
 }

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class Roteador implements HttpHandler {
 
-    /** O que a rota faz; parametros são os grupos da expressão do caminho. */
+    /** O que a rota faz. Os parametros são os grupos da expressão do caminho. */
     interface Acao {
         Resposta tratar(HttpExchange troca, List<String> parametros) throws IOException;
     }
@@ -55,8 +55,10 @@ public class Roteador implements HttpHandler {
         troca.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
         if (troca.getRequestMethod().equals("OPTIONS")) {
             // o navegador pergunta antes de enviar JSON, PUT ou DELETE
-            troca.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            troca.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            troca.getResponseHeaders().set("Access-Control-Allow-Methods",
+                    "GET, POST, PUT, DELETE");
+            troca.getResponseHeaders().set("Access-Control-Allow-Headers",
+                    "Content-Type, Authorization");
             troca.sendResponseHeaders(204, -1);
             troca.close();
             return;

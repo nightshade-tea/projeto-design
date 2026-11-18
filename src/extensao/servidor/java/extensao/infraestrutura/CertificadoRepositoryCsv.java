@@ -3,6 +3,7 @@ package extensao.infraestrutura;
 import extensao.dominio.certificacao.Certificado;
 import extensao.dominio.certificacao.CertificadoRepository;
 import extensao.dominio.identidade.Aluno;
+import extensao.dominio.projetos.Projeto;
 import extensao.dominio.projetos.ProjetoRepository;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -36,10 +37,11 @@ public class CertificadoRepositoryCsv implements CertificadoRepository {
         if (certificado.getId() == null) {
             certificado.atribuirId(linhas.keySet().stream().mapToInt(i -> i).max().orElse(0) + 1);
         }
-        linhas.put(certificado.getId(), List.of(Csv.texto(certificado.getId()),
-                Csv.texto(certificado.getProjeto().getId()), certificado.getAluno().getMatricula(),
+        linhas.put(certificado.getId(), List.of(String.valueOf(certificado.getId()),
+                String.valueOf(certificado.getProjeto().getId()),
+                certificado.getAluno().getMatricula(),
                 certificado.getNomeAluno(), certificado.getTituloProjeto(),
-                certificado.getNomeCoordenador(), Csv.texto(certificado.getCargaHoraria()),
+                certificado.getNomeCoordenador(), String.valueOf(certificado.getCargaHoraria()),
                 certificado.getEmitidoEm().toString()));
         Csv.escrever(arquivo, CABECALHO, new ArrayList<>(linhas.values()));
     }
@@ -55,6 +57,13 @@ public class CertificadoRepositoryCsv implements CertificadoRepository {
                 .filter(l -> l.get(2).equals(aluno.getMatricula()))
                 .map(this::certificado)
                 .toList();
+    }
+
+    @Override
+    public synchronized boolean existe(Projeto projeto, Aluno aluno) {
+        String projetoId = String.valueOf(projeto.getId());
+        return linhas().values().stream()
+                .anyMatch(l -> l.get(1).equals(projetoId) && l.get(2).equals(aluno.getMatricula()));
     }
 
     private Map<Integer, List<String>> linhas() {

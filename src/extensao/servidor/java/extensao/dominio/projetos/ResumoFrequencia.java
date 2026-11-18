@@ -2,7 +2,10 @@ package extensao.dominio.projetos;
 
 import extensao.dominio.identidade.Aluno;
 
-/** Frequência de um aluno em um projeto; usado na consulta de horas e na emissão de certificados. */
+/**
+ * Frequência de um aluno em um projeto, usada na consulta de horas e na
+ * emissão de certificados.
+ */
 public class ResumoFrequencia {
 
     private final Aluno aluno;
@@ -20,7 +23,7 @@ public class ResumoFrequencia {
         this.qtdAtividades = qtdAtividades;
     }
 
-    /** Percentual de 0 a 100; sem atividades, 0. */
+    /** Percentual de 0 a 100, ou 0 se não houver atividades. */
     public double percentualPresenca() {
         return qtdAtividades == 0 ? 0 : 100.0 * qtdPresencas / qtdAtividades;
     }

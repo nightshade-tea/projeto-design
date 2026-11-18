@@ -8,10 +8,10 @@ import java.util.Optional;
  */
 public interface ProvedorIdentidade {
 
-    /** Valida o token do login institucional; vazio se o token for inválido. */
+    /** Valida o token do login institucional, ou devolve vazio se for inválido. */
     Optional<Usuario> identificar(String token);
 
-    /** Busca um usuário pela matrícula; vazio se não existir. */
+    /** Busca um usuário pela matrícula, ou devolve vazio se não existir. */
     Optional<Usuario> buscarPorMatricula(String matricula);
 
     /** Endereço da página de login institucional. */

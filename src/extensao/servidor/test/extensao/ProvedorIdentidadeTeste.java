@@ -54,8 +54,4 @@ public class ProvedorIdentidadeTeste implements ProvedorIdentidade {
     public String urlLogin() {
         return urlLogin;
     }
-
-    public Map<String, Usuario> tokens() {
-        return porToken;
-    }
 }

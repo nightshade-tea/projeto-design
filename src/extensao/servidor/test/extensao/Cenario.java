@@ -38,23 +38,24 @@ public final class Cenario {
 
     /**
      * Sobe o login institucional e o servidor, executa o cenário e para os
-     * dois; lança AssertionError se alguma resposta for diferente do diagrama.
+     * dois. Lança AssertionError se alguma resposta for diferente do diagrama.
      */
     static void executar(boolean imprimir) throws Exception {
         Path dados = Files.createTempDirectory("cenario");
-        LoginInstitucional login = new LoginInstitucional(
-                Path.of("src/institucional/resources/usuarios.csv"));
-        login.iniciar(0);
-        HttpServer servidor = ServidorExtensao.iniciar(0, "http://localhost:" + login.porta(),
-                "http://localhost:8080", dados);
-        try {
-            new Cenario(imprimir).executar("http://localhost:" + servidor.getAddress().getPort());
-            if (imprimir) {
-                System.out.println("\nCenário reproduzido. Dados salvos em " + dados);
+        try (LoginInstitucional login = new LoginInstitucional(
+                Path.of("src/institucional/resources/usuarios.csv"), 0)) {
+            login.iniciar();
+            HttpServer servidor = ServidorExtensao.iniciar(0, "http://localhost:" + login.porta(),
+                    "http://localhost:8080", dados);
+            try {
+                new Cenario(imprimir)
+                        .executar("http://localhost:" + servidor.getAddress().getPort());
+                if (imprimir) {
+                    System.out.println("\nCenário reproduzido. Dados salvos em " + dados);
+                }
+            } finally {
+                servidor.stop(0);
             }
-        } finally {
-            servidor.stop(0);
-            login.parar();
         }
     }
 
@@ -130,7 +131,8 @@ public final class Cenario {
 
     private void esperar(HttpResponse<String> r, int status, String mensagem) {
         if (imprimir) {
-            System.out.println("   -> " + mensagem + "  [" + r.request().method() + " " + r.uri() + "]");
+            System.out.println("   -> " + mensagem
+                    + "  [" + r.request().method() + " " + r.uri() + "]");
         }
         if (r.statusCode() != status) {
             throw new AssertionError(mensagem + ": esperava " + status + ", veio " + r.statusCode()
@@ -138,7 +140,8 @@ public final class Cenario {
         }
     }
 
-    private HttpResponse<String> get(String url, String token) throws IOException, InterruptedException {
+    private HttpResponse<String> get(String url, String token)
+            throws IOException, InterruptedException {
         HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url)).GET();
         if (token != null) {
             b.header("Authorization", "Bearer " + token);

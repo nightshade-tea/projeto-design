@@ -1,5 +1,7 @@
 package extensao.dominio.projetos;
 
+import java.math.BigDecimal;
+
 public class PercentualMinimoPresenca implements CriterioCertificacao {
 
     private final double pct;
@@ -18,5 +20,11 @@ public class PercentualMinimoPresenca implements CriterioCertificacao {
 
     public double getPct() {
         return pct;
+    }
+
+    @Override
+    public String toString() {
+        return "mínimo de " + BigDecimal.valueOf(pct).stripTrailingZeros().toPlainString()
+                + "% de presença";
     }
 }

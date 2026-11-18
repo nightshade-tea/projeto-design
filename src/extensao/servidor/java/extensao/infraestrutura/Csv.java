@@ -19,7 +19,7 @@ final class Csv {
     private Csv() {
     }
 
-    /** Linhas do arquivo, sem o cabeçalho; vazio se o arquivo não existir. */
+    /** Linhas do arquivo, sem o cabeçalho, ou vazio se o arquivo não existir. */
     static List<List<String>> ler(Path arquivo) {
         if (!Files.exists(arquivo)) {
             return new ArrayList<>();
@@ -106,9 +106,5 @@ final class Csv {
             }
         }
         texto.append('\n');
-    }
-
-    static String texto(Object valor) {
-        return valor == null ? "" : valor.toString();
     }
 }

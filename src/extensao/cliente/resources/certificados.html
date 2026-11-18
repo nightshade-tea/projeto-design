@@ -11,7 +11,7 @@
 <script>
 iniciar().then(async function () {
   var certificados = (await chamar('GET', '/me/certificados')).corpo;
-  el('certificados').innerHTML = tabela(['Nº', 'Projeto', 'Horas', 'Emitido em', ''],
+  el('certificados').innerHTML = tabela(['Número', 'Projeto', 'Horas', 'Emitido em', ''],
       certificados.map(function (c) {
         return [c.id, esc(c.projeto), c.cargaHoraria, c.emitidoEm,
                 '<a href="' + API + '/certificados/' + c.id + '/arquivo">baixar</a>'];

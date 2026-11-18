@@ -67,7 +67,8 @@ public abstract class Controller {
     }
 
     protected static Map<String, String> corpo(HttpExchange troca) throws IOException {
-        return Json.lerObjeto(new String(troca.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+        byte[] corpo = troca.getRequestBody().readAllBytes();
+        return Json.lerObjeto(new String(corpo, StandardCharsets.UTF_8));
     }
 
     protected static String obrigatorio(Map<String, String> dados, String campo) {

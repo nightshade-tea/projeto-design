@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Optional;
  * então trocar pelo banco não muda o domínio nem os services.
  *
  * Cada busca lê os arquivos de novo e devolve objetos novos, como faria um
- * banco; salvar reescreve as linhas do projeto inteiro (agregado).
+ * banco. Salvar reescreve as linhas do projeto inteiro (agregado).
  */
 public class ProjetoRepositoryCsv implements ProjetoRepository {
 
@@ -84,7 +85,7 @@ public class ProjetoRepositoryCsv implements ProjetoRepository {
     public synchronized List<Projeto> listarPorAluno(Aluno aluno) {
         return carregar().values().stream()
                 .filter(p -> p.getParticipacoes().stream()
-                        .anyMatch(part -> part.getAluno().mesmoQue(aluno)))
+                        .anyMatch(part -> part.getAluno().equals(aluno)))
                 .toList();
     }
 
@@ -103,7 +104,8 @@ public class ProjetoRepositoryCsv implements ProjetoRepository {
         }
         Map<Integer, List<Participacao>> participacoesPorProjeto = new LinkedHashMap<>();
         for (List<String> l : Csv.ler(participacoes)) {
-            participacoesPorProjeto.computeIfAbsent(Integer.parseInt(l.get(0)), k -> new ArrayList<>())
+            participacoesPorProjeto
+                    .computeIfAbsent(Integer.parseInt(l.get(0)), k -> new ArrayList<>())
                     .add(new Participacao(new Aluno(l.get(1), l.get(2)), LocalDate.parse(l.get(3)),
                             l.get(4).isEmpty() ? null : LocalDate.parse(l.get(4))));
         }
@@ -115,7 +117,8 @@ public class ProjetoRepositoryCsv implements ProjetoRepository {
         Map<Integer, Projeto> todos = new LinkedHashMap<>();
         for (List<String> l : Csv.ler(projetos)) {
             int id = Integer.parseInt(l.get(0));
-            todos.put(id, Projeto.restaurar(id, l.get(1), l.get(2), new Professor(l.get(3), l.get(4)),
+            todos.put(id, Projeto.restaurar(id, l.get(1), l.get(2),
+                    new Professor(l.get(3), l.get(4)),
                     StatusProjeto.valueOf(l.get(5)),
                     atividadesPorProjeto.getOrDefault(id, List.of()),
                     participacoesPorProjeto.getOrDefault(id, List.of()),
@@ -131,22 +134,23 @@ public class ProjetoRepositoryCsv implements ProjetoRepository {
         List<List<String>> linhasParticipacoes = new ArrayList<>();
         List<List<String>> linhasCriterios = new ArrayList<>();
         for (Projeto p : todos.values()) {
-            String id = Csv.texto(p.getId());
+            String id = String.valueOf(p.getId());
             linhasProjetos.add(List.of(id, p.getTitulo(), p.getDescricao(),
                     p.getCoordenador().getMatricula(), p.getCoordenador().getNome(),
                     p.getStatus().name()));
             for (Atividade a : p.getAtividades()) {
-                linhasAtividades.add(List.of(Csv.texto(a.getId()), id, a.getTitulo(),
-                        a.getDescricao(), a.getData().toString(), Csv.texto(a.getCargaHoraria())));
+                linhasAtividades.add(List.of(String.valueOf(a.getId()), id, a.getTitulo(),
+                        a.getDescricao(), a.getData().toString(),
+                        String.valueOf(a.getCargaHoraria())));
                 for (Aluno aluno : a.getPresentes()) {
-                    linhasPresencas.add(List.of(Csv.texto(a.getId()), aluno.getMatricula(),
+                    linhasPresencas.add(List.of(String.valueOf(a.getId()), aluno.getMatricula(),
                             aluno.getNome()));
                 }
             }
             for (Participacao part : p.getParticipacoes()) {
                 linhasParticipacoes.add(List.of(id, part.getAluno().getMatricula(),
                         part.getAluno().getNome(), part.getInicio().toString(),
-                        Csv.texto(part.getFim())));
+                        Objects.toString(part.getFim(), "")));
             }
             for (CriterioCertificacao c : p.getCriterios().getCriterios()) {
                 linhasCriterios.add(linhaCriterio(id, c));
@@ -160,19 +164,21 @@ public class ProjetoRepositoryCsv implements ProjetoRepository {
     }
 
     private static List<String> linhaCriterio(String projetoId, CriterioCertificacao c) {
-        if (c instanceof MinimoHoras m) {
-            return List.of(projetoId, "MinimoHoras", Csv.texto(m.getCargaHoraria()));
-        }
-        if (c instanceof PercentualMinimoPresenca p) {
-            return List.of(projetoId, "PercentualMinimoPresenca", Csv.texto(p.getPct()));
-        }
-        throw new IllegalArgumentException("critério sem formato no CSV: " + c.getClass().getName());
+        return switch (c) {
+            case MinimoHoras m ->
+                    List.of(projetoId, "MinimoHoras", String.valueOf(m.getCargaHoraria()));
+            case PercentualMinimoPresenca p ->
+                    List.of(projetoId, "PercentualMinimoPresenca", String.valueOf(p.getPct()));
+            default -> throw new IllegalArgumentException(
+                    "critério sem formato no CSV: " + c.getClass().getName());
+        };
     }
 
     private static CriterioCertificacao criterio(String tipo, String valor) {
         return switch (tipo) {
             case "MinimoHoras" -> new MinimoHoras(Integer.parseInt(valor));
-            case "PercentualMinimoPresenca" -> new PercentualMinimoPresenca(Double.parseDouble(valor));
+            case "PercentualMinimoPresenca" ->
+                    new PercentualMinimoPresenca(Double.parseDouble(valor));
             default -> throw new IllegalStateException("critério desconhecido no CSV: " + tipo);
         };
     }

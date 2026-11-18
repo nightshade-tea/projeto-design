@@ -12,7 +12,7 @@ function esc(s) {
 }
 function parametro(nome) { return new URLSearchParams(location.search).get(nome); }
 
-// chama a API; sem login (401) volta para a página de entrada
+// chama a API e, sem login (401), volta para a página de entrada
 async function chamar(metodo, caminho, dados) {
   var opcoes = { method: metodo, headers: {}, credentials: 'include' };
   if (dados) {
@@ -45,7 +45,7 @@ function mensagem(texto) {
   el('mensagem').innerHTML = '<b>' + esc(texto) + '</b>';
 }
 
-// tabela com cabeçalho; as células já vêm em HTML
+// tabela com cabeçalho, com as células já em HTML
 function tabela(colunas, linhas, vazio) {
   if (linhas.length === 0) return '<p><i>' + esc(vazio || 'Nada para mostrar.') + '</i></p>';
   var h = '<table border="1" cellpadding="4" cellspacing="0"><tr>';
@@ -66,7 +66,7 @@ async function iniciar() {
   if (usuario.papel === 'aluno') {
     links += ' | <a href="/horas.html">Minhas horas</a> | <a href="/certificados.html">Meus certificados</a>';
   }
-  el('topo').innerHTML = '<table width="100%"><tr><td><b>Projetos de Extensão</b> &mdash; ' + links
+  el('topo').innerHTML = '<table width="100%"><tr><td><b>Projetos de Extensão</b> | ' + links
       + '</td><td align="right">' + esc(usuario.nome) + ' (' + esc(usuario.papel) + ', '
       + esc(usuario.matricula) + ') | <a href="' + API + '/sair">Sair</a></td></tr></table><hr>';
   return usuario;

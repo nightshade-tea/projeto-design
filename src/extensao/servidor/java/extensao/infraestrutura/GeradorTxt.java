@@ -22,7 +22,7 @@ public class GeradorTxt implements GeradorDocumentoCertificado {
                 "%s", coordenado por %s, com carga horária de %d horas.
 
                 Emitido em %s.
-                Certificado nº %d
+                Certificado número %d
                 """.formatted(certificado.getNomeAluno(), certificado.getTituloProjeto(),
                 certificado.getNomeCoordenador(), certificado.getCargaHoraria(),
                 certificado.getEmitidoEm().format(DATA), certificado.getId());

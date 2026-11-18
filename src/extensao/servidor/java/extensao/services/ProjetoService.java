@@ -14,6 +14,7 @@ import extensao.dominio.projetos.RegraNegocioException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /** Criar, editar e consultar projetos e gerenciar atividades, participantes e critérios. */
 public class ProjetoService {
@@ -26,11 +27,7 @@ public class ProjetoService {
         this.provedor = provedor;
     }
 
-    /**
-     * RF01 e RN01: o professor que cria o projeto passa a ser o coordenador.
-     * No protótipo só professores criam projetos: a RN01 também permite o
-     * administrador, mas falta definir quem coordena o projeto nesse caso.
-     */
+    /** RF01 e RN01: só professores criam projetos, e quem cria passa a ser o coordenador. */
     public Projeto criar(String titulo, String descricao, Usuario usuario) {
         if (!(usuario instanceof Professor professor)) {
             throw new SemPermissaoException("só professores criam projetos");
@@ -51,7 +48,7 @@ public class ProjetoService {
         return buscar(id);
     }
 
-    /** O aluno vê os projetos de que participa; os demais veem todos. */
+    /** O aluno vê os projetos de que participa, e os demais veem todos. */
     public List<Projeto> listar(Usuario usuario) {
         if (usuario instanceof Aluno aluno) {
             return repository.listarPorAluno(aluno);
@@ -67,9 +64,17 @@ public class ProjetoService {
         return atividade;
     }
 
+    public void editarAtividade(int id, int atividadeId, String titulo, String descricao,
+                                LocalDate data, int cargaHoraria, Usuario usuario) {
+        Projeto projeto = buscarGerenciavel(id, usuario);
+        projeto.editarAtividade(buscarAtividade(projeto, atividadeId), titulo, descricao, data,
+                cargaHoraria);
+        repository.salvar(projeto);
+    }
+
     public void removerAtividade(int id, int atividadeId, Usuario usuario) {
         Projeto projeto = buscarGerenciavel(id, usuario);
-        projeto.removerAtividade(projeto.atividade(atividadeId));
+        projeto.removerAtividade(buscarAtividade(projeto, atividadeId));
         repository.salvar(projeto);
     }
 
@@ -86,7 +91,7 @@ public class ProjetoService {
         repository.salvar(projeto);
     }
 
-    /** RF06: critérios a partir das opções do sistema; null deixa a opção de fora. */
+    /** RF06: critérios a partir das opções do sistema. Um valor null deixa a opção de fora. */
     public void definirCriterios(int id, Integer minimoHoras, Double percentualMinimo,
                                  Usuario usuario) {
         Projeto projeto = buscarGerenciavel(id, usuario);
@@ -112,9 +117,18 @@ public class ProjetoService {
         return projeto;
     }
 
+    static Atividade buscarAtividade(Projeto projeto, int atividadeId) {
+        try {
+            return projeto.atividade(atividadeId);
+        } catch (NoSuchElementException e) {
+            throw new NaoEncontradoException(e.getMessage());
+        }
+    }
+
     static Aluno buscarAluno(ProvedorIdentidade provedor, String matricula) {
         Usuario encontrado = provedor.buscarPorMatricula(matricula)
-                .orElseThrow(() -> new NaoEncontradoException("matrícula não encontrada: " + matricula));
+                .orElseThrow(() -> new NaoEncontradoException(
+                        "matrícula não encontrada: " + matricula));
         if (!(encontrado instanceof Aluno aluno)) {
             throw new RegraNegocioException("a matrícula não é de um aluno: " + matricula);
         }

@@ -38,7 +38,8 @@ public class FrequenciaController extends Controller {
             return Resposta.aceita("presença removida");
         });
         r.rota("GET", "/projetos/(\\d+)/horas", (troca, p) -> Resposta.json(200,
-                resumos(service.consultarHorasDoProjeto(inteiro(p.get(0), "id"), identificar(troca)))));
+                resumos(service.consultarHorasProjeto(inteiro(p.get(0), "id"),
+                        identificar(troca)))));
         r.rota("GET", "/me/horas", (troca, p) -> Resposta.json(200,
                 resumos(service.consultarHoras(identificar(troca)))));
     }

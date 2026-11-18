@@ -3,13 +3,11 @@ package extensao.services;
 import extensao.dominio.identidade.Aluno;
 import extensao.dominio.identidade.ProvedorIdentidade;
 import extensao.dominio.identidade.Usuario;
-import extensao.dominio.projetos.Participacao;
+import extensao.dominio.projetos.Atividade;
 import extensao.dominio.projetos.Projeto;
 import extensao.dominio.projetos.ProjetoRepository;
 import extensao.dominio.projetos.ResumoFrequencia;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /** RF04 e RF05: registrar e remover presenças e consultar horas. */
 public class FrequenciaService {
@@ -24,15 +22,17 @@ public class FrequenciaService {
 
     public void registrarPresenca(int id, int atividadeId, String matricula, Usuario usuario) {
         Projeto projeto = buscarGerenciavel(id, usuario);
+        Atividade atividade = ProjetoService.buscarAtividade(projeto, atividadeId);
         Aluno aluno = ProjetoService.buscarAluno(provedor, matricula);
-        projeto.registrarPresenca(projeto.atividade(atividadeId), aluno);
+        projeto.registrarPresenca(atividade, aluno);
         repository.salvar(projeto);
     }
 
     public void removerPresenca(int id, int atividadeId, String matricula, Usuario usuario) {
         Projeto projeto = buscarGerenciavel(id, usuario);
+        Atividade atividade = ProjetoService.buscarAtividade(projeto, atividadeId);
         Aluno aluno = ProjetoService.buscarAluno(provedor, matricula);
-        projeto.removerPresenca(projeto.atividade(atividadeId), aluno);
+        projeto.removerPresenca(atividade, aluno);
         repository.salvar(projeto);
     }
 
@@ -45,13 +45,8 @@ public class FrequenciaService {
     }
 
     /** As horas de todos os participantes, para o coordenador ou um administrador. */
-    public List<ResumoFrequencia> consultarHorasDoProjeto(int id, Usuario usuario) {
-        Projeto projeto = buscarGerenciavel(id, usuario);
-        Map<String, Aluno> alunos = new LinkedHashMap<>();
-        for (Participacao p : projeto.getParticipacoes()) {
-            alunos.putIfAbsent(p.getAluno().getMatricula(), p.getAluno());
-        }
-        return alunos.values().stream().map(projeto::resumoFrequencia).toList();
+    public List<ResumoFrequencia> consultarHorasProjeto(int id, Usuario usuario) {
+        return buscarGerenciavel(id, usuario).resumos();
     }
 
     private Projeto buscarGerenciavel(int id, Usuario usuario) {

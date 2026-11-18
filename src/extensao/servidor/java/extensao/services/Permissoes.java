@@ -1,6 +1,5 @@
 package extensao.services;
 
-import extensao.dominio.identidade.Administrador;
 import extensao.dominio.identidade.Aluno;
 import extensao.dominio.identidade.Usuario;
 import extensao.dominio.projetos.Projeto;
@@ -11,10 +10,11 @@ final class Permissoes {
     private Permissoes() {
     }
 
-    /** O professor só gerencia projetos que coordena; o administrador gerencia qualquer um. */
+    /** O professor só gerencia projetos que coordena, e o administrador gerencia qualquer um. */
     static void exigirGestor(Projeto projeto, Usuario usuario) {
-        if (!projeto.getCoordenador().mesmoQue(usuario) && !(usuario instanceof Administrador)) {
-            throw new SemPermissaoException("só o coordenador ou um administrador gerencia o projeto");
+        if (!projeto.podeGerenciar(usuario)) {
+            throw new SemPermissaoException(
+                    "só o coordenador ou um administrador gerencia o projeto");
         }
     }
 

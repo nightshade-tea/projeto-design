@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Conjunto de critérios de um projeto; o resumo precisa atender a todos. */
+/** Conjunto de critérios de um projeto. O resumo precisa atender a todos. */
 public class CriteriosCertificacao {
 
     private final List<CriterioCertificacao> criterios = new ArrayList<>();
@@ -14,7 +14,7 @@ public class CriteriosCertificacao {
     }
 
     /** Substitui os critérios. */
-    public void definir(List<CriterioCertificacao> criterios) {
+    void definir(List<CriterioCertificacao> criterios) {
         this.criterios.clear();
         this.criterios.addAll(criterios);
     }

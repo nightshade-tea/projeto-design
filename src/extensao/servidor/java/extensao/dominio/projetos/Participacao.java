@@ -17,8 +17,8 @@ public class Participacao {
         this.fim = fim;
     }
 
-    /** Desvincular só encerra a participação; as presenças continuam valendo. */
-    public void encerrar() {
+    /** Desvincular só encerra a participação, e as presenças continuam valendo. */
+    void encerrar() {
         if (fim == null) {
             fim = LocalDate.now();
         }

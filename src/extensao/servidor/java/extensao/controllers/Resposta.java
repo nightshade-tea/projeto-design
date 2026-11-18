@@ -13,7 +13,7 @@ record Resposta(int status, Object corpo, String tipo, Map<String, String> cabec
         return new Resposta(status, corpo, null, new LinkedHashMap<>());
     }
 
-    /** Escrita aceita (ver ADR 002). */
+    /** Escrita aceita (ver arquitetura.md, Comunicação). */
     static Resposta aceita(String mensagem) {
         return json(202, Map.of("mensagem", mensagem));
     }

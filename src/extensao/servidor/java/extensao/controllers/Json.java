@@ -145,7 +145,8 @@ final class Json {
                     case 'f' -> r.append('\f');
                     case 'u' -> {
                         if (i + 4 > s.length()) {
-                            throw new IllegalArgumentException("JSON inválido: escape \\u incompleto");
+                            throw new IllegalArgumentException(
+                                    "JSON inválido: escape \\u incompleto");
                         }
                         r.append((char) Integer.parseInt(s.substring(i, i + 4), 16));
                         i += 4;

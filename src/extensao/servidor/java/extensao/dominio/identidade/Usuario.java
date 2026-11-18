@@ -1,34 +1,34 @@
 package extensao.dominio.identidade;
 
-/** Usuário obtido do provedor de identidade; o papel é a subclasse. */
+import java.util.Objects;
+
+/** Usuário obtido do provedor de identidade, com o papel definido pela subclasse. */
 public abstract class Usuario {
 
-    private String matricula;
-    private String nome;
+    private final String matricula;
+    private final String nome;
 
     protected Usuario(String matricula, String nome) {
-        this.matricula = matricula;
-        this.nome = nome;
+        this.matricula = Objects.requireNonNull(matricula, "matricula");
+        this.nome = Objects.requireNonNull(nome, "nome");
     }
 
     public String getMatricula() {
         return matricula;
     }
 
-    public void setMatricula(String matricula) {
-        this.matricula = matricula;
-    }
-
     public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    /** Mesmo usuário se tiver a mesma matrícula (a matrícula é a chave). */
+    @Override
+    public final boolean equals(Object outro) {
+        return outro instanceof Usuario u && matricula.equals(u.matricula);
     }
 
-    /** Mesmo usuário se tiver a mesma matrícula (a matrícula é a chave). */
-    public boolean mesmoQue(Usuario outro) {
-        return outro != null && matricula.equals(outro.matricula);
+    @Override
+    public final int hashCode() {
+        return matricula.hashCode();
     }
 }

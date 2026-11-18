@@ -23,11 +23,13 @@ public class CertificadoController extends Controller {
     @Override
     void rotas(Roteador r) {
         r.rota("GET", "/me/certificados", (troca, p) -> Resposta.json(200,
-                service.listar(identificar(troca)).stream().map(CertificadoController::resumo).toList()));
+                service.listar(identificar(troca)).stream()
+                        .map(CertificadoController::resumo).toList()));
         r.rota("GET", "/certificados/(\\d+)/arquivo", (troca, p) -> {
             byte[] arquivo = service.gerarArquivo(inteiro(p.get(0), "id"), identificar(troca));
             return Resposta.texto("text/plain", new String(arquivo, StandardCharsets.UTF_8))
-                    .com("Content-Disposition", "attachment; filename=certificado-" + p.get(0) + ".txt");
+                    .com("Content-Disposition",
+                            "attachment; filename=certificado-" + p.get(0) + ".txt");
         });
     }
 

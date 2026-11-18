@@ -40,8 +40,8 @@ public class ProvedorIdentidadeInstitucional implements ProvedorIdentidade {
             .connectTimeout(Duration.ofSeconds(3)).build();
 
     /**
-     * url: endereço do login institucional; retorno: para onde o login
-     * institucional manda o usuário depois de entrar, com o token.
+     * Recebe o endereço do login institucional (url) e o endereço para onde
+     * ele manda o usuário depois de entrar, com o token (retorno).
      */
     public ProvedorIdentidadeInstitucional(String url, String retorno, Path pasta) {
         this.url = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
@@ -116,7 +116,8 @@ public class ProvedorIdentidadeInstitucional implements ProvedorIdentidade {
     private synchronized void guardar(Usuario usuario, String papel) {
         Map<String, List<String>> linhas = new LinkedHashMap<>();
         Csv.ler(copiaLocal).forEach(l -> linhas.put(l.get(0), l));
-        linhas.put(usuario.getMatricula(), List.of(usuario.getMatricula(), usuario.getNome(), papel));
+        linhas.put(usuario.getMatricula(),
+                List.of(usuario.getMatricula(), usuario.getNome(), papel));
         Csv.escrever(copiaLocal, CABECALHO, new ArrayList<>(linhas.values()));
     }
 }

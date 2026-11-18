@@ -28,18 +28,13 @@ public class EncerramentoService {
         List<ResumoFrequencia> aprovados = projeto.aprovados();
         projetos.salvar(projeto);
         return aprovados.stream()
-                .filter(resumo -> !temCertificado(resumo))
+                // no máximo um certificado por aluno e projeto
+                .filter(resumo -> !certificados.existe(projeto, resumo.getAluno()))
                 .map(resumo -> {
                     Certificado certificado = new Certificado(resumo);
                     certificados.salvar(certificado);
                     return certificado;
                 })
                 .toList();
-    }
-
-    /** No máximo um certificado por aluno e projeto. */
-    private boolean temCertificado(ResumoFrequencia resumo) {
-        return certificados.listarPorAluno(resumo.getAluno()).stream()
-                .anyMatch(c -> c.getProjeto().getId().equals(resumo.getProjeto().getId()));
     }
 }

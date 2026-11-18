@@ -1,6 +1,7 @@
 package extensao;
 
 import extensao.dominio.certificacao.Certificado;
+import extensao.dominio.identidade.Administrador;
 import extensao.dominio.identidade.Aluno;
 import extensao.dominio.identidade.Professor;
 import extensao.dominio.identidade.Usuario;
@@ -25,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +104,34 @@ public final class Testes {
             igual(4, c.getCargaHoraria());
             verdade(c.pertenceA(ANA) && !c.pertenceA(BRUNO));
         });
+        testes.put("só o coordenador ou um administrador pode gerenciar", () -> {
+            Projeto p = new Projeto("Horta", "", CARLA);
+            verdade(p.podeGerenciar(new Professor("P001", "Carla Souza")));
+            verdade(p.podeGerenciar(new Administrador("A001", "Elisa Rocha")));
+            verdade(!p.podeGerenciar(new Professor("P002", "Diego Lima")));
+            verdade(!p.podeGerenciar(ANA));
+        });
+        testes.put("editar atividade muda as horas e mantém as presenças", () -> {
+            Projeto p = new Projeto("Horta", "", CARLA);
+            p.vincular(ANA);
+            p.vincular(BRUNO);
+            Atividade a = p.adicionarAtividade("Plantio", "", HOJE, 4);
+            p.registrarPresenca(a, ANA);
+            p.editarAtividade(a, "Plantio de mudas", "", HOJE, 6);
+            igual(6, p.resumoFrequencia(ANA).getHorasCumpridas());
+            igual(2, p.resumos().size());
+            falha(IllegalArgumentException.class, () -> p.editarAtividade(a, "", "", HOJE, 6));
+        });
+        testes.put("gerador em texto do protótipo", () -> {
+            Projeto p = new Projeto("Horta", "", CARLA);
+            p.vincular(ANA);
+            p.registrarPresenca(p.adicionarAtividade("Plantio", "", HOJE, 4), ANA);
+            Certificado c = new Certificado(p.resumoFrequencia(ANA));
+            c.atribuirId(7);
+            String texto = new String(new GeradorTxt().gerar(c), StandardCharsets.UTF_8);
+            verdade(texto.contains("Ana Martins") && texto.contains("\"Horta\"")
+                    && texto.contains("4 horas") && texto.contains("número 7"));
+        });
 
         // --------------------------------------------- services e CSV
 
@@ -121,6 +149,10 @@ public final class Testes {
                     () -> c.projetos.vincular(p.getId(), "P002", c.usuario("token-professor")));
             falha(NaoEncontradoException.class,
                     () -> c.projetos.consultar(99, c.usuario("token-professor")));
+            falha(NaoEncontradoException.class,
+                    () -> c.projetos.removerAtividade(p.getId(), 99, c.usuario("token-professor")));
+            igual("mínimo de 75% de presença", new PercentualMinimoPresenca(75).toString());
+            igual("mínimo de 62.5% de presença", new PercentualMinimoPresenca(62.5).toString());
         });
         testes.put("CSV guarda e recupera o projeto inteiro", () -> {
             Contexto c = new Contexto();
@@ -148,12 +180,14 @@ public final class Testes {
             c.projetos.definirCriterios(p.getId(), 4, null, carla);
             List<Certificado> emitidos = c.encerramento.encerrar(p.getId(), carla);
             igual(1, emitidos.size());
+            Projeto encerrado = c.projetoRepo.buscarPorId(p.getId()).orElseThrow();
+            verdade(c.certRepo.existe(encerrado, ANA) && !c.certRepo.existe(encerrado, BRUNO));
             falha(RegraNegocioException.class, () -> c.encerramento.encerrar(p.getId(), carla));
             Usuario ana = c.usuario("token-aluno");
             igual(4, c.frequencia.consultarHoras(ana).get(0).getHorasCumpridas());
             int id = c.certificados.listar(ana).get(0).getId();
             String texto = new String(c.certificados.gerarArquivo(id, ana), StandardCharsets.UTF_8);
-            verdade(texto.contains("Ana Martins") && texto.contains("4 horas"));
+            igual(id + ";Ana Martins;Horta;4", texto);
             falha(SemPermissaoException.class,
                     () -> c.certificados.gerarArquivo(id, c.usuario("token-aluno2")));
         });
@@ -162,10 +196,9 @@ public final class Testes {
 
         testes.put("login institucional: senha, validar e cópia local", () -> {
             Path pasta = Files.createTempDirectory("teste");
-            LoginInstitucional login = new LoginInstitucional(
-                    Path.of("src/institucional/resources/usuarios.csv"));
-            login.iniciar(0);
-            try {
+            try (LoginInstitucional login = new LoginInstitucional(
+                    Path.of("src/institucional/resources/usuarios.csv"), 0)) {
+                login.iniciar();
                 ProvedorIdentidadeInstitucional provedor = new ProvedorIdentidadeInstitucional(
                         "http://localhost:" + login.porta(), "http://cliente/", pasta);
                 igual(null, login.entrar("carla", "errada"));
@@ -174,11 +207,9 @@ public final class Testes {
                 verdade(provedor.identificar("invalido").isEmpty());
                 verdade(provedor.buscarPorMatricula("ana").orElseThrow() instanceof Aluno);
                 verdade(provedor.buscarPorMatricula("ninguem").isEmpty());
-                login.parar();
+                login.close();
                 // provedor fora do ar: alunos da cópia local ainda são encontrados
                 verdade(provedor.buscarPorMatricula("ana").isPresent());
-            } finally {
-                login.parar();
             }
         });
         testes.put("cenário completo do diagrama de sequência, por HTTP", () -> {
@@ -208,15 +239,17 @@ public final class Testes {
         final FrequenciaService frequencia;
         final EncerramentoService encerramento;
         final CertificadoService certificados;
+        final ProjetoRepositoryCsv projetoRepo;
+        final CertificadoRepositoryCsv certRepo;
 
         Contexto() throws Exception {
             pasta = Files.createTempDirectory("teste");
-            ProjetoRepositoryCsv repo = new ProjetoRepositoryCsv(pasta);
-            CertificadoRepositoryCsv certRepo = new CertificadoRepositoryCsv(pasta, repo);
-            projetos = new ProjetoService(repo, provedor);
-            frequencia = new FrequenciaService(repo, provedor);
-            encerramento = new EncerramentoService(repo, certRepo);
-            certificados = new CertificadoService(certRepo, new GeradorTxt());
+            projetoRepo = new ProjetoRepositoryCsv(pasta);
+            certRepo = new CertificadoRepositoryCsv(pasta, projetoRepo);
+            projetos = new ProjetoService(projetoRepo, provedor);
+            frequencia = new FrequenciaService(projetoRepo, provedor);
+            encerramento = new EncerramentoService(projetoRepo, certRepo);
+            certificados = new CertificadoService(certRepo, new GeradorDocumentoTeste());
         }
 
         Usuario usuario(String token) {

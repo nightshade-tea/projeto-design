@@ -1,11 +1,9 @@
 package extensao.controllers;
 
 import extensao.dominio.certificacao.Certificado;
+import extensao.dominio.identidade.Aluno;
 import extensao.dominio.projetos.Atividade;
-import extensao.dominio.projetos.CriterioCertificacao;
-import extensao.dominio.projetos.MinimoHoras;
 import extensao.dominio.projetos.Participacao;
-import extensao.dominio.projetos.PercentualMinimoPresenca;
 import extensao.dominio.projetos.Projeto;
 import extensao.services.AutenticacaoService;
 import extensao.services.EncerramentoService;
@@ -21,6 +19,7 @@ import java.util.Map;
  * PUT    /projetos/{id}                          editar {titulo, descricao}
  * POST   /projetos/{id}/encerramento             encerrar e emitir os certificados
  * POST   /projetos/{id}/atividades               adicionar {titulo, descricao, data, cargaHoraria}
+ * PUT    /projetos/{id}/atividades/{atividadeId} editar {titulo, descricao, data, cargaHoraria}
  * DELETE /projetos/{id}/atividades/{atividadeId} remover
  * POST   /projetos/{id}/participantes            vincular {matricula}
  * DELETE /projetos/{id}/participantes/{matricula} desvincular
@@ -43,7 +42,8 @@ public class ProjetoController extends Controller {
     @Override
     void rotas(Roteador r) {
         r.rota("GET", "/projetos/?", (troca, p) -> Resposta.json(200,
-                service.listar(identificar(troca)).stream().map(ProjetoController::resumo).toList()));
+                service.listar(identificar(troca)).stream()
+                        .map(ProjetoController::resumo).toList()));
         r.rota("POST", "/projetos/?", (troca, p) -> {
             var usuario = identificar(troca);
             var dados = corpo(troca);
@@ -73,6 +73,15 @@ public class ProjetoController extends Controller {
                     inteiro(obrigatorio(dados, "cargaHoraria"), "cargaHoraria"), usuario);
             return Resposta.json(202, Map.of("mensagem", "atividade adicionada",
                     "id", atividade.getId()));
+        });
+        r.rota("PUT", ID + "/atividades/(\\d+)", (troca, p) -> {
+            var usuario = identificar(troca);
+            var dados = corpo(troca);
+            service.editarAtividade(id(p), inteiro(p.get(1), "atividadeId"),
+                    obrigatorio(dados, "titulo"), dados.getOrDefault("descricao", ""),
+                    data(obrigatorio(dados, "data"), "data"),
+                    inteiro(obrigatorio(dados, "cargaHoraria"), "cargaHoraria"), usuario);
+            return Resposta.aceita("atividade editada");
         });
         r.rota("DELETE", ID + "/atividades/(\\d+)", (troca, p) -> {
             service.removerAtividade(id(p), inteiro(p.get(1), "atividadeId"), identificar(troca));
@@ -113,11 +122,12 @@ public class ProjetoController extends Controller {
     private static Map<String, Object> detalhe(Projeto p) {
         Map<String, Object> dados = resumo(p);
         dados.put("descricao", p.getDescricao());
-        dados.put("atividades", p.getAtividades().stream().map(ProjetoController::atividade).toList());
+        dados.put("atividades", p.getAtividades().stream()
+                .map(ProjetoController::atividade).toList());
         dados.put("participantes", p.getParticipacoes().stream()
                 .map(ProjetoController::participante).toList());
         dados.put("criterios", p.getCriterios().getCriterios().stream()
-                .map(ProjetoController::criterio).toList());
+                .map(Object::toString).toList());
         return dados;
     }
 
@@ -127,7 +137,8 @@ public class ProjetoController extends Controller {
         dados.put("titulo", a.getTitulo());
         dados.put("data", a.getData().toString());
         dados.put("cargaHoraria", a.getCargaHoraria());
-        dados.put("presentes", a.getPresentes().stream().map(aluno -> aluno.getMatricula()).toList());
+        dados.put("presentes", a.getPresentes().stream()
+                .map(Aluno::getMatricula).toList());
         return dados;
     }
 
@@ -138,15 +149,5 @@ public class ProjetoController extends Controller {
         dados.put("inicio", part.getInicio().toString());
         dados.put("fim", part.getFim() == null ? null : part.getFim().toString());
         return dados;
-    }
-
-    private static String criterio(CriterioCertificacao c) {
-        if (c instanceof MinimoHoras m) {
-            return "mínimo de " + m.getCargaHoraria() + " horas";
-        }
-        if (c instanceof PercentualMinimoPresenca p) {
-            return "mínimo de " + p.getPct() + "% de presença";
-        }
-        return c.getClass().getSimpleName();
     }
 }

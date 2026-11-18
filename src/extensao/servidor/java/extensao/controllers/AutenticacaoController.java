@@ -35,7 +35,8 @@ public class AutenticacaoController extends Controller {
         });
         r.rota("GET", "/sair", (troca, p) -> Resposta.redirecionar(urlCliente + "/")
                 .com("Set-Cookie", "token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"));
-        r.rota("GET", "/me", (troca, p) -> Resposta.json(200, consultarUsuario(identificar(troca))));
+        r.rota("GET", "/me", (troca, p) ->
+                Resposta.json(200, consultarUsuario(identificar(troca))));
     }
 
     private static Map<String, Object> consultarUsuario(Usuario usuario) {

@@ -10,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Cliente web: só entrega as páginas ao navegador. As páginas conversam
- * direto com a API do servidor, cujo endereço vai em /config.js; este
+ * O cliente web só entrega as páginas ao navegador. As páginas conversam
+ * direto com a API do servidor, cujo endereço vai em /config.js, e este
  * programa não conhece nada do servidor além desse endereço.
  */
 public final class ClienteExtensao {
@@ -19,7 +19,10 @@ public final class ClienteExtensao {
     private ClienteExtensao() {
     }
 
-    /** Uso: java -Dporta=8080 -Dapi=http://localhost:7080 -Dpaginas=pasta cliente.ClienteExtensao */
+    /**
+     * Uso: java -Dporta=8080 -Dapi=http://localhost:7080 -Dpaginas=pasta
+     * cliente.ClienteExtensao
+     */
     public static void main(String[] args) throws IOException {
         int porta = Integer.parseInt(System.getProperty("porta", "8080"));
         String api = System.getProperty("api", "http://localhost:7080");
@@ -40,7 +43,8 @@ public final class ClienteExtensao {
             enviar(troca, 200, "text/javascript", "var API = '" + api + "';\n");
         } else if (nome.matches("[a-z]+\\.(html|js)") && Files.exists(paginas.resolve(nome))) {
             String tipo = nome.endsWith(".js") ? "text/javascript" : "text/html";
-            enviar(troca, 200, tipo, Files.readString(paginas.resolve(nome), StandardCharsets.UTF_8));
+            enviar(troca, 200, tipo,
+                    Files.readString(paginas.resolve(nome), StandardCharsets.UTF_8));
         } else {
             enviar(troca, 404, "text/plain", "página não encontrada");
         }

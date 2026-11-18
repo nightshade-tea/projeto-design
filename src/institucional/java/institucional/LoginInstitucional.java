@@ -30,26 +30,28 @@ import java.util.concurrent.ConcurrentHashMap;
  *   GET  /validar?token=...     validar(token): devolve a matrícula, ou 401
  *   GET  /usuarios/{matricula}  devolve "matricula,nome,vinculo", ou 404
  */
-public class LoginInstitucional {
+public class LoginInstitucional implements AutoCloseable {
 
     private record Conta(String matricula, String senha, String nome, String vinculo) {
     }
 
     private final Map<String, Conta> contas = new LinkedHashMap<>();
     private final Map<String, String> tokens = new ConcurrentHashMap<>();
-    private HttpServer servidor;
+    private final HttpServer servidor;
+    private boolean fechado;
 
     /** Uso: java -Dporta=9080 -Dusuarios=arquivo.csv institucional.LoginInstitucional */
     public static void main(String[] args) throws IOException {
         int porta = Integer.parseInt(System.getProperty("porta", "9080"));
         Path usuarios = Path.of(System.getProperty("usuarios",
                 "src/institucional/resources/usuarios.csv"));
-        new LoginInstitucional(usuarios).iniciar(porta);
+        new LoginInstitucional(usuarios, porta).iniciar();
         System.out.println("Login institucional (simulado): http://localhost:" + porta
                 + "/login, usuários em " + usuarios);
     }
 
-    public LoginInstitucional(Path usuarios) {
+    /** Porta 0 escolhe uma porta livre (usado nos testes). */
+    public LoginInstitucional(Path usuarios, int porta) throws IOException {
         try {
             List<String> linhas = Files.readAllLines(usuarios, StandardCharsets.UTF_8);
             for (String linha : linhas.subList(1, linhas.size())) {
@@ -62,18 +64,21 @@ public class LoginInstitucional {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    public void iniciar(int porta) throws IOException {
         servidor = HttpServer.create(new InetSocketAddress(porta), 0);
         servidor.createContext("/login", this::login);
         servidor.createContext("/validar", this::validar);
         servidor.createContext("/usuarios/", this::usuario);
+    }
+
+    public void iniciar() {
         servidor.start();
     }
 
-    public void parar() {
-        if (servidor != null) {
+    /** Para o servidor. Chamar de novo não tem efeito. */
+    @Override
+    public void close() {
+        if (!fechado) {
+            fechado = true;
             servidor.stop(0);
         }
     }
@@ -96,7 +101,8 @@ public class LoginInstitucional {
 
     private void login(HttpExchange troca) throws IOException {
         if (troca.getRequestMethod().equals("GET")) {
-            String retorno = parametros(troca.getRequestURI().getRawQuery()).getOrDefault("retorno", "");
+            String retorno = parametros(troca.getRequestURI().getRawQuery())
+                    .getOrDefault("retorno", "");
             enviar(troca, 200, "text/html", pagina(retorno, ""));
             return;
         }
@@ -135,7 +141,8 @@ public class LoginInstitucional {
         if (conta == null) {
             enviar(troca, 404, "text/plain", "matrícula não encontrada");
         } else {
-            enviar(troca, 200, "text/csv", conta.matricula() + "," + conta.nome() + "," + conta.vinculo());
+            enviar(troca, 200, "text/csv",
+                    conta.matricula() + "," + conta.nome() + "," + conta.vinculo());
         }
     }
 
@@ -154,7 +161,8 @@ public class LoginInstitucional {
     }
 
     private static String html(String s) {
-        return s.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;");
+        return s.replace("&", "&amp;").replace("\"", "&quot;")
+                .replace("<", "&lt;").replace(">", "&gt;");
     }
 
     private static Map<String, String> parametros(String texto) {

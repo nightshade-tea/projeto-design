@@ -4,10 +4,10 @@ import extensao.dominio.identidade.Aluno;
 import java.util.List;
 import java.util.Optional;
 
-/** Salva e busca o agregado Projeto; a implementação fica fora do domínio. */
+/** Salva e busca o agregado Projeto. A implementação fica fora do domínio. */
 public interface ProjetoRepository {
 
-    /** Salva o projeto inteiro; um projeto sem id recebe um id novo. */
+    /** Salva o projeto inteiro. Um projeto sem id recebe um id novo. */
     void salvar(Projeto projeto);
 
     Optional<Projeto> buscarPorId(int id);

@@ -1,13 +1,16 @@
 package extensao.dominio.projetos;
 
+import extensao.dominio.identidade.Administrador;
 import extensao.dominio.identidade.Aluno;
 import extensao.dominio.identidade.Professor;
+import extensao.dominio.identidade.Usuario;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Agregado Projeto: é a entrada para alterar atividades, participantes,
@@ -47,7 +50,7 @@ public class Projeto {
         this.criterios = new CriteriosCertificacao(criterios);
     }
 
-    /** Recria um projeto já salvo; usado só pelas implementações dos repositories. */
+    /** Recria um projeto já salvo. Usado só pelas implementações dos repositories. */
     public static Projeto restaurar(Integer id, String titulo, String descricao,
                                     Professor coordenador, StatusProjeto status,
                                     List<Atividade> atividades, List<Participacao> participacoes,
@@ -68,12 +71,23 @@ public class Projeto {
         status = StatusProjeto.ENCERRADO;
     }
 
+    /** RN02 e RN03: o coordenador gerencia o projeto, e o administrador gerencia qualquer um. */
+    public boolean podeGerenciar(Usuario usuario) {
+        return coordenador.equals(usuario) || usuario instanceof Administrador;
+    }
+
     public Atividade adicionarAtividade(String titulo, String descricao, LocalDate data,
                                         int cargaHoraria) {
         exigirAtivo();
         Atividade atividade = new Atividade(titulo, descricao, data, cargaHoraria);
         atividades.add(atividade);
         return atividade;
+    }
+
+    public void editarAtividade(Atividade atividade, String titulo, String descricao,
+                                LocalDate data, int cargaHoraria) {
+        exigirAtivo();
+        daqui(atividade).editar(titulo, descricao, data, cargaHoraria);
     }
 
     /** Remover uma atividade remove também as presenças dela. */
@@ -93,7 +107,7 @@ public class Projeto {
         }
     }
 
-    /** Desvincular só encerra a participação; as presenças e horas continuam. */
+    /** Desvincular só encerra a participação, e as presenças e horas continuam. */
     public void desvincular(Aluno aluno) {
         exigirAtivo();
         Participacao atual = participacaoAtual(aluno);
@@ -112,7 +126,8 @@ public class Projeto {
         exigirAtivo();
         Atividade daqui = daqui(atividade);
         if (!vinculado(aluno, daqui.getData())) {
-            throw new RegraNegocioException("o aluno não estava vinculado ao projeto na data da atividade");
+            throw new RegraNegocioException(
+                    "o aluno não estava vinculado ao projeto na data da atividade");
         }
         daqui.registrarPresenca(aluno);
     }
@@ -124,12 +139,12 @@ public class Projeto {
 
     public boolean vinculado(Aluno aluno, LocalDate data) {
         return participacoes.stream()
-                .anyMatch(p -> p.getAluno().mesmoQue(aluno) && p.ativaEm(data));
+                .anyMatch(p -> p.getAluno().equals(aluno) && p.ativaEm(data));
     }
 
     /**
      * Soma as participações do aluno (ele pode ter sido desvinculado e
-     * vinculado de novo); cada atividade é contada uma vez só.
+     * vinculado de novo), contando cada atividade uma vez só.
      */
     public ResumoFrequencia resumoFrequencia(Aluno aluno) {
         List<Atividade> restantes = new ArrayList<>(atividades);
@@ -138,7 +153,7 @@ public class Projeto {
         int total = 0;
         boolean participou = false;
         for (Participacao p : participacoes) {
-            if (!p.getAluno().mesmoQue(aluno)) {
+            if (!p.getAluno().equals(aluno)) {
                 continue;
             }
             participou = true;
@@ -154,14 +169,16 @@ public class Projeto {
         return new ResumoFrequencia(aluno, this, horas, presencas, total);
     }
 
-    /** Alunos que atendem aos critérios, incluindo os já desvinculados. */
-    public List<ResumoFrequencia> aprovados() {
+    /** Um resumo por aluno que participa ou participou do projeto. */
+    public List<ResumoFrequencia> resumos() {
         Map<String, Aluno> alunos = new LinkedHashMap<>();
         participacoes.forEach(p -> alunos.putIfAbsent(p.getAluno().getMatricula(), p.getAluno()));
-        return alunos.values().stream()
-                .map(this::resumoFrequencia)
-                .filter(criterios::atende)
-                .toList();
+        return alunos.values().stream().map(this::resumoFrequencia).toList();
+    }
+
+    /** Alunos que atendem aos critérios, incluindo os já desvinculados. */
+    public List<ResumoFrequencia> aprovados() {
+        return resumos().stream().filter(criterios::atende).toList();
     }
 
     /** Busca uma atividade do projeto pelo id. */
@@ -169,12 +186,12 @@ public class Projeto {
         return atividades.stream()
                 .filter(a -> a.getId() != null && a.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("atividade não encontrada: " + id));
+                .orElseThrow(() -> new NoSuchElementException("atividade não encontrada: " + id));
     }
 
     private Participacao participacaoAtual(Aluno aluno) {
         return participacoes.stream()
-                .filter(p -> p.getAluno().mesmoQue(aluno) && !p.encerrada())
+                .filter(p -> p.getAluno().equals(aluno) && !p.encerrada())
                 .findFirst()
                 .orElse(null);
     }

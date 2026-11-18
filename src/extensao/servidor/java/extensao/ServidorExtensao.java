@@ -20,15 +20,15 @@ import java.net.InetSocketAddress;
 import java.nio.file.Path;
 
 /**
- * Monta a aplicação: é o único lugar que conhece as implementações. Trocar
+ * Monta a aplicação e é o único lugar que conhece as implementações. Trocar
  * os repositories em CSV pelo banco de dados, ou o gerador de texto pelo de
  * PDF, muda só este arquivo.
  *
  * O login institucional é um sistema externo, iniciado separadamente
- * (institucional.LoginInstitucional); o servidor só conhece o endereço dele.
- * O cliente web também é um programa separado (cliente.ClienteExtensao): o
- * servidor só oferece a API, e conhece o endereço do cliente para liberar as
- * chamadas das páginas (CORS) e para voltar a ele depois do login.
+ * (institucional.LoginInstitucional), e o servidor só conhece o endereço
+ * dele. O cliente web também é um programa separado (cliente.ClienteExtensao).
+ * O servidor só oferece a API, e conhece o endereço do cliente para liberar
+ * as chamadas das páginas (CORS) e para voltar a ele depois do login.
  */
 public final class ServidorExtensao {
 

@@ -12,7 +12,8 @@ public class CertificadoService {
     private final CertificadoRepository repository;
     private final GeradorDocumentoCertificado gerador;
 
-    public CertificadoService(CertificadoRepository repository, GeradorDocumentoCertificado gerador) {
+    public CertificadoService(CertificadoRepository repository,
+                              GeradorDocumentoCertificado gerador) {
         this.repository = repository;
         this.gerador = gerador;
     }
