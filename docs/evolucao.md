@@ -12,9 +12,10 @@ Por exemplo, trocar o banco relacional por um banco de documentos (ex. MongoDB)
   novas implementações de `ProjetoRepository` e `CertificadoRepository`
 - A cópia local dos usuários, guardada por `ProvedorIdentidadeInstitucional`
 - A fila de escritas, que hoje é uma tabela no banco de dados, precisa ser
-  feita de outra forma. Dependendo do mecanismo escolhido (caso não implemente),
-  um novo serviço de fila será necessário
-- Preciso garantir que o novo mecanismo salve operações como transações
+  feita de outra forma. Se o novo mecanismo não oferecer algo equivalente,
+  um serviço de fila separado será necessário
+- É preciso garantir que o novo mecanismo salve cada operação de forma
+  atômica, como as transações de hoje
 - O "deploy" da aplicação, garantindo o provisionamento do novo mecanismo
 
 **Elementos inalterados**
@@ -25,12 +26,12 @@ Por exemplo, trocar o banco relacional por um banco de documentos (ex. MongoDB)
 - O provedor de identidade e a geração do certificado
 
 **Decisões que ajudam**
-- Uso de Repositories como interfaces no domínio, desacoplando qualquer
-  tecnologia de persistência de como o sistema opera em alto nível
-- Um repository por "recurso", diminuindo a abrangência da mudança de código
-  a ser feita e separando a eventual migração
-- Pelas escritas serem idempotentes, a migração não precisa ter "medo" de
-  duplicar dados ao reprocessar as operações
+- Uso de repositories como interfaces no domínio, desacoplando a tecnologia
+  de persistência das regras de negócio
+- Um repository por agregado, o que diminui o código a mudar e permite
+  migrar um agregado de cada vez
+- Como as escritas são idempotentes, reprocessar operações durante a
+  migração não duplica dados
 
 **Decisões que dificultam**
 - Ter a fila no próprio banco (acoplamento). Simplifica as operações mas também
@@ -58,9 +59,10 @@ Por exemplo, troca do login único por OAuth, ou usar autenticação do gov.br
 - A persistência, os certificados e a API
 
 **Decisões que ajudam**
-- Uso de `ProvedorIdentidade` como interface no domínio, apenas precisará
-  de novas implementações
-- Não existe persistência nessa parte e, portanto, não precisa migrar nada
+- Uso de `ProvedorIdentidade` como interface no domínio, então basta uma
+  nova implementação
+- A cópia local dos usuários usa a matrícula como chave e não depende do
+  provedor, então não precisa ser migrada (a não ser que a chave mude)
 - O papel do usuário fica nele mesmo e não no token recebido, então mudar o
   formato do token não muda as permissões dos usuários
 

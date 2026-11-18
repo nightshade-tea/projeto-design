@@ -50,7 +50,7 @@ chamadas de método.
 
 - As fronteiras entre os módulos dependem da disciplina da equipe, pois nada
   impede que um módulo use outro diretamente
-- Todos os módulos escalam juntos: não é possível dar mais recursos só à parte
-  mais usada
+- Todos os módulos escalam juntos, então não é possível dar mais recursos
+  só à parte mais usada
 - Uma falha grave na aplicação afeta todos os módulos, o que é reduzido rodando
   várias instâncias

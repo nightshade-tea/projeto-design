@@ -1,4 +1,4 @@
-# ADR 002: Uso de Camadas
+# ADR 002: Uso de camadas
 
 ## Contexto
 
@@ -35,8 +35,8 @@ dependências apontam para o domínio:
   negócio
 - **Services** executam os casos de uso
 - **Domínio** tem os objetos e as regras
-- **Interfaces** tem as interfaces mais generalizadas para tecnologias externas
-  ou separadas
+- **Interfaces** têm as interfaces, definidas nos módulos do domínio, para o
+  banco de dados, o provedor de identidade e a geração do arquivo
 - **Infraestrutura** tem as implementações concretas dessas interfaces, e
   depende delas
 
